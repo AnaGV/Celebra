@@ -1,0 +1,27 @@
+---
+import Base from './Base.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../config/site';
+interface Props { title: string; updated: string }
+const { title, updated } = Astro.props;
+---
+
+<Base title={`${title} · ${site.brand.name}`} description={`${title} de ${site.brand.name}.`}>
+  <main class="wrap narrow legal">
+    <a href="/" class="back">← Volver a la página</a>
+    <h1>{title}</h1>
+    <p class="muted mono">Última actualización: {updated}</p>
+    <p class="draft">Texto base de ejemplo. Revísalo con un abogado o contador antes de publicar.</p>
+    <slot />
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .legal { display: grid; gap: 1rem; padding-block: 3rem 4rem; }
+  .legal h1 { font-size: var(--step-3); }
+  .legal :global(h2) { font-size: var(--step-1); margin-top: 1rem; }
+  .legal :global(p), .legal :global(li) { max-width: 65ch; }
+  .back { font-weight: 700; text-decoration: none; color: var(--muted); }
+  .draft { padding: 0.8rem 1rem; border-radius: 10px; background: var(--warn-soft); font-size: 0.9rem; }
+</style>

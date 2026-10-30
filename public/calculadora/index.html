@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculadora de presupuesto para fiestas · Celebra</title>
+<meta name="description" content="Reparte el presupuesto de tu fiesta infantil por rubro y calcula cuánto gastar por niño. Gratis, de Celebra.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Fraunces:opsz,wght,SOFT@9..144,900,100&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#fdf8fb;--surface:#fff;--sunk:#f7eef4;--ink:#2a1b2d;--muted:#6e5a72;--line:#eadfee;--plum:#4a1a4f;--accent:#c2185b;--ok:#1a7f4b;--display:'Fraunces',Georgia,serif;--body:'Figtree',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+.rain{height:8px;background:linear-gradient(90deg,#f8bbd0 0 16.6%,#ffd8b5 16.6% 33.3%,#fdeca6 33.3% 50%,#c8f0dc 50% 66.6%,#c5e3f6 66.6% 83.3%,#e0d1f5 83.3%)}
+.wrap{max-width:980px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-right,0px)) 64px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
+h1{margin:0;font-family:var(--display);font-weight:900;font-variation-settings:'SOFT' 100;color:var(--plum);font-size:clamp(32px,5vw,48px);line-height:1.02;text-wrap:balance}
+.lead{margin:0;color:var(--muted);font-size:18px;max-width:60ch}
+.fld{display:flex;flex-direction:column;gap:6px}.fld label{font-weight:700;font-size:14px}
+input,select{height:46px;border-radius:11px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
+.calc{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:18px;align-items:start}
+.calc-in{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.money{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}
+.calc-out{display:flex;flex-direction:column;gap:12px;min-width:0}
+.calc-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.calc-kpis>div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.k-l{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.k-v{font-family:var(--mono);font-size:18px;color:var(--plum);overflow-wrap:anywhere}
+.tbl-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:14px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}td.r,th.r{text-align:right}tr:last-child td{border-bottom:0}tr.tot td{font-weight:800;color:var(--plum)}
+.calc-note{margin:0;color:var(--muted);font-size:14px}.calc-actions{display:flex;gap:12px;align-items:center}.calc-copied{color:var(--ok);font-weight:700;font-size:14px}
+.btn-sec{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:700 15px var(--body);cursor:pointer;color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:20px 22px;border-radius:18px;background:#fde9a6;color:var(--plum)}
+.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:13px 20px;border-radius:11px}
+@media (max-width:760px){.calc{grid-template-columns:1fr}}@media (max-width:460px){.calc-kpis{grid-template-columns:1fr}}
+</style></head><body><div class="rain"></div><main class="wrap">
+<h1>¿Cuánto cuesta tu fiesta?</h1>
+<p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía que usamos en el taller Celebra.</p>
+<div class="calc" id="calc">
+  <form class="calc-in" id="calc-form" novalidate>
+    <div class="fld">
+      <label for="calc-total">¿Cuánto vas a gastar en total?</label>
+      <div class="money"><select id="calc-cur" aria-label="Moneda"><option value="USD">USD</option><option value="Bs">Bs</option><option value="CLP">CLP</option></select><input id="calc-total" type="number" inputmode="decimal" min="0" step="1" value="130"></div>
+    </div>
+    <div class="fld">
+      <label for="calc-kids">¿Cuántos niños invitas?</label>
+      <input id="calc-kids" type="number" inputmode="numeric" min="1" step="1" value="15">
+    </div>
+    <div class="fld">
+      <label for="calc-place">¿Alquilas un lugar? (opcional)</label>
+      <input id="calc-place" type="number" inputmode="decimal" min="0" step="1" value="0">
+    </div>
+  </form>
+  <div class="calc-out">
+    <div class="calc-kpis">
+      <div><span class="k-l">Por niño</span><b class="k-v" id="calc-perkid">—</b></div>
+      <div><span class="k-l">Cada bolsita</span><b class="k-v" id="calc-bag">—</b></div>
+      <div><span class="k-l">Imprevistos</span><b class="k-v" id="calc-buffer">—</b></div>
+    </div>
+    <div class="tbl-wrap"><table class="calc-t" id="calc-table"><thead><tr><th scope="col">Rubro</th><th scope="col" class="r">%</th><th scope="col" class="r">Monto</th></tr></thead><tbody></tbody></table></div>
+    <p class="calc-note" id="calc-note"></p>
+    <div class="calc-actions"><button type="button" class="btn-sec" id="calc-copy">Copiar para WhatsApp</button><span class="calc-copied" id="calc-copied" role="status"></span></div>
+  </div>
+</div>
+<script>
+(function () {
+  const SPLIT = [
+    ['Comida y bebidas', 30], ['Torta', 15], ['Decoración y globos', 12], ['Piñata y relleno', 12],
+    ['Mesa dulce y cotillón', 11], ['Recuerdos (bolsitas)', 10], ['Imprevistos', 10]
+  ];
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n, cur) => {
+    const dec = cur === 'CLP' ? 0 : 2;
+    const s = new Intl.NumberFormat('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n);
+    return cur + ' ' + s;
+  };
+  let summary = '';
+  function calc() {
+    const cur = $('calc-cur').value;
+    const total = Math.max(0, Number($('calc-total').value) || 0);
+    const kids = Math.max(1, Math.round(Number($('calc-kids').value) || 1));
+    const place = Math.min(total, Math.max(0, Number($('calc-place').value) || 0));
+    const rest = total - place;
+    const rows = SPLIT.map(([name, pct]) => [name, pct, rest * pct / 100]);
+    if (place > 0) rows.unshift(['Lugar', null, place]);
+    $('calc-table').tBodies[0].innerHTML = rows.map(([n, p, v]) =>
+      '<tr><td>' + n + '</td><td class="r">' + (p === null ? '—' : p + '%') + '</td><td class="r">' + fmt(v, cur) + '</td></tr>').join('') +
+      '<tr class="tot"><td>Total</td><td class="r">100%</td><td class="r">' + fmt(total, cur) + '</td></tr>';
+    const recuerdos = rest * 0.10;
+    $('calc-perkid').textContent = fmt(total / kids, cur);
+    $('calc-bag').textContent = fmt(recuerdos / (kids + 2), cur);
+    $('calc-buffer').textContent = fmt(rest * 0.10, cur);
+    $('calc-note').textContent = 'Cuenta ' + (kids + 2) + ' bolsitas: ' + kids + ' niños y 2 de repuesto. Si el monto por niño te parece alto, baja invitados o haz más cosas en casa; no recortes la comida.';
+    summary = 'Mi presupuesto para la fiesta (' + kids + ' niños)\n' + rows.map(([n, p, v]) => '• ' + n + ': ' + fmt(v, cur)).join('\n') + '\nTotal: ' + fmt(total, cur) + '\nCalculado con la guía de Celebra';
+  }
+  ['calc-cur', 'calc-total', 'calc-kids', 'calc-place'].forEach((id) => $(id).addEventListener('input', calc));
+  $('calc-form').addEventListener('submit', (e) => e.preventDefault());
+  $('calc-copy').addEventListener('click', () => {
+    const done = () => { $('calc-copied').textContent = 'Copiado'; setTimeout(() => { $('calc-copied').textContent = ''; }, 1800); };
+    const fallback = () => { $('calc-copied').textContent = 'Selecciona la tabla y cópiala'; };
+    try { navigator.clipboard.writeText(summary).then(done, fallback); } catch (e) { fallback(); }
+  });
+  calc();
+})();
+</script>
+
+<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/#muestra">Quiero el capítulo gratis</a></div>
+</main></body></html>

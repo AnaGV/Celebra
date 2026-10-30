@@ -1,0 +1,41 @@
+---
+import { site } from '../config/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <a href="/" class="footer-mark">{site.brand.name}</a>
+      <p class="muted">{site.brand.tagline}</p>
+    </div>
+    <div>
+      <p class="footer-title">Contacto</p>
+      <p>WhatsApp <span class="mono">{site.contact.whatsappDisplay}</span></p>
+      <p>Email <span class="mono">{site.brand.email}</span></p>
+    </div>
+    <div>
+      <p class="footer-title">Redes</p>
+      <p><a href={site.contact.instagram} target="_blank" rel="noopener">Instagram</a></p>
+      <p><a href={site.contact.tiktok} target="_blank" rel="noopener">TikTok</a></p>
+      <p><a href={site.contact.facebook} target="_blank" rel="noopener">Facebook</a></p>
+    </div>
+    <div>
+      <p class="footer-title">Legal</p>
+      <p><a href="/terminos">Términos de venta</a></p>
+      <p><a href="/reembolsos">Política de reembolso</a></p>
+      <p><a href="/privacidad">Política de privacidad</a></p>
+    </div>
+  </div>
+  <div class="wrap footer-bottom muted">© {year} {site.brand.name}. Caripe, Monagas, Venezuela.</div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--line); padding-block: 3rem 2rem; font-size: 0.92rem; }
+  .footer-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .footer-grid > div { display: grid; gap: 0.35rem; align-content: start; min-width: 0; }
+  .footer-mark { font-family: var(--font-display); font-size: var(--step-1); text-decoration: none; }
+  .footer-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+  .footer a { text-decoration-color: var(--line); text-underline-offset: 3px; }
+  .footer-bottom { margin-top: 2.5rem; font-size: 0.82rem; }
+</style>

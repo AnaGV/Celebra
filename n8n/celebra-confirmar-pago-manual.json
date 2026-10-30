@@ -1,0 +1,452 @@
+{
+  "name": "Celebra · Confirmar pago manual (Binance / Pago Móvil)",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "formTitle": "Confirmar pago manual · Celebra",
+        "formDescription": "Úsalo solo después de ver el pago en Binance o en tu banco. Envía el ebook al cliente y marca el código como usado.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Referencia del pedido",
+              "placeholder": "EB-7K4Q2",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Nombre del cliente"
+            },
+            {
+              "fieldLabel": "Email del cliente",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Método de pago",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Binance Pay"
+                  },
+                  {
+                    "option": "Pago Móvil"
+                  },
+                  {
+                    "option": "Pago en el local"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Monto recibido (USD)",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Código de descuento (si usó)"
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Listo: pedido guardado y ebook enviado."
+            }
+          }
+        }
+      },
+      "id": "d1",
+      "name": "Formulario: confirmar pago",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "celebra-confirmar-pago",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "",
+          "name": "Acceso formulario Celebra"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Datos del pago que tú verificaste en Binance o en tu banco.\nconst crypto = require('crypto');\nconst f = $input.first().json;\nconst email = String(f['Email del cliente'] || '').trim().toLowerCase();\nconst codigo = String(f['Código de descuento (si usó)'] || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');\nreturn [{ json: {\n  fecha: new Date().toISOString(),\n  pedido: String(f['Referencia del pedido'] || '').trim().toUpperCase(),\n  identificador: 'manual-' + crypto.randomUUID(),\n  referencia: String(f['Referencia del pedido'] || '').trim().toUpperCase(),\n  pais: 'VE',\n  cliente: String(f['Nombre del cliente'] || '').trim(),\n  email,\n  producto: 'Fiestas que se recuerdan (ebook)',\n  variante: 'PDF',\n  total_usd: Number(f['Monto recibido (USD)'] || 0),\n  moneda: 'USD',\n  metodo: f['Método de pago'],\n  codigo,\n  email_hash: crypto.createHash('sha256').update(email).digest('hex'),\n  event_time: Math.floor(Date.now() / 1000),\n} }];"
+      },
+      "id": "d2",
+      "name": "Preparar pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pedidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{ $json.fecha }}",
+            "pedido": "={{ $json.pedido }}",
+            "identificador": "={{ $json.identificador }}",
+            "referencia": "={{ $json.referencia }}",
+            "pais": "={{ $json.pais }}",
+            "cliente": "={{ $json.cliente }}",
+            "email": "={{ $json.email }}",
+            "producto": "={{ $json.producto }}",
+            "variante": "={{ $json.variante }}",
+            "total_usd": "={{ $json.total_usd }}",
+            "moneda": "={{ $json.moneda }}",
+            "metodo": "={{ $json.metodo }}",
+            "email_hash": "={{ $json.email_hash }}",
+            "event_time": "={{ $json.event_time }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "d3",
+      "name": "Guardar pedido",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        460,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "compro": "sí"
+          },
+          "matchingColumns": [
+            "email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "d4",
+      "name": "Marcar lead como comprador",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        460,
+        -40
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.codigo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5",
+      "name": "¿Usó código?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        460,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "codigo",
+              "lookupValue": "={{ $json.codigo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d6",
+      "name": "Buscar código usado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        700,
+        140
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "codigo": "={{ $json.codigo }}",
+            "estado": "usado",
+            "compro": "sí"
+          },
+          "matchingColumns": [
+            "codigo"
+          ]
+        },
+        "options": {}
+      },
+      "id": "d7",
+      "name": "Marcar código como usado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        920,
+        60
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.lemonsqueezy.com/v1/discounts/{{ $json.ls_discount_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.api+json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.LEMON_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d8",
+      "name": "Desactivar código en Lemon Squeezy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        220
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $env.EBOOK_PATH }}",
+        "options": {
+          "dataPropertyName": "ebook"
+        }
+      },
+      "id": "d9",
+      "name": "Leer el ebook del servidor",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        700,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "={{ $('Preparar pedido').item.json.email }}",
+        "subject": "=Tu ebook Fiestas que se recuerdan · pedido {{ $('Preparar pedido').item.json.referencia }}",
+        "emailFormat": "html",
+        "html": "=<div style=\"margin:0;padding:24px 12px;background:#fdf6fa;font-family:Arial,Helvetica,sans-serif;color:#2a1b2d\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden\"><div style=\"height:8px;background:linear-gradient(90deg,#f8bbd0,#ffd8b5,#fdeca6,#c8f0dc,#c5e3f6,#e0d1f5)\"></div><div style=\"padding:28px 28px 8px\"><div style=\"font-weight:bold;letter-spacing:4px;font-size:12px;color:#4a1a4f\">CELEBRA</div></div><div style=\"padding:0 28px 28px;font-size:16px;line-height:1.55\"><h1 style=\"font-size:24px;color:#4a1a4f;margin:0 0 12px\">¡Tu libro está aquí!</h1><p>Hola {{ $('Preparar pedido').item.json.cliente || '' }}, confirmamos tu pago. Te dejamos <b>Fiestas que se recuerdan</b> adjunto a este email, en PDF.</p><div style=\"margin:18px 0;padding:16px;border-radius:12px;background:#faf3f7;font-size:14px\"><b>Recibo</b><br>Pedido: {{ $('Preparar pedido').item.json.referencia }}<br>Método: {{ $('Preparar pedido').item.json.metodo }}<br>Total: {{ $('Preparar pedido').item.json.total_usd }} USD<br>Fecha: {{ DateTime.now().setZone('America/Caracas').setLocale('es').toFormat('d LLL yyyy, HH:mm') }}</div><p>Si el archivo no abre, responde este email o escríbenos por WhatsApp con tu número de pedido.</p></div><div style=\"padding:18px 28px;background:#faf3f7;font-size:12px;color:#6e5a72\">Celebra · Taller de fiestas en Caripe, Monagas. <a href=\"https://{{ $env.SITE_DOMAIN }}/baja?e={{ encodeURIComponent($('Preparar pedido').item.json.email) }}\" style=\"color:#6e5a72\">Darme de baja</a></div></div></div>",
+        "options": {
+          "appendAttribution": false,
+          "attachments": "ebook"
+        }
+      },
+      "id": "d10",
+      "name": "Enviar ebook y recibo",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        920,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $env.META_PIXEL_ID }}/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $env.META_CAPI_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ Math.floor(Date.now() / 1000) }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://{{ $env.SITE_DOMAIN }}/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"USD\", \"value\": {{ $json.total_usd }}, \"content_name\": \"Fiestas que se recuerdan\" }\n  }]\n}",
+        "options": {}
+      },
+      "id": "d11",
+      "name": "Avisar a Meta: Purchase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        -300
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Formulario: confirmar pago": {
+      "main": [
+        [
+          {
+            "node": "Preparar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar pedido": {
+      "main": [
+        [
+          {
+            "node": "Guardar pedido",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Marcar lead como comprador",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Usó código?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Leer el ebook del servidor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Avisar a Meta: Purchase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Usó código?": {
+      "main": [
+        [
+          {
+            "node": "Buscar código usado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Buscar código usado": {
+      "main": [
+        [
+          {
+            "node": "Marcar código como usado",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Desactivar código en Lemon Squeezy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer el ebook del servidor": {
+      "main": [
+        [
+          {
+            "node": "Enviar ebook y recibo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

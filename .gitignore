@@ -1,0 +1,9 @@
+node_modules
+dist
+.astro
+.wrangler
+.env
+.env.*
+.dev.vars
+# El libro pagado nunca va al repo ni al sitio publico
+libro/

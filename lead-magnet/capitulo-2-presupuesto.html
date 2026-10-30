@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Fiestas que se recuerdan · Capítulo de regalo: Presupuesto real</title>
+<style>
+@font-face{font-family:'Fraunces';src:url(../../portada/node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2) format('woff2');font-weight:100 900;font-style:normal}
+@font-face{font-family:'Fraunces';src:url(../../portada/node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2) format('woff2');font-weight:100 900;font-style:italic}
+@font-face{font-family:'Caveat';src:url(../../portada/node_modules/@fontsource/caveat/files/caveat-latin-700-normal.woff2);font-weight:700}
+@font-face{font-family:'Figtree';src:url(../../portada/node_modules/@fontsource/figtree/files/figtree-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:'Figtree';src:url(../../portada/node_modules/@fontsource/figtree/files/figtree-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:'Figtree';src:url(../../portada/node_modules/@fontsource/figtree/files/figtree-latin-700-normal.woff2);font-weight:700}
+@font-face{font-family:'Figtree';src:url(../../portada/node_modules/@fontsource/figtree/files/figtree-latin-800-normal.woff2);font-weight:800}
+
+@page{size:8.5in 11in;margin:0}
+:root{--plum:#4a1a4f;--mag:#c2185b;--ink:#2a1b2d;--muted:#6e5a72;--line:#eadfee;--yel:#fde9a6;--cream:#fffaf0;--pink:#f8bbd0;--peach:#ffd8b5;--lemon:#fdeca6;--mint:#c8f0dc;--sky:#c5e3f6;--lilac:#e0d1f5}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#ffffff}
+body{font-family:'Figtree',sans-serif;color:var(--ink);font-size:14.5px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:8.5in;height:11in;position:relative;overflow:hidden;page-break-after:always;break-after:page;padding:72px 76px 64px}
+.page:last-child{page-break-after:auto;break-after:auto}
+.rain{position:absolute;left:0;right:0;top:0;height:10px;background:linear-gradient(90deg,var(--pink) 0 16.6%,var(--peach) 16.6% 33.3%,var(--lemon) 33.3% 50%,var(--mint) 50% 66.6%,var(--sky) 66.6% 83.3%,var(--lilac) 83.3%)}
+.run{position:absolute;left:76px;right:76px;bottom:30px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);letter-spacing:.04em}
+.kicker{font-weight:800;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mag)}
+h1,h2,h3{margin:0;color:var(--plum)}
+h2{font-family:'Fraunces',serif;font-weight:900;font-variation-settings:'SOFT' 100,'opsz' 96;font-size:44px;line-height:1;letter-spacing:-.02em;margin:10px 0 18px}
+h2 em{font-style:italic;color:var(--mag);font-weight:800}
+h3{font-family:'Fraunces',serif;font-weight:800;font-variation-settings:'SOFT' 100,'opsz' 36;font-size:22px;line-height:1.15;margin:0 0 6px}
+p{margin:0 0 12px}
+.lead{font-size:17px;color:var(--ink);max-width:56ch}
+.muted{color:var(--muted)}
+.hand{font-family:'Caveat',cursive;font-weight:700}
+.note{font-family:'Caveat',cursive;font-weight:700;font-size:24px;line-height:1.1;color:var(--mag)}
+.box{border-radius:18px;padding:20px 22px}
+.yel{background:var(--yel)}
+.cream{background:var(--cream);border:1.5px solid #f3e6c4}
+.soft{background:#fdf0f6}
+.star{display:inline-block;width:16px;height:16px;vertical-align:-2px}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+.step{display:grid;grid-template-columns:54px 1fr;gap:16px;align-items:start}
+.num{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:900;font-size:28px;color:var(--plum)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 10px;border-bottom:1.5px solid var(--line);vertical-align:middle}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;border-bottom:2px solid var(--plum)}
+td.r,th.r{text-align:right}
+tr.tot td{font-weight:800;color:var(--plum);border-bottom:0;font-size:16px}
+.bar{height:12px;border-radius:6px}
+.blank td{height:40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border-radius:16px;padding:16px 16px 14px;border:1.5px solid var(--line);background:#fff}
+.card h3{font-size:18px}
+.card p{font-size:13.5px;margin:0}
+.tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:8px;color:var(--plum)}
+.paste{border:2px dashed #d9c3df;border-radius:16px;display:grid;place-items:center;color:#a58aab;font-family:'Caveat',cursive;font-weight:700;font-size:26px}
+.chk{display:flex;gap:10px;align-items:center;margin:6px 0}
+.cb{width:18px;height:18px;border:2px solid var(--plum);border-radius:5px;flex:none}
+.btn{display:inline-block;background:var(--mag);color:#fff;text-decoration:none;font-weight:800;font-size:16px;padding:14px 26px;border-radius:12px}
+a{color:var(--mag)}
+/* cover */
+.cover{padding:0}
+.cover img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.cv{position:absolute;left:60px;right:60px;top:46px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.cv .brand{font-weight:800;font-size:18px;letter-spacing:.42em;padding-left:.42em;color:var(--plum)}
+.cv h1{font-family:'Fraunces',serif;font-weight:900;font-variation-settings:'SOFT' 100,'opsz' 144;font-size:84px;line-height:.92;letter-spacing:-.02em}
+.cv h1 em{font-style:italic;font-weight:800;color:var(--mag)}
+.gift{margin-top:10px;display:flex;align-items:center;gap:12px;background:var(--yel);border-radius:999px;padding:10px 22px 10px 14px;transform:rotate(-2.5deg);box-shadow:0 5px 0 rgba(74,26,79,.08)}
+.gift b{font-family:'Caveat',cursive;font-size:30px;color:var(--plum);line-height:1}
+.gift span{font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mag)}
+</style>
+</head>
+<body>
+
+<!-- 1 · PORTADA -->
+<section class="page cover">
+<img src="../../portada/manos-arte.jpg" alt="">
+<div class="cv">
+<div class="brand">CELEBRA</div>
+<h1>Fiestas <em>que se</em><br>recuerdan</h1>
+<div class="gift"><svg class="star" viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#c2185b"/></svg><b>Capítulo de regalo</b><span>· Presupuesto real</span></div>
+</div>
+</section>
+
+<!-- 2 · BIENVENIDA -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Antes de empezar</span>
+<h2>Una fiesta bonita empieza <em>con un número</em></h2>
+<p class="lead">Este es el capítulo 2 de <b>Fiestas que se recuerdan</b>, la guía de nuestro taller en Caripe para organizar el cumpleaños de tu hijo haciendo tú misma lo que se puede hacer en casa, y gastando menos.</p>
+<p class="lead">En estas páginas vas a decidir cuánto gastar, repartirlo con cabeza y saber desde hoy si te alcanza.</p>
+
+<div class="box yel" style="margin-top:22px">
+<h3>Qué te llevas en este capítulo</h3>
+<div class="chk"><span class="cb"></span>La regla del taller para que el dinero alcance</div>
+<div class="chk"><span class="cb"></span>Una guía de cuánto poner en cada cosa</div>
+<div class="chk"><span class="cb"></span>Un ejemplo resuelto: cumpleaños para 15 niños</div>
+<div class="chk"><span class="cb"></span>Seis ideas para ahorrar haciendo en casa</div>
+<div class="chk"><span class="cb"></span>La plantilla para imprimir y completar</div>
+</div>
+
+<div class="grid3" style="margin-top:26px">
+<div class="card"><span class="tag" style="background:var(--pink)">Paso 1</span><h3>Lee</h3><p>Diez minutos. Con un café y el celular en silencio.</p></div>
+<div class="card"><span class="tag" style="background:var(--mint)">Paso 2</span><h3>Imprime</h3><p>La plantilla de la página 7. Pégala en la nevera.</p></div>
+<div class="card"><span class="tag" style="background:var(--sky)">Paso 3</span><h3>Completa</h3><p>Con lápiz: los números van a cambiar y está bien.</p></div>
+</div>
+
+<p class="note" style="margin-top:30px">Marca las casillas a medida que avanzas. Ese pequeño visto se siente muy bien.</p>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>2</span></div>
+</section>
+
+<!-- 3 · LA REGLA -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Capítulo 2 · Presupuesto real</span>
+<h2>Decide el total primero, <em>repártelo después</em></h2>
+<p class="lead">El error más común es ir comprando y sumar al final. Así la cuenta siempre sale más alta de lo que pensabas, y la última semana aparecen gastos que no habías visto.</p>
+<p class="lead">En el taller lo hacemos al revés: primero un número total, después se reparte, y cada compra tiene su límite.</p>
+
+<div class="steps" style="margin-top:22px">
+<div class="step"><div class="num" style="background:var(--pink)">1</div><div><h3>Elige tu número total</h3><p>Lo que de verdad puedes gastar sin endeudarte ni sacar de otra cosa importante. Escríbelo en grande. Ese es tu techo.</p></div></div>
+<div class="step"><div class="num" style="background:var(--lemon)">2</div><div><h3>Aparta el 10% para imprevistos</h3><p>Siempre falta algo: hielo, pilas, más platos, un invitado sorpresa. Si no lo usas, se va a los recuerdos o a la próxima fiesta.</p></div></div>
+<div class="step"><div class="num" style="background:var(--mint)">3</div><div><h3>Reparte el resto por rubro</h3><p>Usa la guía de la página siguiente como punto de partida y ajústala a lo que más le importa a tu familia.</p></div></div>
+<div class="step"><div class="num" style="background:var(--sky)">4</div><div><h3>Calcula por niño, no a ojo</h3><p>Comida, recuerdos y relleno de piñata se calculan por cada niño invitado. Así no sobra ni falta.</p></div></div>
+</div>
+
+<div class="box soft" style="margin-top:26px;display:flex;gap:16px;align-items:center">
+<svg viewBox="0 0 24 24" style="width:40px;height:40px;flex:none"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#fde9a6" stroke="#c2185b" stroke-width="1.2"/></svg>
+<p style="margin:0"><b>Regla del taller:</b> antes de comprar algo, pregúntate en qué rubro va y si todavía queda espacio en ese rubro. Si no queda, se saca de otro o no se compra.</p>
+</div>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>3</span></div>
+</section>
+
+<!-- 4 · GUÍA DE REPARTO -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Guía de reparto</span>
+<h2>¿Cuánto poner <em>en cada cosa?</em></h2>
+<p class="lead">Una fiesta en casa para niños se reparte más o menos así. Es una guía de partida, no una ley: si la torta es lo que más le ilusiona a tu hijo, súbele y bájale a otra cosa.</p>
+
+<table style="margin-top:14px">
+<thead><tr><th>Rubro</th><th style="width:44%"></th><th class="r">% del total</th></tr></thead>
+<tbody>
+<tr><td>Comida y bebidas</td><td><div class="bar" style="width:100%;background:var(--pink)"></div></td><td class="r">30%</td></tr>
+<tr><td>Torta</td><td><div class="bar" style="width:50%;background:var(--peach)"></div></td><td class="r">15%</td></tr>
+<tr><td>Decoración y globos</td><td><div class="bar" style="width:40%;background:var(--lemon)"></div></td><td class="r">12%</td></tr>
+<tr><td>Piñata y relleno</td><td><div class="bar" style="width:40%;background:var(--mint)"></div></td><td class="r">12%</td></tr>
+<tr><td>Mesa dulce y cotillón</td><td><div class="bar" style="width:36%;background:var(--sky)"></div></td><td class="r">11%</td></tr>
+<tr><td>Recuerdos (bolsitas)</td><td><div class="bar" style="width:33%;background:var(--lilac)"></div></td><td class="r">10%</td></tr>
+<tr><td>Imprevistos</td><td><div class="bar" style="width:33%;background:#e6dce8"></div></td><td class="r">10%</td></tr>
+<tr class="tot"><td>Total</td><td></td><td class="r">100%</td></tr>
+</tbody>
+</table>
+<p class="muted" style="font-size:13px;margin-top:8px">¿Alquilas un local? Ese gasto sale primero del total y el resto se reparte igual.</p>
+
+<div class="grid2" style="margin-top:20px">
+<div class="box cream">
+<h3>Cuentas por niño</h3>
+<p style="margin:0"><b>Recuerdos:</b> número de niños + 2 de repuesto.<br><b>Relleno de piñata:</b> un puñado generoso por niño.<br><b>Vasos:</b> 2 o 3 por persona, adultos incluidos.<br><b>Platos:</b> 2 por persona.</p>
+</div>
+<div class="box yel">
+<h3>¿Cuánto por niño?</h3>
+<p style="margin:0">Divide tu total entre el número de niños. Ese es tu <b>costo por niño</b>. Si te parece alto, baja invitados o haz más cosas en casa; no recortes la comida.</p>
+</div>
+</div>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>4</span></div>
+</section>
+
+<!-- 5 · EJEMPLO -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Ejemplo resuelto</span>
+<h2>Cumpleaños para <em>15 niños</em></h2>
+<p class="lead">Valentina cumple 6. Fiesta en casa, temática estrellita arcoíris, 15 niños y algunos adultos. Total que la familia decidió gastar: <b>USD 130</b>.</p>
+
+<table style="margin-top:10px">
+<thead><tr><th>Rubro</th><th class="r">Presupuesto</th><th class="r">Gastado</th><th>Cómo se ahorró</th></tr></thead>
+<tbody>
+<tr><td>Comida y bebidas</td><td class="r">40</td><td class="r">38</td><td class="muted">Tequeños y sándwiches hechos en casa</td></tr>
+<tr><td>Torta</td><td class="r">20</td><td class="r">20</td><td class="muted">Torta sencilla + topper impreso</td></tr>
+<tr><td>Decoración y globos</td><td class="r">15</td><td class="r">13</td><td class="muted">Arco de globos armado la noche antes</td></tr>
+<tr><td>Piñata y relleno</td><td class="r">15</td><td class="r">14</td><td class="muted">Piñata estrella de cartón reciclado</td></tr>
+<tr><td>Mesa dulce y cotillón</td><td class="r">14</td><td class="r">12</td><td class="muted">Cajas forradas como bases de altura</td></tr>
+<tr><td>Recuerdos (17 bolsitas)</td><td class="r">13</td><td class="r">13</td><td class="muted">Bolsitas armadas en casa</td></tr>
+<tr><td>Imprevistos (10%)</td><td class="r">13</td><td class="r">6</td><td class="muted">Hielo y más platos</td></tr>
+<tr class="tot"><td>Total (USD)</td><td class="r">130</td><td class="r">116</td><td></td></tr>
+</tbody>
+</table>
+
+<div class="grid2" style="margin-top:20px">
+<div class="box yel"><h3>Costo por niño</h3><p style="margin:0;font-size:15px">130 ÷ 15 niños = <b>USD 8,67</b> por niño. Al final gastaron 116: <b>USD 7,73</b> por niño.</p></div>
+<div class="box soft"><h3>¿Y lo que sobró?</h3><p style="margin:0;font-size:15px">Los USD 14 que no se usaron quedaron para la próxima fiesta. Así funciona el 10%.</p></div>
+</div>
+<p class="muted" style="font-size:12.5px;margin-top:12px">Las cifras son un ejemplo para mostrar el método. Los precios cambian según tu ciudad y la fecha: usa siempre los tuyos.</p>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>5</span></div>
+</section>
+
+<!-- 6 · AHORRAR EN CASA -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Dónde se ahorra</span>
+<h2>Seis cosas que puedes <em>hacer en casa</em></h2>
+<p class="lead">Lo que más encarece una fiesta es pagar por cosas que se pueden hacer con tiempo, cartón y papel. Estas son las que más rinden.</p>
+<div class="grid2" style="margin-top:12px;gap:14px">
+<div class="card"><span class="tag" style="background:var(--pink)">Piñata</span><h3>Piñata de cartón reciclado</h3><p>Con dos o tres cajas, papel crepé y pegamento. En el libro completo está la piñata estrella paso a paso, con dibujos y video.</p></div>
+<div class="card"><span class="tag" style="background:var(--peach)">Invitación</span><h3>Invitación digital</h3><p>Una imagen para WhatsApp en vez de imprimir. Que también pida confirmar cuántos niños van y si hay alergias.</p></div>
+<div class="card"><span class="tag" style="background:var(--lemon)">Globos</span><h3>Arco de globos casero</h3><p>Globos de tres tamaños y una cinta. Se arma la noche antes y se guarda en bolsas grandes.</p></div>
+<div class="card"><span class="tag" style="background:var(--mint)">Mesa</span><h3>Alturas con cajas</h3><p>Cajas de zapatos forradas con papel del color principal hacen de bases para la torta y los frascos.</p></div>
+<div class="card"><span class="tag" style="background:var(--sky)">Recuerdos</span><h3>Bolsitas armadas en casa</h3><p>Bolsa transparente, pocos dulces, un juguete pequeño y una etiqueta con el nombre.</p></div>
+<div class="card"><span class="tag" style="background:var(--lilac)">Cartel</span><h3>Cartel con el nombre</h3><p>Letras recortadas en cartulina sobre un cordel. Lo puede ayudar a hacer el cumpleañero.</p></div>
+</div>
+<p class="note" style="margin-top:22px">Pide ayuda: una tarde con la abuela, una tía o una amiga hace todo más rápido y más rico.</p>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>6</span></div>
+</section>
+
+<!-- 7 · PLANTILLA -->
+<section class="page">
+<div class="rain"></div>
+<span class="kicker">Para imprimir</span>
+<h2>Tu presupuesto</h2>
+<div class="grid3" style="grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin-bottom:14px">
+<div class="box cream" style="padding:14px 16px"><b>Total que voy a gastar</b><div class="hand" style="font-size:30px;color:#c9b6cd;margin-top:6px">____________</div></div>
+<div class="box cream" style="padding:14px 16px"><b>Número de niños</b><div class="hand" style="font-size:30px;color:#c9b6cd;margin-top:6px">______</div></div>
+<div class="box cream" style="padding:14px 16px"><b>Costo por niño</b><div class="hand" style="font-size:30px;color:#c9b6cd;margin-top:6px">______</div></div>
+</div>
+<table class="blank">
+<thead><tr><th>Rubro</th><th class="r" style="width:15%">%</th><th class="r" style="width:18%">Presupuesto</th><th class="r" style="width:18%">Gastado</th><th style="width:22%">Notas</th></tr></thead>
+<tbody>
+<tr><td>Comida y bebidas</td><td class="r muted">30%</td><td></td><td></td><td></td></tr>
+<tr><td>Torta</td><td class="r muted">15%</td><td></td><td></td><td></td></tr>
+<tr><td>Decoración y globos</td><td class="r muted">12%</td><td></td><td></td><td></td></tr>
+<tr><td>Piñata y relleno</td><td class="r muted">12%</td><td></td><td></td><td></td></tr>
+<tr><td>Mesa dulce y cotillón</td><td class="r muted">11%</td><td></td><td></td><td></td></tr>
+<tr><td>Recuerdos</td><td class="r muted">10%</td><td></td><td></td><td></td></tr>
+<tr><td>Imprevistos</td><td class="r muted">10%</td><td></td><td></td><td></td></tr>
+<tr><td>Lugar (si alquilas)</td><td class="r muted"></td><td></td><td></td><td></td></tr>
+<tr class="tot"><td>Total</td><td class="r">100%</td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+<div class="grid2" style="margin-top:16px;grid-template-columns:1fr 1.1fr">
+<div><div class="chk"><span class="cb"></span>Decidí el total</div><div class="chk"><span class="cb"></span>Aparté el 10% para imprevistos</div><div class="chk"><span class="cb"></span>Repartí por rubro</div><div class="chk"><span class="cb"></span>Calculé recuerdos y comida por niño</div><div class="chk"><span class="cb"></span>Cotizé al menos 2 opciones de lo más caro</div></div>
+<div class="paste" style="height:150px">Pega aquí tus cotizaciones</div>
+</div>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>7</span></div>
+</section>
+
+<!-- 8 · CIERRE -->
+<section class="page" style="background:#fffaf3">
+<div class="rain"></div>
+<span class="kicker">Esto fue solo el capítulo 2</span>
+<h2>Ya sabes cuánto. <em>Ahora, cómo.</em></h2>
+<p class="lead">En el libro completo te acompañamos desde la idea hasta que se va el último invitado:</p>
+<div class="grid2" style="gap:8px 26px;margin:6px 0 18px">
+<div class="chk"><span class="cb" style="background:var(--pink)"></span>1. Tu idea primero</div>
+<div class="chk"><span class="cb" style="background:var(--lilac)"></span>5. Proveedores: qué reservar y qué no</div>
+<div class="chk"><span class="cb" style="background:var(--peach)"></span>2. Presupuesto real <span class="muted">(lo tienes)</span></div>
+<div class="chk"><span class="cb" style="background:var(--pink)"></span>6. Lo mínimo de una fiesta</div>
+<div class="chk"><span class="cb" style="background:var(--lemon)"></span>3. Diseño, colores y temática</div>
+<div class="chk"><span class="cb" style="background:var(--peach)"></span>7. El plan de 6 semanas</div>
+<div class="chk"><span class="cb" style="background:var(--mint)"></span>4. La invitación</div>
+<div class="chk"><span class="cb" style="background:var(--lemon)"></span>8. El día antes y el día hora por hora</div>
+</div>
+<div class="box yel" style="display:flex;gap:18px;align-items:center">
+<svg viewBox="0 0 24 24" style="width:46px;height:46px;flex:none"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#c2185b"/></svg>
+<div><h3>Y la guía visual: hazlo tú misma</h3><p style="margin:0">La piñata estrella paso a paso, el arco de globos, la mesa principal y las bolsitas de recuerdo. Con dibujos y videos.</p></div>
+</div>
+
+<div class="box" style="margin-top:20px;border:2px dashed var(--mag);background:#fff;text-align:center;padding:22px">
+<p class="note" style="font-size:30px;margin:0 0 6px">Tienes un regalo esperándote</p>
+<p style="margin:0 0 14px;font-size:15.5px">Revisa el email con el que recibiste este capítulo: ahí está <b>tu código de descuento</b> para el libro completo. Es personal, se usa una sola vez y vence a las 48 horas.</p>
+<a class="btn" href="https://TU-DOMINIO.com/?utm_source=capitulo2&amp;utm_medium=pdf&amp;utm_campaign=lead">Quiero el libro completo</a>
+</div>
+<p class="muted" style="font-size:13px;margin-top:18px;text-align:center">¿Prefieres que la cuenta se haga sola? Usa la calculadora gratis en <b>TU-DOMINIO.com/calculadora</b>.<br>Celebra · Taller de fiestas en Caripe, Monagas · Instagram @[TU_USUARIO]</p>
+<div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>8</span></div>
+</section>
+
+</body>
+</html>

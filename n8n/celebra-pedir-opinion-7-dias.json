@@ -1,0 +1,169 @@
+{
+  "name": "Celebra · Pedir opinión a los 7 días",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "id": "o1",
+      "name": "Cada día a las 10:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pedidos"
+        },
+        "options": {}
+      },
+      "id": "o2",
+      "name": "Leer pedidos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// A quién pedirle opinión hoy: compraron hace 7 días o más y todavía no se les pidió.\n// Se le pide a TODAS las clientas, no solo a las contentas (regla de Google).\nconst ahora = Date.now();\nconst out = [];\nfor (const it of $input.all()) {\n  const r = it.json;\n  if (!r.email || r.opinion_pedida === 'sí') continue;\n  const dias = (ahora - new Date(r.fecha).getTime()) / 86400000;\n  if (dias >= 7 && dias < 30) out.push({ json: { ...r, nombre: String(r.cliente || '').split(' ')[0] } });\n}\nreturn out;"
+      },
+      "id": "o3",
+      "name": "¿A quién le toca?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.nombre ? $json.nombre + ', ¿' : '¿' }}cómo te fue con el libro?",
+        "emailFormat": "html",
+        "html": "=<div style=\"margin:0;padding:24px 12px;background:#fdf6fa;font-family:Arial,Helvetica,sans-serif;color:#2a1b2d\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden\"><div style=\"height:8px;background:linear-gradient(90deg,#f8bbd0,#ffd8b5,#fdeca6,#c8f0dc,#c5e3f6,#e0d1f5)\"></div><div style=\"padding:28px 28px 8px\"><div style=\"font-weight:bold;letter-spacing:4px;font-size:12px;color:#4a1a4f\">CELEBRA</div></div><div style=\"padding:0 28px 28px;font-size:16px;line-height:1.55\"><h1 style=\"font-size:22px;color:#4a1a4f;margin:0 0 12px\">¿Nos cuentas qué te pareció?</h1><p>Hola {{ $json.nombre || '' }}. Hace una semana recibiste <b>Fiestas que se recuerdan</b>. Nos encantaría saber cómo te fue: si ya organizaste la fiesta, si hiciste la piñata, o si algo no quedó claro.</p><p>Tu opinión ayuda a otras mamás a decidir, y a nosotras a mejorar el libro. Toma un minuto.</p><p style=\"margin:22px 0 10px\"><a href=\"https://search.google.com/local/writereview?placeid=ChIJ1UP5xAmpM4wRrsY4LBxHGsk\" style=\"display:inline-block;background:#c2185b;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:10px\">Dejar mi opinión en Google</a></p><p style=\"margin:0 0 22px\"><a href=\"{{ $env.N8N_FORM_OPINION_URL }}\" style=\"color:#c2185b;font-weight:bold\">Prefiero contarles por aquí →</a></p><p style=\"font-size:14px;color:#6e5a72\">Si algo no te gustó, también queremos saberlo. Y si tienes una foto de tu fiesta, ¡nos haría muy felices verla!</p></div><div style=\"padding:18px 28px;background:#faf3f7;font-size:12px;color:#6e5a72\">Celebra · Taller de fiestas en Caripe, Monagas. Recibes este email porque compraste el libro. <a href=\"https://{{ $env.SITE_DOMAIN }}/baja?e={{ encodeURIComponent($json.email) }}\" style=\"color:#6e5a72\">Darme de baja</a></div></div></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "o4",
+      "name": "Email: ¿cómo te fue con el libro?",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pedidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "identificador": "={{ $('¿A quién le toca?').item.json.identificador }}",
+            "opinion_pedida": "sí"
+          },
+          "matchingColumns": [
+            "identificador"
+          ]
+        },
+        "options": {}
+      },
+      "id": "o5",
+      "name": "Anotar que ya se pidió",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        0
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Cada día a las 10:00": {
+      "main": [
+        [
+          {
+            "node": "Leer pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer pedidos": {
+      "main": [
+        [
+          {
+            "node": "¿A quién le toca?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿A quién le toca?": {
+      "main": [
+        [
+          {
+            "node": "Email: ¿cómo te fue con el libro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: ¿cómo te fue con el libro?": {
+      "main": [
+        [
+          {
+            "node": "Anotar que ya se pidió",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,17 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../config/site';
+---
+
+<Legal title="Términos de venta" updated="octubre 2026">
+  <h2>Productos</h2>
+  <p>Vendemos libros digitales (ebooks en PDF y EPUB) con entrega por email, y libros impresos con retiro exclusivo en nuestro local de Caripe, estado Monagas, Venezuela. No realizamos envíos de libros impresos.</p>
+  <h2>Precios y pagos</h2>
+  <p>Los precios se expresan en dólares estadounidenses. Los pagos con tarjeta y PayPal se procesan a través de Lemon Squeezy, que actúa como comerciante registrado y emite el recibo de la compra. Los pagos con Binance Pay y Pago Móvil se verifican manualmente; el monto en bolívares se calcula con la tasa indicada al momento de la compra.</p>
+  <h2>Entrega</h2>
+  <p>Los ebooks pagados con tarjeta o PayPal se entregan de inmediato por email. Los pagados con Binance o Pago Móvil se entregan al verificar el pago, en un plazo máximo de 24 horas hábiles. Las reservas de libros impresos se mantienen por {site.payments.pickup.reservationDays} días.</p>
+  <h2>Uso del contenido</h2>
+  <p>El ebook es para uso personal. No está permitido revenderlo, compartirlo públicamente ni distribuirlo.</p>
+  <h2>Contacto</h2>
+  <p>Escríbenos a {site.brand.email} o por WhatsApp al {site.contact.whatsappDisplay}.</p>
+</Legal>

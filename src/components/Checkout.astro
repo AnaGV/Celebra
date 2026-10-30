@@ -1,0 +1,634 @@
+---
+import { site, countries } from '../config/site';
+---
+
+<dialog id="checkout" class="co" aria-labelledby="co-title">
+  <div class="co-sheet">
+    <header class="co-head">
+      <div>
+        <p class="eyebrow">Pago seguro</p>
+        <h2 id="co-title">Completa tu compra</h2>
+      </div>
+      <button type="button" class="co-close" data-co-close aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path></svg>
+      </button>
+    </header>
+
+    <div id="co-body" class="co-body">
+      <div class="field">
+        <label for="co-country">¿Desde qué país compras?</label>
+        <select id="co-country" class="input">
+          {countries.map((c) => <option value={c.code}>{c.label}</option>)}
+        </select>
+        <span class="hint" id="co-country-hint">Lo detectamos automáticamente. Cámbialo si no es correcto.</span>
+      </div>
+
+      <fieldset class="co-group">
+        <legend>Producto</legend>
+        <div id="co-products" class="co-options"></div>
+      </fieldset>
+
+      <div class="field" id="co-code-wrap">
+        <label for="co-code">¿Tienes un código de descuento?</label>
+        <div class="co-code-row">
+          <input id="co-code" class="input mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FIESTA……" />
+          <button type="button" class="btn btn-ghost" id="co-code-apply">Aplicar</button>
+        </div>
+        <span class="hint" id="co-code-msg" aria-live="polite"></span>
+      </div>
+
+      <fieldset class="co-group">
+        <legend>Forma de pago</legend>
+        <div id="co-methods" class="co-options"></div>
+      </fieldset>
+
+      <div id="co-panel" class="co-panel" aria-live="polite"></div>
+    </div>
+
+    <div id="co-result" class="co-body" hidden></div>
+  </div>
+</dialog>
+
+<style is:global>
+  .co {
+    width: min(560px, 100%);
+    max-width: 100%;
+    max-height: 100dvh;
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    border-radius: 22px 22px 0 0;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  @media (min-width: 640px) {
+    .co { margin: auto; border-radius: 22px; max-height: 92dvh; }
+  }
+  .co::backdrop { background: rgb(10 22 19 / 0.55); backdrop-filter: blur(2px); }
+  .co[open] { animation: co-up 0.22s ease-out; }
+  @keyframes co-up { from { transform: translateY(24px); opacity: 0.6; } }
+
+  .co-sheet { display: grid; max-height: inherit; grid-template-rows: auto 1fr; }
+  .co-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .co-head h2 { font-size: var(--step-2); }
+  .co-close {
+    flex: none; display: grid; place-items: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .co-body {
+    display: grid; gap: 1.4rem; overflow-y: auto;
+    padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .co-group { border: 0; margin: 0; padding: 0; display: grid; gap: 0.6rem; min-width: 0; }
+  .co-group legend { font-weight: 700; font-size: var(--step--1); padding: 0; margin-bottom: 0.6rem; }
+  .co-options { display: grid; gap: 0.6rem; }
+
+  .co-option { position: relative; display: block; cursor: pointer; }
+  .co-option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .co-option-box {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.85rem;
+    padding: 0.85rem 1rem; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .co-option input:checked + .co-option-box { border-color: var(--fiesta); background: var(--fiesta-soft); }
+  .co-option input:focus-visible + .co-option-box { outline: 3px solid var(--sol); outline-offset: 2px; }
+  .co-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; }
+  .co-option input:checked + .co-option-box .co-dot { border-color: var(--fiesta); }
+  .co-option input:checked + .co-option-box .co-dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--fiesta); }
+  .co-option-title { font-weight: 700; line-height: 1.3; }
+  .co-option-sub { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+  .co-option-price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 500; white-space: nowrap; }
+  .co-option-box > div { min-width: 0; }
+
+  .co-code-row { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
+  .co-code-row .btn { min-height: 48px; }
+  #co-code-msg[data-ok='true'] { color: var(--ok); font-weight: 700; }
+  #co-code-msg[data-ok='false'] { color: var(--fiesta); }
+  .co-was { text-decoration: line-through; color: var(--muted); font-size: 0.85em; margin-right: 0.35rem; }
+  .co-panel { display: grid; gap: 1rem; }
+  .co-panel:empty { display: none; }
+  .co-form { display: grid; gap: 0.9rem; }
+  .co-note { font-size: 0.88rem; color: var(--muted); }
+  .co-steps { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; font-size: 0.95rem; }
+
+  /* Comprobante con forma de ticket */
+  .ticket {
+    position: relative;
+    display: grid; gap: 0.7rem;
+    padding: 1rem 1.1rem;
+    background: var(--sunk);
+    border-radius: 12px;
+    --notch: 10px;
+    -webkit-mask: radial-gradient(circle var(--notch) at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle var(--notch) at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+            mask: radial-gradient(circle var(--notch) at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle var(--notch) at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+  }
+  .ticket-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .ticket-amount { font-family: var(--font-mono); font-size: var(--step-2); font-variant-numeric: tabular-nums; }
+  .ticket-rows { display: grid; gap: 0.45rem; border-top: 1.5px dashed var(--line); padding-top: 0.7rem; }
+  .ticket-row { display: grid; grid-template-columns: 7.5rem 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.92rem; }
+  .ticket-row dt { color: var(--muted); }
+  .ticket-row dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; min-width: 0; }
+  @media (max-width: 420px) { .ticket-row { grid-template-columns: 1fr auto; } .ticket-row dt { grid-column: 1 / -1; } }
+  .copy {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 999px; padding: 0.3rem 0.7rem; font: 700 0.78rem/1 var(--font-body); cursor: pointer; min-height: 32px;
+  }
+  .copy[data-done='true'] { border-color: var(--ok); color: var(--ok); }
+
+  .co-alert { padding: 0.8rem 1rem; border-radius: 10px; background: var(--warn-soft); font-size: 0.9rem; }
+  .co-success { display: grid; gap: 1rem; text-align: left; }
+  .co-success-mark {
+    width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ok-soft); color: var(--ok);
+  }
+  .co-success h3 { font-size: var(--step-2); }
+  .co-ref { font-family: var(--font-mono); font-size: var(--step-1); letter-spacing: 0.06em; }
+</style>
+
+<script>
+  import { site, type CountryCode, type PaymentMethodId } from '../config/site';
+  import { products, type Product } from '../config/products';
+  import { detectCountry, isInAppBrowser } from '../lib/country';
+  import { track } from '../lib/analytics';
+
+  const pay = site.payments;
+  const dialog = document.getElementById('checkout') as HTMLDialogElement;
+  const countrySel = document.getElementById('co-country') as HTMLSelectElement;
+  const productsEl = document.getElementById('co-products')!;
+  const methodsEl = document.getElementById('co-methods')!;
+  const panel = document.getElementById('co-panel')!;
+  const bodyEl = document.getElementById('co-body')!;
+  const resultEl = document.getElementById('co-result')!;
+  const codeWrap = document.getElementById('co-code-wrap')!;
+  const codeInput = document.getElementById('co-code') as HTMLInputElement;
+  const codeBtn = document.getElementById('co-code-apply') as HTMLButtonElement;
+  const codeMsg = document.getElementById('co-code-msg')!;
+
+  const methodInfo: Record<PaymentMethodId, { title: string; sub: string }> = {
+    lemon: { title: 'Tarjeta o PayPal', sub: 'Visa, Mastercard, Apple Pay, Google Pay o PayPal. Entrega automática.' },
+    binance: { title: 'Binance Pay (USDT)', sub: 'Pagas desde tu app de Binance, sin comisión.' },
+    pago_movil: { title: 'Pago Móvil', sub: 'En bolívares, desde cualquier banco venezolano.' },
+    pagar_en_local: { title: 'Pagar al retirar', sub: 'Reservas ahora y pagas en el local de Caripe.' },
+  };
+
+  const state = {
+    country: detectCountry() as CountryCode,
+    productId: products[0].id,
+    method: null as PaymentMethodId | null,
+    ref: '',
+    code: '',
+    discount: 0,
+  };
+
+  // ---------- utilidades ----------
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  const usd = (n: number) => `USD ${n.toFixed(2).replace('.', ',')}`;
+  const bs = (n: number) => `Bs ${new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
+  const product = () => products.find((p) => p.id === state.productId)!;
+  /** Precio a cobrar: el código de descuento solo aplica al ebook. */
+  const finalPrice = (p: Product) => Math.max(0, +(p.priceUsd - (p.kind === 'digital' ? state.discount : 0)).toFixed(2));
+  const priceHtml = (p: Product) =>
+    finalPrice(p) < p.priceUsd ? `<span class="co-was">${usd(p.priceUsd)}</span>${usd(finalPrice(p))}` : usd(p.priceUsd);
+
+  // ---------- código de descuento ----------
+  function setCodeMsg(text: string, ok: boolean | null) {
+    codeMsg.textContent = text;
+    if (ok === null) codeMsg.removeAttribute('data-ok');
+    else codeMsg.dataset.ok = String(ok);
+  }
+
+  async function applyCode(raw: string) {
+    const codigo = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    codeInput.value = codigo;
+    state.code = '';
+    state.discount = 0;
+    if (!codigo) { setCodeMsg('', null); renderAll(); return; }
+    codeBtn.disabled = true;
+    setCodeMsg('Revisando…', null);
+    try {
+      let out: { valido: boolean; descuento_usd?: number; mensaje?: string };
+      if (site.demoMode) {
+        await new Promise((r) => setTimeout(r, 400));
+        out = /^FIESTA[A-Z2-9]{6}$/.test(codigo)
+          ? { valido: true, descuento_usd: pay.leadDiscountUsd }
+          : { valido: false, mensaje: 'Ese código no existe. Revísalo en tu email.' };
+      } else {
+        const res = await fetch(pay.codeEndpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ codigo, producto: 'ebook-fiestas' }),
+        });
+        out = await res.json();
+      }
+      if (out.valido) {
+        state.code = codigo;
+        state.discount = Number(out.descuento_usd) || 0;
+        setCodeMsg(`Código aplicado: ${usd(state.discount)} menos en el ebook.`, true);
+      } else {
+        setCodeMsg(out.mensaje ?? 'Ese código no es válido.', false);
+      }
+    } catch {
+      setCodeMsg('No pudimos revisar el código. Inténtalo de nuevo.', false);
+    } finally {
+      codeBtn.disabled = false;
+      renderAll();
+    }
+  }
+
+  function newRef(p: Product) {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    const bytes = crypto.getRandomValues(new Uint8Array(5));
+    bytes.forEach((b) => (s += alphabet[b % alphabet.length]));
+    return `${p.kind === 'digital' ? 'EB' : 'LF'}-${s}`;
+  }
+
+  const visibleProducts = () => products.filter((p) => p.countries === 'ALL' || p.countries.includes(state.country));
+  const methodsFor = (p: Product): PaymentMethodId[] => p.methods ?? [...pay.byCountry[state.country]];
+
+  // ---------- render ----------
+  function renderProducts() {
+    const list = visibleProducts();
+    if (!list.some((p) => p.id === state.productId)) state.productId = list[0].id;
+    productsEl.innerHTML = list
+      .map(
+        (p) => `
+        <label class="co-option">
+          <input type="radio" name="co-product" value="${p.id}" ${p.id === state.productId ? 'checked' : ''} />
+          <span class="co-option-box">
+            <span class="co-dot" aria-hidden="true"></span>
+            <div>
+              <div class="co-option-title">${esc(p.shortName)}</div>
+              <div class="co-option-sub">${esc(p.format)} · ${esc(p.delivery)}</div>
+            </div>
+            <span class="co-option-price">${priceHtml(p)}</span>
+          </span>
+        </label>`,
+      )
+      .join('');
+  }
+
+  function renderMethods() {
+    const list = methodsFor(product());
+    if (!state.method || !list.includes(state.method)) state.method = list[0];
+    methodsEl.innerHTML = list
+      .map(
+        (m) => `
+        <label class="co-option">
+          <input type="radio" name="co-method" value="${m}" ${m === state.method ? 'checked' : ''} />
+          <span class="co-option-box">
+            <span class="co-dot" aria-hidden="true"></span>
+            <div>
+              <div class="co-option-title">${methodInfo[m].title}</div>
+              <div class="co-option-sub">${methodInfo[m].sub}</div>
+            </div>
+            <span></span>
+          </span>
+        </label>`,
+      )
+      .join('');
+  }
+
+  const copyRow = (label: string, value: string) => `
+    <div class="ticket-row"><dt>${label}</dt><dd>${esc(value)}</dd>
+      <button type="button" class="copy" data-copy="${esc(value)}">Copiar</button></div>`;
+
+  function renderPanel() {
+    const p = product();
+    codeWrap.hidden = p.kind !== 'digital';
+    const price = finalPrice(p);
+    state.ref = state.ref || newRef(p);
+    const ref = state.ref;
+
+    if (state.method === 'lemon') {
+      panel.innerHTML = `
+        <form class="co-form" data-form="lemon" novalidate>
+          <div class="field">
+            <label for="co-email-lemon">Email para recibir el ebook</label>
+            <input id="co-email-lemon" class="input" type="email" name="email" autocomplete="email" inputmode="email" placeholder="tu@email.com" />
+            <span class="hint">Opcional: si lo dejas vacío, lo pides en el siguiente paso.</span>
+          </div>
+          <button class="btn btn-block" type="submit">Pagar ${usd(price)}</button>
+          <p class="co-note">Se abrirá el pago seguro de Lemon Squeezy. Recibirás el ebook y tu recibo por email al instante.</p>
+        </form>`;
+      return;
+    }
+
+    if (state.method === 'binance') {
+      panel.innerHTML = `
+        <div class="ticket">
+          <div class="ticket-total"><span class="muted">Monto exacto</span><span class="ticket-amount">${price.toFixed(2)} USDT</span></div>
+          <dl class="ticket-rows" style="margin:0">
+            ${copyRow('Binance Pay ID', pay.binance.payId)}
+            ${copyRow('Titular', pay.binance.accountName)}
+            ${copyRow('Referencia', ref)}
+          </dl>
+        </div>
+        <ol class="co-steps">
+          <li>En tu app de Binance toca <strong>Pagar → Enviar</strong>.</li>
+          <li>Pega el Binance Pay ID y envía el monto exacto en USDT.</li>
+          <li>En la nota del pago escribe la referencia <span class="mono">${ref}</span>.</li>
+          <li>Completa este formulario con el ID de la orden de Binance.</li>
+        </ol>
+        <form class="co-form" data-form="binance" novalidate>
+          <div class="field">
+            <label for="co-email-bn">Tu email</label>
+            <input id="co-email-bn" class="input" type="email" name="email" autocomplete="email" inputmode="email" required placeholder="tu@email.com" />
+          </div>
+          <div class="field">
+            <label for="co-order-bn">ID de la orden en Binance</label>
+            <input id="co-order-bn" class="input mono" name="binanceOrderId" required inputmode="numeric" placeholder="Ej. 312345678901234567" />
+            <span class="hint">Aparece en el historial de Binance Pay, en el detalle del pago.</span>
+          </div>
+          <button class="btn btn-block" type="submit">Ya pagué, enviar comprobante</button>
+        </form>`;
+      return;
+    }
+
+    if (state.method === 'pago_movil') {
+      const amountBs = price * pay.pagoMovil.rate;
+      panel.innerHTML = `
+        <div class="ticket">
+          <div class="ticket-total"><span class="muted">Monto a transferir</span><span class="ticket-amount">${bs(amountBs)}</span></div>
+          <p class="co-note">${usd(price)} × ${pay.pagoMovil.rate} Bs/USD · ${esc(pay.pagoMovil.rateLabel)}</p>
+          <dl class="ticket-rows" style="margin:0">
+            ${copyRow('Banco', pay.pagoMovil.bank)}
+            ${copyRow('Teléfono', pay.pagoMovil.phone)}
+            ${copyRow('Cédula', pay.pagoMovil.idDocument)}
+            ${copyRow('Monto', amountBs.toFixed(2))}
+          </dl>
+        </div>
+        <form class="co-form" data-form="pago_movil" novalidate>
+          <div class="field">
+            <label for="co-email-pm">Tu email</label>
+            <input id="co-email-pm" class="input" type="email" name="email" autocomplete="email" inputmode="email" required placeholder="tu@email.com" />
+          </div>
+          <div class="field">
+            <label for="co-phone-pm">Teléfono desde el que pagaste</label>
+            <input id="co-phone-pm" class="input mono" name="phone" type="tel" autocomplete="tel" required placeholder="0414-000-0000" />
+          </div>
+          <div class="field">
+            <label for="co-ref-pm">Número de referencia del pago</label>
+            <input id="co-ref-pm" class="input mono" name="bankReference" inputmode="numeric" required placeholder="Últimos 6 dígitos" />
+          </div>
+          <button class="btn btn-block" type="submit">Ya pagué, enviar comprobante</button>
+          <p class="co-note">Verificamos el pago en tu banco y te enviamos ${p.kind === 'digital' ? 'el ebook por email' : 'la confirmación para retirar tu libro'}.</p>
+        </form>`;
+      return;
+    }
+
+    if (state.method === 'pagar_en_local') {
+      panel.innerHTML = `
+        <div class="co-alert">Solo retiro en el local de Caripe. Apartamos tu libro por ${pay.pickup.reservationDays} días.</div>
+        <form class="co-form" data-form="pagar_en_local" novalidate>
+          <div class="field">
+            <label for="co-name-pl">Nombre y apellido</label>
+            <input id="co-name-pl" class="input" name="name" autocomplete="name" required placeholder="Como aparece en tu cédula" />
+          </div>
+          <div class="field">
+            <label for="co-phone-pl">Teléfono o WhatsApp</label>
+            <input id="co-phone-pl" class="input mono" name="phone" type="tel" autocomplete="tel" required placeholder="0414-000-0000" />
+          </div>
+          <div class="field">
+            <label for="co-email-pl">Email (opcional)</label>
+            <input id="co-email-pl" class="input" type="email" name="email" autocomplete="email" inputmode="email" placeholder="tu@email.com" />
+          </div>
+          <button class="btn btn-block" type="submit">Reservar mi libro</button>
+          <p class="co-note">Pagas al retirar en efectivo, Pago Móvil o tarjeta en el punto de venta del local.</p>
+        </form>`;
+    }
+  }
+
+  function renderAll() {
+    countrySel.value = state.country;
+    renderProducts();
+    renderMethods();
+    renderPanel();
+  }
+
+  // ---------- validación y envío ----------
+  function validate(form: HTMLFormElement) {
+    let ok = true;
+    form.querySelectorAll<HTMLInputElement>('input').forEach((input) => {
+      const value = input.value.trim();
+      const bad =
+        (input.required && !value) ||
+        (input.type === 'email' && value !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value));
+      input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      if (bad && ok) { input.focus(); ok = false; }
+    });
+    return ok;
+  }
+
+  async function sendOrder(payload: Record<string, unknown>) {
+    if (site.demoMode) {
+      await new Promise((r) => setTimeout(r, 700));
+      return { ok: true };
+    }
+    const res = await fetch(pay.ordersEndpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  function showResult(html: string) {
+    bodyEl.hidden = true;
+    resultEl.hidden = false;
+    resultEl.innerHTML = html;
+    resultEl.scrollTop = 0;
+  }
+
+  const checkIcon = `<div class="co-success-mark"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+  const demoNote = site.demoMode ? `<div class="co-alert"><strong>Modo demo:</strong> no se registró ningún pago real.</div>` : '';
+  const closeBtn = `<button type="button" class="btn btn-ghost btn-block" data-co-close>Volver a la página</button>`;
+
+  async function handleSubmit(form: HTMLFormElement) {
+    if (!validate(form)) return;
+    const p = product();
+    const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+    const kind = form.dataset.form as PaymentMethodId;
+    track('AddPaymentInfo', { content_ids: [p.id], value: finalPrice(p), currency: 'USD', payment_method: kind });
+
+    if (kind === 'lemon') {
+      openLemon(p, data.email);
+      return;
+    }
+
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+    try {
+      await sendOrder({
+        ref: state.ref, productId: p.id, country: state.country, method: kind,
+        amountUsd: finalPrice(p), listPriceUsd: p.priceUsd, codigo: p.kind === 'digital' ? state.code : '', ...data,
+      });
+      const isReserve = kind === 'pagar_en_local';
+      if (isReserve) track('Lead', { content_ids: [p.id], value: p.priceUsd, currency: 'USD' });
+      showResult(`
+        <div class="co-success">
+          ${checkIcon}
+          <h3>${isReserve ? 'Libro reservado' : 'Recibimos tu comprobante'}</h3>
+          <p>Tu código de pedido es</p>
+          <p class="co-ref">${state.ref}</p>
+          <p class="muted">${
+            isReserve
+              ? `Muéstralo al retirar en el local. La reserva vence en ${pay.pickup.reservationDays} días.`
+              : p.kind === 'digital'
+                ? `Cuando verifiquemos el pago, te enviaremos el ebook a <strong>${esc(data.email ?? '')}</strong>. Suele tomar menos de 2 horas en horario laboral.`
+                : `Cuando verifiquemos el pago te avisaremos para que retires tu libro en el local de Caripe.`
+          }</p>
+          ${demoNote}
+          ${closeBtn}
+        </div>`);
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Reintentar envío';
+      panel.insertAdjacentHTML('beforeend', `<div class="co-alert">No pudimos enviar tu comprobante. Revisa tu conexión y vuelve a intentarlo, o escríbenos por WhatsApp con tu referencia ${state.ref}.</div>`);
+    }
+  }
+
+  // ---------- Lemon Squeezy ----------
+  declare global {
+    interface Window { LemonSqueezy?: { Url: { Open: (url: string) => void } }; createLemonSqueezy?: () => void }
+  }
+  let lemonLoaded = false;
+  function loadLemonJs() {
+    if (lemonLoaded || site.demoMode || !products.some((p) => p.lemonCheckoutUrl)) return;
+    lemonLoaded = true;
+    const s = document.createElement('script');
+    s.src = pay.lemon.scriptUrl;
+    s.defer = true;
+    s.onload = () => window.createLemonSqueezy?.();
+    document.head.appendChild(s);
+  }
+
+  function openLemon(p: Product, email?: string) {
+    const inApp = isInAppBrowser();
+    if (site.demoMode || !p.lemonCheckoutUrl) {
+      showResult(`
+        <div class="co-success">
+          ${checkIcon}
+          <h3>Aquí se abre el pago con tarjeta</h3>
+          <p>Con la tienda de Lemon Squeezy conectada, este botón ${
+            inApp
+              ? 'abre el checkout como página completa, porque detectamos el navegador interno de Instagram o Facebook.'
+              : 'abre el checkout encima de tu página, sin salir de ella.'
+          }</p>
+          <p class="muted">Después del pago, el cliente recibe el ebook y su recibo por email, y el webhook registra el pedido ${esc(state.ref)}.</p>
+          ${demoNote}
+          ${closeBtn}
+        </div>`);
+      return;
+    }
+    const url = new URL(p.lemonCheckoutUrl);
+    if (email) url.searchParams.set('checkout[email]', email);
+    url.searchParams.set('checkout[custom][ref]', state.ref);
+    url.searchParams.set('checkout[custom][country]', state.country);
+    // Lemon Squeezy vuelve a validar el código al cobrar: un solo uso y con vencimiento.
+    if (state.code) url.searchParams.set('checkout[discount_code]', state.code);
+    if (!inApp && window.LemonSqueezy) {
+      window.LemonSqueezy.Url.Open(url.toString());
+    } else {
+      window.location.href = url.toString();
+    }
+  }
+
+  // ---------- eventos ----------
+  function openCheckout(productId?: string) {
+    if (productId && products.some((p) => p.id === productId)) state.productId = productId;
+    state.ref = '';
+    bodyEl.hidden = false;
+    resultEl.hidden = true;
+    renderAll();
+    loadLemonJs();
+    dialog.showModal();
+    const p = product();
+    track('InitiateCheckout', { content_ids: [p.id], value: p.priceUsd, currency: 'USD' });
+  }
+
+  document.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const buy = target.closest<HTMLElement>('[data-buy]');
+    if (buy) {
+      e.preventDefault();
+      openCheckout(buy.dataset.buy);
+      return;
+    }
+    if (target.closest('[data-co-close]')) {
+      dialog.close();
+      return;
+    }
+    const copyBtn = target.closest<HTMLButtonElement>('[data-copy]');
+    if (copyBtn) {
+      const value = copyBtn.dataset.copy ?? '';
+      try {
+        await navigator.clipboard.writeText(value);
+        copyBtn.textContent = 'Copiado';
+        copyBtn.dataset.done = 'true';
+        setTimeout(() => { copyBtn.textContent = 'Copiar'; copyBtn.dataset.done = 'false'; }, 1800);
+      } catch {
+        const dd = copyBtn.previousElementSibling;
+        if (dd) {
+          const range = document.createRange();
+          range.selectNodeContents(dd);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }
+    }
+  });
+
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+
+  countrySel.addEventListener('change', () => {
+    state.country = countrySel.value as CountryCode;
+    state.method = null;
+    state.ref = '';
+    renderAll();
+  });
+
+  productsEl.addEventListener('change', (e) => {
+    state.productId = (e.target as HTMLInputElement).value;
+    state.method = null;
+    state.ref = '';
+    renderMethods();
+    renderPanel();
+  });
+
+  methodsEl.addEventListener('change', (e) => {
+    state.method = (e.target as HTMLInputElement).value as PaymentMethodId;
+    renderPanel();
+  });
+
+  codeBtn.addEventListener('click', () => applyCode(codeInput.value));
+  codeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyCode(codeInput.value); }
+  });
+
+  panel.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleSubmit(e.target as HTMLFormElement);
+  });
+
+  renderAll();
+
+  // El email de seguimiento trae ?codigo=FIESTA… en el enlace: lo aplicamos y abrimos el checkout.
+  const fromUrl = new URLSearchParams(location.search).get('codigo');
+  if (fromUrl) {
+    applyCode(fromUrl).then(() => { if (state.code) openCheckout('ebook-fiestas'); });
+  }
+</script>

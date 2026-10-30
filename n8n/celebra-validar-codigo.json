@@ -1,0 +1,150 @@
+{
+  "name": "Celebra · Validar código de descuento",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "codigo/validar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c1",
+      "name": "Consulta desde el checkout",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "celebra-codigo"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const req = $input.first().json;\nconst b = req.body || {};\nif (!$env.CELEBRA_FORM_KEY || String(req.headers?.['x-celebra-key'] || '') !== $env.CELEBRA_FORM_KEY) return [{ json: { codigo: '', clave: false } }];\nreturn [{ json: { clave: true, codigo: String(b.codigo || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, ''), producto: String(b.producto || '') } }];"
+      },
+      "id": "c2",
+      "name": "Preparar consulta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "codigo",
+              "lookupValue": "={{ $json.codigo || '-' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3",
+      "name": "Buscar código",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Reglas: existe, no usado, no vencido y es para el ebook.\nconst pedido = $('Preparar consulta').first().json;\nconst r = $input.first().json || {};\nconst no = (motivo, mensaje) => [{ json: { valido: false, motivo, mensaje } }];\nif (!pedido.clave) return no('clave', 'No autorizado');\nif (!pedido.codigo || !r.codigo) return no('no_existe', 'Ese código no existe. Revísalo en tu email.');\nif (pedido.producto && pedido.producto !== 'ebook-fiestas') return no('producto', 'Este código es solo para el ebook.');\nif (r.estado === 'usado' || r.compro === 'sí') return no('usado', 'Este código ya se usó.');\nif (r.estado === 'vencido' || new Date(r.vence).getTime() < Date.now()) return no('vencido', 'Este código ya venció.');\nreturn [{ json: { valido: true, codigo: r.codigo, descuento_usd: Number(r.descuento_usd), vence: r.vence } }];"
+      },
+      "id": "c4",
+      "name": "Decidir si vale",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "c5",
+      "name": "Responder al checkout",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Consulta desde el checkout": {
+      "main": [
+        [
+          {
+            "node": "Preparar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar consulta": {
+      "main": [
+        [
+          {
+            "node": "Buscar código",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar código": {
+      "main": [
+        [
+          {
+            "node": "Decidir si vale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir si vale": {
+      "main": [
+        [
+          {
+            "node": "Responder al checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

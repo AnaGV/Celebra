@@ -1,0 +1,56 @@
+---
+import '../styles/global.css';
+import { site } from '../config/site';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const pixelId = site.tracking.metaPixelId;
+---
+
+<!doctype html>
+<html lang="es" data-demo={site.demoMode ? 'true' : 'false'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Vista previa al compartir en WhatsApp, Instagram y Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="es_LA" />
+    <!-- TODO: <meta property="og:image" content="https://tudominio.com/og.jpg" /> (1200×630) -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&family=Young+Serif&display=swap"
+    />
+
+    {
+      pixelId && (
+        <script is:inline define:vars={{ pixelId }}>
+          !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+          n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+          document,'script','https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', pixelId); fbq('track', 'PageView');
+        </script>
+      )
+    }
+  </head>
+  <body>
+    {site.demoMode && <div class="demo-ribbon">BORRADOR · contenido e imágenes de ejemplo · los pagos están en modo demo</div>}
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,194 @@
+{
+  "name": "Celebra · Formulario de opinión del libro",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "¿Qué te pareció Fiestas que se recuerdan?",
+        "formDescription": "Gracias por tomarte un minuto. Leemos cada opinión.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Tu nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ciudad",
+              "placeholder": "Ej. Maturín"
+            },
+            {
+              "fieldLabel": "Email con el que compraste",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "¿Cuántas estrellas le das?",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "5"
+                  },
+                  {
+                    "option": "4"
+                  },
+                  {
+                    "option": "3"
+                  },
+                  {
+                    "option": "2"
+                  },
+                  {
+                    "option": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Tu opinión",
+              "fieldType": "textarea",
+              "requiredField": true,
+              "placeholder": "¿Qué te sirvió más? ¿Hiciste la piñata?"
+            },
+            {
+              "fieldLabel": "¿Podemos publicarla con tu nombre y ciudad?",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sí, pueden publicarla"
+                  },
+                  {
+                    "option": "No, es solo para ustedes"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "¡Gracias por tu opinión! Si quieres ayudarnos un poquito más, déjala también en Google Maps buscando Celebra, Caripe."
+            }
+          }
+        }
+      },
+      "id": "f1",
+      "name": "Formulario de opinión",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "celebra-opinion"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const f = $input.first().json;\nreturn [{ json: {\n  fecha: new Date().toISOString(),\n  nombre: String(f['Tu nombre'] || '').trim(),\n  ciudad: String(f['Ciudad'] || '').trim(),\n  email: String(f['Email con el que compraste'] || '').trim().toLowerCase(),\n  estrellas: Number(f['¿Cuántas estrellas le das?'] || 0),\n  opinion: String(f['Tu opinión'] || '').trim().slice(0, 1500),\n  permiso: f['¿Podemos publicarla con tu nombre y ciudad?'] === 'Sí, pueden publicarla' ? 'sí' : 'no',\n  publicada: 'no',\n} }];"
+      },
+      "id": "f2",
+      "name": "Preparar opinión",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Opiniones"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{ $json.fecha }}",
+            "nombre": "={{ $json.nombre }}",
+            "ciudad": "={{ $json.ciudad }}",
+            "email": "={{ $json.email }}",
+            "estrellas": "={{ $json.estrellas }}",
+            "opinion": "={{ $json.opinion }}",
+            "permiso": "={{ $json.permiso }}",
+            "publicada": "={{ $json.publicada }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "f3",
+      "name": "Guardar en Opiniones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "={{ $env.MAIL_FROM }}",
+        "subject": "=Nueva opinión del libro: {{ $json.estrellas }} estrellas de {{ $json.nombre }}",
+        "emailFormat": "text",
+        "text": "={{ $json.nombre }} ({{ $json.ciudad }}) · {{ $json.estrellas }} estrellas\nPermiso para publicar: {{ $json.permiso }}\n\n{{ $json.opinion }}\n\nPara mostrarla en la web, en la hoja Opiniones cambia publicada a sí.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f4",
+      "name": "Avisarme de la opinión",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "Formulario de opinión": {
+      "main": [
+        [
+          {
+            "node": "Preparar opinión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar opinión": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Opiniones",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Avisarme de la opinión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

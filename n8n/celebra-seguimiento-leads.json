@@ -1,0 +1,339 @@
+{
+  "name": "Celebra · Seguimiento de leads (cada hora)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "s1",
+      "name": "Cada hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "options": {}
+      },
+      "id": "s2",
+      "name": "Leer todos los leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Decide qué email le toca a cada lead. Corre cada hora.\n// seguimiento: 0 = recibió el capítulo · 1 = recibió el tip de la piñata · 2 = recibió el aviso de vencimiento\nconst ahora = Date.now();\nconst out = [];\nfor (const it of $input.all()) {\n  const r = it.json;\n  if (!r.email || r.compro === 'sí' || r.baja === 'sí') continue;\n  const horas = (ahora - new Date(r.fecha).getTime()) / 3600000;\n  const quedan = (new Date(r.vence).getTime() - ahora) / 3600000;\n  const paso = Number(r.seguimiento || 0);\n  if (r.estado === 'emitido' && quedan <= 0) {\n    out.push({ json: { ...r, accion: 'vencer', estado: 'vencido', enviar: false } });\n  } else if (r.estado === 'emitido' && paso === 0 && horas >= 20 && quedan > 10) {\n    out.push({ json: { ...r, accion: 'tip', seguimiento: '1', enviar: true } });\n  } else if (r.estado === 'emitido' && paso <= 1 && quedan > 0 && quedan <= 8) {\n    out.push({ json: { ...r, accion: 'vence', seguimiento: '2', enviar: true } });\n  }\n}\nreturn out;"
+      },
+      "id": "s3",
+      "name": "¿Qué le toca a cada uno?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "tip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "tip"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "vence",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "vence"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "vencer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "vencer"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "s4",
+      "name": "¿Tipo de mensaje?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=La piñata estrella: así la hacemos en el taller",
+        "emailFormat": "html",
+        "html": "=<div style=\"margin:0;padding:24px 12px;background:#fdf6fa;font-family:Arial,Helvetica,sans-serif;color:#2a1b2d\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden\"><div style=\"height:8px;background:linear-gradient(90deg,#f8bbd0,#ffd8b5,#fdeca6,#c8f0dc,#c5e3f6,#e0d1f5)\"></div><div style=\"padding:28px 28px 8px\"><div style=\"font-weight:bold;letter-spacing:4px;font-size:12px;color:#4a1a4f\">CELEBRA</div></div><div style=\"padding:0 28px 28px;font-size:16px;line-height:1.55\"><h1 style=\"font-size:22px;color:#4a1a4f;margin:0 0 12px\">¿Ya pensaste en la piñata?</h1><p>Hola {{ $json.nombre || '' }}. La piñata es de las cosas que más ahorras haciendo en casa. En el taller la hacemos con 2 o 3 cajas de cartón, papel crepé y pegamento.</p><p><a href=\"{{ $env.IG_VIDEO_PINATA }}\" style=\"color:#c2185b;font-weight:bold\">Mira el video del paso a paso en nuestro Instagram →</a></p><p>En el libro completo está la guía visual con cada paso dibujado: el molde, los laterales, cómo reforzar los bordes y cómo poner los flecos. Más el arco de globos, la mesa principal y las bolsitas.</p><div style=\"margin:22px 0;padding:18px;border:2px dashed #c2185b;border-radius:14px;text-align:center\"><div style=\"font-size:13px;color:#6e5a72\">Tu código personal · {{ $json.descuento_usd }} USD de descuento</div><div style=\"font-size:28px;font-weight:bold;letter-spacing:3px;color:#4a1a4f;margin:6px 0\">{{ $json.codigo }}</div><div style=\"font-size:13px;color:#6e5a72\">Se usa una sola vez · vence el {{ DateTime.fromISO($json.vence).setZone($json.zona || 'America/Caracas').setLocale('es').toFormat(\"d 'de' LLLL 'a las' HH:mm\") }}</div></div><p><a href=\"https://{{ $env.SITE_DOMAIN }}/?codigo={{ $json.codigo }}&utm_source=email&utm_medium=lead&utm_campaign=e2\" style=\"display:inline-block;background:#c2185b;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:10px\">Quiero el libro completo</a></p></div><div style=\"padding:18px 28px;background:#faf3f7;font-size:12px;color:#6e5a72\">Celebra · Taller de fiestas en Caripe, Monagas. Recibes este email porque pediste el capítulo de regalo. <a href=\"https://{{ $env.SITE_DOMAIN }}/baja?e={{ encodeURIComponent($json.email) }}\" style=\"color:#6e5a72\">Darme de baja</a></div></div></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "s5",
+      "name": "Email 2: tip de la piñata",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        900,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=Tu descuento vence hoy, {{ $json.nombre || '' }}",
+        "emailFormat": "html",
+        "html": "=<div style=\"margin:0;padding:24px 12px;background:#fdf6fa;font-family:Arial,Helvetica,sans-serif;color:#2a1b2d\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden\"><div style=\"height:8px;background:linear-gradient(90deg,#f8bbd0,#ffd8b5,#fdeca6,#c8f0dc,#c5e3f6,#e0d1f5)\"></div><div style=\"padding:28px 28px 8px\"><div style=\"font-weight:bold;letter-spacing:4px;font-size:12px;color:#4a1a4f\">CELEBRA</div></div><div style=\"padding:0 28px 28px;font-size:16px;line-height:1.55\"><h1 style=\"font-size:22px;color:#4a1a4f;margin:0 0 12px\">Tu código vence en unas horas</h1><p>Hola {{ $json.nombre || '' }}. Solo un aviso: tu descuento para <b>Fiestas que se recuerdan</b> vence hoy. Después el libro queda a su precio normal.</p><div style=\"margin:22px 0;padding:18px;border:2px dashed #c2185b;border-radius:14px;text-align:center\"><div style=\"font-size:13px;color:#6e5a72\">Tu código personal · {{ $json.descuento_usd }} USD de descuento</div><div style=\"font-size:28px;font-weight:bold;letter-spacing:3px;color:#4a1a4f;margin:6px 0\">{{ $json.codigo }}</div><div style=\"font-size:13px;color:#6e5a72\">Se usa una sola vez · vence el {{ DateTime.fromISO($json.vence).setZone($json.zona || 'America/Caracas').setLocale('es').toFormat(\"d 'de' LLLL 'a las' HH:mm\") }}</div></div><p><a href=\"https://{{ $env.SITE_DOMAIN }}/?codigo={{ $json.codigo }}&utm_source=email&utm_medium=lead&utm_campaign=e3\" style=\"display:inline-block;background:#c2185b;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:10px\">Usar mi descuento</a></p><p style=\"font-size:14px;color:#6e5a72\">Si ya lo compraste, ¡gracias! Ignora este mensaje.</p></div><div style=\"padding:18px 28px;background:#faf3f7;font-size:12px;color:#6e5a72\">Celebra · Taller de fiestas en Caripe, Monagas. Recibes este email porque pediste el capítulo de regalo. <a href=\"https://{{ $env.SITE_DOMAIN }}/baja?e={{ encodeURIComponent($json.email) }}\" style=\"color:#6e5a72\">Darme de baja</a></div></div></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "s6",
+      "name": "Email 3: tu código vence hoy",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        900,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('¿Qué le toca a cada uno?').item.json.email }}",
+            "seguimiento": "={{ $('¿Qué le toca a cada uno?').item.json.seguimiento }}"
+          },
+          "matchingColumns": [
+            "email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "s7",
+      "name": "Anotar seguimiento",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1140,
+        -80
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "estado": "vencido"
+          },
+          "matchingColumns": [
+            "email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "s8",
+      "name": "Marcar código vencido",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        900,
+        160
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Cada hora": {
+      "main": [
+        [
+          {
+            "node": "Leer todos los leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer todos los leads": {
+      "main": [
+        [
+          {
+            "node": "¿Qué le toca a cada uno?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Qué le toca a cada uno?": {
+      "main": [
+        [
+          {
+            "node": "¿Tipo de mensaje?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tipo de mensaje?": {
+      "main": [
+        [
+          {
+            "node": "Email 2: tip de la piñata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email 3: tu código vence hoy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar código vencido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email 2: tip de la piñata": {
+      "main": [
+        [
+          {
+            "node": "Anotar seguimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email 3: tu código vence hoy": {
+      "main": [
+        [
+          {
+            "node": "Anotar seguimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

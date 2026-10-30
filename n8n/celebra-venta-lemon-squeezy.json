@@ -1,0 +1,272 @@
+{
+  "name": "Celebra · Venta con Lemon Squeezy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lemon-squeezy",
+        "responseMode": "onReceived",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "a1",
+      "name": "Webhook Lemon Squeezy",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "celebra-lemon-squeezy"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Verifica la firma de Lemon Squeezy y prepara los datos del pedido.\n// Requiere en el VPS: NODE_FUNCTION_ALLOW_BUILTIN=crypto\nconst crypto = require('crypto');\nconst SECRET = $env.LEMON_SIGNING_SECRET; // variable de entorno del VPS (no la pegues en el workflow)\n\nconst raw = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst signature = String($input.first().json.headers['x-signature'] || '');\nconst digest = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');\nconst valid = signature.length === digest.length &&\n  crypto.timingSafeEqual(Buffer.from(digest, 'utf8'), Buffer.from(signature, 'utf8'));\nif (!valid) {\n  // Firma inválida: se descarta sin procesar.\n  return [];\n}\n\nconst body = JSON.parse(raw.toString('utf8'));\nconst event = body.meta?.event_name;\nconst a = body.data?.attributes || {};\nif (event !== 'order_created' || a.status !== 'paid') {\n  return []; // solo pedidos pagados\n}\n\nconst email = String(a.user_email || '').trim().toLowerCase();\nconst custom = body.meta?.custom_data || {};\nreturn [{\n  json: {\n    fecha: a.created_at,\n    pedido: a.order_number,\n    identificador: a.identifier,\n    referencia: custom.ref || '',\n    pais: custom.country || '',\n    cliente: a.user_name || '',\n    email,\n    producto: a.first_order_item?.product_name || '',\n    variante: a.first_order_item?.variant_name || '',\n    total_usd: (a.total_usd ?? a.total ?? 0) / 100,\n    moneda: a.currency || 'USD',\n    metodo: 'Lemon Squeezy',\n    descuento_usd: (a.discount_total_usd ?? a.discount_total ?? 0) / 100,\n    email_hash: crypto.createHash('sha256').update(email).digest('hex'),\n    event_time: Math.floor(new Date(a.created_at || Date.now()).getTime() / 1000),\n  },\n}];"
+      },
+      "id": "a2",
+      "name": "Verificar firma y preparar pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pedidos"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "a3",
+      "name": "Guardar pedido en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $env.META_PIXEL_ID }}/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $env.META_CAPI_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ $json.event_time }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://TU-DOMINIO.com/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"{{ $json.moneda }}\", \"value\": {{ $json.total_usd }}, \"content_name\": \"{{ $json.producto }}\" }\n  }]\n}",
+        "options": {}
+      },
+      "id": "a4",
+      "name": "Enviar compra a Meta (CAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "hola@TU-DOMINIO.com",
+        "toEmail": "hola@TU-DOMINIO.com",
+        "subject": "=Nueva venta: {{ $json.producto }} ({{ $json.total_usd }} USD)",
+        "emailFormat": "text",
+        "text": "=Pedido #{{ $json.pedido }}\nCliente: {{ $json.cliente }} <{{ $json.email }}>\nProducto: {{ $json.producto }} {{ $json.variante }}\nTotal: {{ $json.total_usd }} {{ $json.moneda }}\nPaís: {{ $json.pais }}\nReferencia: {{ $json.referencia }}",
+        "options": {}
+      },
+      "id": "a5",
+      "name": "Avisarme por email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        520,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "compro": "sí"
+          },
+          "matchingColumns": [
+            "email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6",
+      "name": "Marcar lead como comprador",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        320
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.descuento_usd }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7",
+      "name": "¿Pagó con código?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        520,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ID_DE_TU_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "estado": "usado"
+          },
+          "matchingColumns": [
+            "email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8",
+      "name": "Marcar código como usado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        760,
+        480
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Webhook Lemon Squeezy": {
+      "main": [
+        [
+          {
+            "node": "Verificar firma y preparar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar firma y preparar pedido": {
+      "main": [
+        [
+          {
+            "node": "Guardar pedido en Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar compra a Meta (CAPI)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Avisarme por email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Marcar lead como comprador",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Pagó con código?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Pagó con código?": {
+      "main": [
+        [
+          {
+            "node": "Marcar código como usado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
