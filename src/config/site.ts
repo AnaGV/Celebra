@@ -38,10 +38,9 @@ export const site = {
 
   location: {
     name: 'Local Taller de Fiestas',
-    address: 'Calle Bolívar, sector centro, Caripe, estado Monagas, Venezuela',
+    address: 'Caripe, estado Monagas, Venezuela. La ubicación exacta está en Google Maps.',
     hours: [
-      { days: 'Lunes a viernes', time: '9:00 a 18:00' },
-      { days: 'Sábado', time: '9:00 a 14:00' },
+      { days: 'Lunes a sábado', time: '9:00 a 20:00' },
       { days: 'Domingo', time: 'Cerrado' },
     ],
     /** Enlace "Abrir en Google Maps" (compartir → copiar enlace). */
