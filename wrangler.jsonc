@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers: página estática (dist) + API en worker/index.ts
+  "name": "celebra",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true }
+  // Los secretos (N8N_BASE_URL, CELEBRA_FORM_KEY, TURNSTILE_SECRET) se cargan en
+  // Cloudflare > Workers > celebra > Configuración > Variables y secretos. Nunca aquí.
+}
