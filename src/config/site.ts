@@ -64,7 +64,7 @@ export const site = {
 
     binance: {
       payId: '1085534879',
-      accountName: 'User-50041',
+      accountName: 'veraana',
       network: 'Binance Pay (sin comisión entre usuarios de Binance)',
     },
 
