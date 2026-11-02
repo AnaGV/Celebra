@@ -2,32 +2,37 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Calculadora de presupuesto para fiestas · Celebra</title>
 <meta name="description" content="Reparte el presupuesto de tu fiesta infantil por rubro y calcula cuánto gastar por niño. Gratis, de Celebra.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Fraunces:opsz,wght,SOFT@9..144,900,100&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
-:root{--bg:#fdf8fb;--surface:#fff;--sunk:#f7eef4;--ink:#2a1b2d;--muted:#6e5a72;--line:#eadfee;--plum:#4a1a4f;--accent:#c2185b;--ok:#1a7f4b;--display:'Fraunces',Georgia,serif;--body:'Figtree',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
-.rain{height:8px;background:linear-gradient(90deg,#f8bbd0 0 16.6%,#ffd8b5 16.6% 33.3%,#fdeca6 33.3% 50%,#c8f0dc 50% 66.6%,#c5e3f6 66.6% 83.3%,#e0d1f5 83.3%)}
-.wrap{max-width:980px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-right,0px)) 64px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
-h1{margin:0;font-family:var(--display);font-weight:900;font-variation-settings:'SOFT' 100;color:var(--plum);font-size:clamp(32px,5vw,48px);line-height:1.02;text-wrap:balance}
+:root{--bg:#ffffff;--surface:#fff;--sunk:#f4f5f7;--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--plum:#16171a;--accent:#c2185b;--soft:#fdeaf2;--ok:#1a7f4b;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;gap:10px;height:64px;max-width:980px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));font-weight:800;font-size:20px;letter-spacing:-0.03em;color:var(--ink);text-decoration:none}
+.topbar{border-bottom:1px solid var(--line)}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.wrap{max-width:980px;margin:0 auto;padding:40px max(20px,env(safe-area-inset-right,0px)) 64px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
+h1{margin:0;font-weight:800;letter-spacing:-0.025em;color:var(--ink);font-size:clamp(32px,5vw,48px);line-height:1.08;text-wrap:balance}
 .lead{margin:0;color:var(--muted);font-size:18px;max-width:60ch}
 .fld{display:flex;flex-direction:column;gap:6px}.fld label{font-weight:700;font-size:14px}
-input,select{height:46px;border-radius:11px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
+input,select{height:52px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
 .calc{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:18px;align-items:start}
-.calc-in{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.calc-in{background:var(--soft);border:0;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .money{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}
 .calc-out{display:flex;flex-direction:column;gap:12px;min-width:0}
 .calc-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .calc-kpis>div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
-.k-l{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.k-v{font-family:var(--mono);font-size:18px;color:var(--plum);overflow-wrap:anywhere}
+.k-l{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.k-v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
 .tbl-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:14px;background:#fff}
 table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
-th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}td.r,th.r{text-align:right}tr:last-child td{border-bottom:0}tr.tot td{font-weight:800;color:var(--plum)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}td.r,th.r{text-align:right}tr:last-child td{border-bottom:0}tr.tot td{font-weight:800;color:var(--ink)}
 .calc-note{margin:0;color:var(--muted);font-size:14px}.calc-actions{display:flex;gap:12px;align-items:center}.calc-copied{color:var(--ok);font-weight:700;font-size:14px}
 .btn-sec{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:700 15px var(--body);cursor:pointer;color:var(--ink)}
-.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:20px 22px;border-radius:18px;background:#fde9a6;color:var(--plum)}
-.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:13px 20px;border-radius:11px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:22px 24px;border-radius:18px;background:#fde9a6;color:#4a1a4f;margin-top:8px}
+.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
+.btn-sec:focus-visible,.cta a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(194,24,91,.15)}
+.foot{text-align:center;color:var(--muted);font-size:13px;padding:0 20px 40px}.foot a{color:var(--muted)}
 @media (max-width:760px){.calc{grid-template-columns:1fr}}@media (max-width:460px){.calc-kpis{grid-template-columns:1fr}}
-</style></head><body><div class="rain"></div><main class="wrap">
+</style></head><body><div class="topbar"><a class="top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></span>Celebra</a></div><main class="wrap">
 <h1>¿Cuánto cuesta tu fiesta?</h1>
 <p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía que usamos en el taller Celebra.</p>
 <div class="calc" id="calc">
@@ -94,9 +99,13 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
     const fallback = () => { $('calc-copied').textContent = 'Selecciona la tabla y cópiala'; };
     try { navigator.clipboard.writeText(summary).then(done, fallback); } catch (e) { fallback(); }
   });
+  // Moneda sugerida según el país (Cloudflare). La persona la puede cambiar.
+  fetch('/api/pais').then((r) => r.json()).then(({ pais }) => {
+    if (pais === 'CL' && $('calc-total').value === '130') { $('calc-cur').value = 'CLP'; $('calc-total').value = '150000'; calc(); }
+  }).catch(() => {});
   calc();
 })();
 </script>
 
-<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/#muestra">Quiero el capítulo gratis</a></div>
-</main></body></html>
+<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/regalo/">Quiero el capítulo gratis</a></div>
+</main><p class="foot">Celebra · Caripe, Monagas, Venezuela · <a href="/">Ver el libro Fiestas que se recuerdan</a></p></body></html>
