@@ -1,41 +1,53 @@
 ---
 import { site } from '../config/site';
+const c = site.contact;
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer">
-  <div class="wrap footer-grid">
-    <div class="footer-brand">
-      <a href="/" class="footer-mark">{site.brand.name}</a>
-      <p class="muted">{site.brand.tagline}</p>
+<footer class="foot">
+  <div class="foot-wrap">
+    <div class="foot-g">
+      <div>
+        <a class="foot-brand" href="/">
+          <span class="foot-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></span>Celebra
+        </a>
+        <span>Libros y piñatas hechos en Caripe.</span>
+      </div>
+      <div>
+        <b>Contacto</b>
+        <a href={`https://wa.me/${c.whatsapp}`}>Libro y pagos: {c.whatsappDisplay}</a>
+        <a href={`https://wa.me/${c.localWhatsapp}`}>Local de Caripe: {c.localWhatsappDisplay}</a>
+        <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
+      </div>
+      <div>
+        <b>Redes</b>
+        <a href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
+        <a href={c.tiktok} target="_blank" rel="noopener">TikTok {c.instagramHandle}</a>
+        <a href={c.googleMaps} target="_blank" rel="noopener">Celebra en Google Maps</a>
+      </div>
+      <div>
+        <b>Legal</b>
+        <a href="/terminos">Términos de venta</a>
+        <a href="/reembolsos">Política de reembolso</a>
+        <a href="/privacidad">Privacidad</a>
+      </div>
     </div>
-    <div>
-      <p class="footer-title">Contacto</p>
-      <p>WhatsApp <span class="mono">{site.contact.whatsappDisplay}</span></p>
-      <p>Email <span class="mono">{site.brand.email}</span></p>
-    </div>
-    <div>
-      <p class="footer-title">Redes</p>
-      <p><a href={site.contact.instagram} target="_blank" rel="noopener">Instagram</a></p>
-      <p><a href={site.contact.tiktok} target="_blank" rel="noopener">TikTok</a></p>
-      <p><a href={site.contact.facebook} target="_blank" rel="noopener">Facebook</a></p>
-    </div>
-    <div>
-      <p class="footer-title">Legal</p>
-      <p><a href="/terminos">Términos de venta</a></p>
-      <p><a href="/reembolsos">Política de reembolso</a></p>
-      <p><a href="/privacidad">Política de privacidad</a></p>
-    </div>
+    <p class="foot-b">© {year} Celebra. Caripe, Monagas, Venezuela.</p>
   </div>
-  <div class="wrap footer-bottom muted">© {year} {site.brand.name}. Caripe, Monagas, Venezuela.</div>
 </footer>
 
 <style>
-  .footer { border-top: 1px solid var(--line); padding-block: 3rem 2rem; font-size: 0.92rem; }
-  .footer-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
-  .footer-grid > div { display: grid; gap: 0.35rem; align-content: start; min-width: 0; }
-  .footer-mark { font-family: var(--font-display); font-size: var(--step-1); text-decoration: none; }
-  .footer-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
-  .footer a { text-decoration-color: var(--line); text-underline-offset: 3px; }
-  .footer-bottom { margin-top: 2.5rem; font-size: 0.82rem; }
+  .foot{margin-top:112px;border-top:1px solid #e3e5ea;padding:56px 0 40px;font-size:15px;font-family:'Figtree',system-ui,sans-serif;color:#16171a;background:#ffffff}
+  .foot-wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .foot-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+  .foot-g div{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .foot-g b{font-size:14px}
+  .foot-g span{color:#5c6070}
+  .foot a{color:#5c6070;text-decoration:none;overflow-wrap:anywhere}
+  .foot a:hover{color:#16171a}
+  .foot .foot-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#16171a}
+  .foot-mark{width:30px;height:30px;border-radius:9px;background:#c2185b;display:grid;place-items:center}
+  .foot-b{margin:48px 0 0;color:#5c6070;font-size:13px}
+  @media (max-width:980px){.foot-g{grid-template-columns:1fr 1fr}}
+  @media (max-width:560px){.foot-g{grid-template-columns:1fr}.foot{margin-top:80px}}
 </style>

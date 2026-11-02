@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/mini.css';
+const check = 'M20 6L9 17l-5-5';
+const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
+const share = encodeURIComponent('Mira este capítulo gratis para organizar la fiesta de los niños sin gastar de más: ') ;
+---
+
+<Base
+  title="Capítulo gratis · Calcula la fiesta de tu hijo antes de gastar"
+  description="Te regalamos el capítulo de presupuesto del libro Fiestas que se recuerdan: la regla del taller, un ejemplo resuelto para 15 niños y la plantilla para imprimir."
+  image="/img/og-regalo.jpg"
+>
+  <div class="mini">
+    <a class="wrap top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d={star}></path></svg></span>Celebra</a>
+
+    <main class="wrap stack" style="padding-block:24px 8px">
+      <div class="stack" id="rg-form-view">
+        <span class="badge">Gratis · PDF de 8 páginas</span>
+        <h1 style="font-size:32px">Calcula la fiesta de tu hijo antes de gastar <span data-solo="VE">un bolívar</span><span data-solo="CL" hidden>un peso</span><span data-solo="OTRO" hidden>un dólar</span> de más</h1>
+        <p style="font-size:17px;color:var(--muted)">Te regalamos el capítulo de presupuesto de nuestro libro <b style="color:var(--ink)">Fiestas que se recuerdan</b>. Lo usamos en el taller para cada cumpleaños que decoramos.</p>
+        <div class="devices" role="img" aria-label="El capítulo de regalo en una tablet y un celular">
+          <div class="tablet"><img src="/img/regalo-portada.jpg" alt="Portada del capítulo de regalo" fetchpriority="high" /></div>
+          <div class="phone"><img src="/img/regalo-ejemplo.jpg" alt="Página del ejemplo resuelto para 15 niños" /></div>
+        </div>
+        <ul class="ticks">
+          {['Sabes desde hoy si te alcanza, y cuánto gastar en cada cosa', 'Un ejemplo real resuelto: cumpleaños para 15 niños', 'La plantilla para imprimir y pegar en la nevera'].map((t) => (
+            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg><span>{t}</span></li>
+          ))}
+        </ul>
+        <form class="form" id="form" data-origen="regalo" novalidate>
+          <div class="field"><label for="rg-email">Tu email</label><input id="rg-email" name="email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="tu@email.com" required /></div>
+          <div class="field"><label for="rg-name">Tu nombre (opcional)</label><input id="rg-name" name="nombre" class="input" type="text" autocomplete="given-name" placeholder="Ej. Daniela" /></div>
+          <div class="hp" aria-hidden="true"><label>Empresa <input name="empresa" tabindex="-1" autocomplete="off" /></label></div>
+          <p class="err" data-lead-error role="alert" hidden></p>
+          <button type="submit" class="btn">Quiero mi capítulo gratis</button>
+          <p class="note">Te llega en un minuto. Sin spam: te das de baja con un clic. <a href="/privacidad">Privacidad</a></p>
+        </form>
+        <h2 style="font-size:22px;margin-top:8px">Qué trae</h2>
+        <div class="inside">
+          <div class="cell"><b>La regla del taller</b><span>Decide el total y repártelo después</span></div>
+          <div class="cell"><b>Guía de reparto</b><span>Cuánto poner en cada cosa</span></div>
+          <div class="cell"><b>Ejemplo resuelto</b><span>15 niños con USD 130</span></div>
+          <div class="cell"><b>6 ideas de ahorro</b><span>Lo que puedes hacer en casa</span></div>
+        </div>
+        <div class="who"><div class="ava"><img src="/img/pinata-real.jpg" alt="" loading="lazy" /></div><p style="font-size:15px"><b>Lo hacemos en Celebra</b>, nuestro taller de piñatas y decoración en Caripe, Monagas. Esto es lo que aprendimos armando cumpleaños de verdad.</p></div>
+        <a class="btn btn-line" href="#form">Quiero mi capítulo gratis</a>
+      </div>
+
+      <div class="stack" id="rg-done" hidden>
+        <div class="done">
+          <div class="done-mark"><svg class="ico" viewBox="0 0 24 24" style="width:28px;height:28px" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"></path></svg></div>
+          <h1 style="font-size:28px">¡Listo! Revisa tu email</h1>
+          <p>Te enviamos el capítulo a <b id="rg-email-out"></b>. Llega en un par de minutos.</p>
+          <ol class="plain"><li>Busca un email de <b>Celebra</b>.</li><li>Si no está, revisa la carpeta de promociones o spam.</li><li>Ábrelo y descarga el PDF. Ahí también está tu código de descuento para el libro completo.</li></ol>
+        </div>
+        <h2 style="font-size:22px">Mientras tanto</h2>
+        <a class="btn btn-line" href="https://instagram.com/somoscelebra.ve" target="_blank" rel="noopener">Ver las piñatas en Instagram</a>
+        <a class="btn btn-line" id="rg-share" href={`https://wa.me/?text=${share}`}>Compartir con una amiga por WhatsApp</a>
+        <a class="btn" href="/">Ver el libro completo</a>
+      </div>
+    </main>
+    <p class="foot wrap">Celebra · Caripe, Monagas, Venezuela · <a href="/privacidad">Privacidad</a></p>
+  </div>
+</Base>
+
+<script>
+  import { initPais } from '../lib/pais';
+  import { wireLeadForm } from '../lib/lead';
+  import type { CountryCode } from '../config/site';
+
+  const apply = (p: CountryCode) => document.querySelectorAll<HTMLElement>('[data-solo]').forEach((el) => (el.hidden = el.dataset.solo !== p));
+  window.addEventListener('celebra:pais', (e) => apply((e as CustomEvent<CountryCode>).detail));
+  initPais();
+
+  const share = document.getElementById('rg-share') as HTMLAnchorElement;
+  share.href += encodeURIComponent(location.origin + '/regalo');
+
+  wireLeadForm(document.getElementById('form') as HTMLFormElement, (email) => {
+    document.getElementById('rg-form-view')!.hidden = true;
+    document.getElementById('rg-email-out')!.textContent = email;
+    document.getElementById('rg-done')!.hidden = false;
+    scrollTo({ top: 0 });
+  });
+</script>

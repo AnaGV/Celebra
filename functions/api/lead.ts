@@ -5,7 +5,7 @@
  */
 import { callN8n, json, turnstileOk, type N8nEnv } from './_n8n';
 
-type LeadBody = { nombre?: string; email?: string; pais?: string; utm?: string; event_id?: string; empresa?: string; turnstile?: string };
+type LeadBody = { nombre?: string; email?: string; pais?: string; origen?: string; utm?: string; event_id?: string; empresa?: string; turnstile?: string };
 
 export const onRequestPost: PagesFunction<N8nEnv> = async ({ request, env }) => {
   let body: LeadBody;
@@ -35,6 +35,7 @@ export const onRequestPost: PagesFunction<N8nEnv> = async ({ request, env }) => 
       nombre: String(body.nombre ?? '').slice(0, 60),
       email,
       pais,
+      origen: body.origen === 'regalo' ? 'regalo' : 'landing',
       utm: String(body.utm ?? '').slice(0, 120),
       event_id: String(body.event_id ?? '').slice(0, 80),
     });

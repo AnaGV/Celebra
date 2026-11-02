@@ -21,6 +21,11 @@ export default {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return handler({ request, env, waitUntil: ctx.waitUntil.bind(ctx), params: {}, data: {} });
     }
+    if (url.pathname === '/api/pais') {
+      const c = (request as any).cf?.country ?? request.headers.get('cf-ipcountry') ?? '';
+      const pais = c === 'VE' ? 'VE' : c === 'CL' ? 'CL' : 'OTRO';
+      return new Response(JSON.stringify({ pais }), { headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } });
+    }
     if (url.pathname.startsWith('/api/')) return new Response('No encontrado', { status: 404 });
     return env.ASSETS.fetch(request);
   },

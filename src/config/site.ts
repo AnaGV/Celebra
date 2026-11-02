@@ -14,10 +14,10 @@ export const site = {
   demoMode: true,
 
   brand: {
-    name: 'Taller de Fiestas',
+    name: 'Celebra',
     tagline: 'Libros y piñatas hechos en Caripe',
-    authorName: 'Nombre de la autora',
-    email: 'hola@tudominio.com',
+    authorName: 'Celebra',
+    email: 'somoscelebra.ve@gmail.com',
   },
 
   contact: {
@@ -30,14 +30,14 @@ export const site = {
     /** Ficha de Google Maps (sin publicar la dirección en la web). */
     googleMaps: 'https://maps.google.com/?cid=14490972937344566958',
     googleReview: 'https://search.google.com/local/writereview?placeid=ChIJ1UP5xAmpM4wRrsY4LBxHGsk',
-    instagram: 'https://instagram.com/tu_cuenta',
-    instagramHandle: '@tu_cuenta',
-    tiktok: 'https://tiktok.com/@tu_cuenta',
-    facebook: 'https://facebook.com/tu_pagina',
+    instagram: 'https://instagram.com/somoscelebra.ve',
+    instagramHandle: '@somoscelebra.ve',
+    tiktok: 'https://tiktok.com/@somoscelebra.ve',
+    facebook: 'https://facebook.com/somoscelebra.ve',
   },
 
   location: {
-    name: 'Local Taller de Fiestas',
+    name: 'Taller Celebra',
     address: 'Caripe, estado Monagas, Venezuela. La ubicación exacta está en Google Maps.',
     hours: [
       { days: 'Lunes a sábado', time: '9:00 a 20:00' },

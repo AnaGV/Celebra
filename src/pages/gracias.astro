@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/mini.css';
+import { site } from '../config/site';
+const c = site.contact;
+const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
+---
+
+<Base title="Gracias por tu compra · Celebra" description="Tu libro Fiestas que se recuerdan va camino a tu email.">
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="mini">
+    <a class="wrap top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d={star}></path></svg></span>Celebra</a>
+    <main class="wrap stack" style="padding-block:24px 8px">
+      <div class="done">
+        <div class="done-mark"><svg class="ico" viewBox="0 0 24 24" style="width:28px;height:28px" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"></path></svg></div>
+        <h1 style="font-size:28px">¡Gracias por tu compra!</h1>
+        <p>Tu libro <b>Fiestas que se recuerdan</b> va camino a tu email, con tu recibo.</p>
+      </div>
+      <h2 style="font-size:22px">Qué sigue</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><span><b>Abre el email de Celebra</b> y descarga el PDF. Si no lo ves, revisa promociones o spam.</span></li>
+        <li><span class="n">2</span><span><b>Guárdalo en tu celular</b> o en tu computador, para tenerlo a mano.</span></li>
+        <li><span class="n">3</span><span><b>Empieza por el capítulo 1</b> y escribe tu idea antes de comprar nada.</span></li>
+      </ol>
+      <div class="box sun"><b>Tu molde de regalo</b><p>El molde de la piñata estrella, listo para imprimir en grande con Rasterbator.</p><a class="btn" href="/regalo/molde-estrella.png" download>Descargar el molde</a></div>
+      <div class="box panel"><b>¿Pagaste con Binance o Pago Móvil?</b><p>Te enviamos el libro cuando verificamos el pago, normalmente en menos de 2 horas en horario laboral.</p></div>
+      <div class="box panel"><b>¿Te gustó?</b><p>Tu opinión en Google ayuda a otras mamás a decidir. Cuéntanos qué te pareció el libro.</p><a class="btn btn-line" href={c.googleReview} target="_blank" rel="noopener">Dejar mi opinión en Google</a></div>
+      <h2 style="font-size:22px;margin-top:6px">Compártelo</h2>
+      <a class="btn btn-line" href={c.instagram} target="_blank" rel="noopener">Síguenos en Instagram</a>
+      <a class="btn btn-line" id="gr-share" href={`https://wa.me/?text=${encodeURIComponent('Estoy organizando la fiesta con esta guía de Celebra: ')}`}>Contarle a una amiga por WhatsApp</a>
+      <a class="btn btn-line" href="/calculadora/">Usar la calculadora de presupuesto</a>
+      <div class="box panel"><b>¿Algún problema con el archivo?</b><p>Escríbenos por WhatsApp al <a href={`https://wa.me/${c.whatsapp}`}><b>{c.whatsappDisplay}</b></a> con tu número de pedido y te lo resolvemos. Para pedidos del local de Caripe: <a href={`https://wa.me/${c.localWhatsapp}`}><b>{c.localWhatsappDisplay}</b></a>.</p></div>
+    </main>
+    <p class="foot wrap">Celebra · Taller de fiestas en Caripe, Monagas, Venezuela</p>
+  </div>
+</Base>
+
+<script>
+  const a = document.getElementById('gr-share') as HTMLAnchorElement;
+  a.href += encodeURIComponent(location.origin);
+</script>

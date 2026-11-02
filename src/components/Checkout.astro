@@ -180,7 +180,7 @@ import { site, countries } from '../config/site';
   };
 
   const state = {
-    country: detectCountry() as CountryCode,
+    country: ((document.documentElement.dataset.pais as CountryCode) || detectCountry()) as CountryCode,
     productId: products[0].id,
     method: null as PaymentMethodId | null,
     ref: '',
@@ -622,6 +622,15 @@ import { site, countries } from '../config/site';
   panel.addEventListener('submit', (e) => {
     e.preventDefault();
     handleSubmit(e.target as HTMLFormElement);
+  });
+
+  // La página detecta el país (Cloudflare) y avisa; el checkout lo sigue mientras esté cerrado.
+  window.addEventListener('celebra:pais', (e) => {
+    const p = (e as CustomEvent<CountryCode>).detail;
+    if (dialog.open || p === state.country) return;
+    state.country = p;
+    state.method = null;
+    renderAll();
   });
 
   renderAll();
