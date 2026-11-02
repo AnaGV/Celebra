@@ -125,7 +125,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
               </button>
               <button type="button" role="radio" aria-checked="false" class="opt" data-pick-fmt="print">
                 <span class="dot" aria-hidden="true"></span>
-                <span><span class="opt-t">Libro impreso</span><span class="opt-s">Solo retiro en nuestro local de Caripe</span></span>
+                <span><span class="opt-t">Libro impreso</span><span class="opt-s">Solo retiro en nuestro local de Caripe. Sin envíos a domicilio</span></span>
                 <span class="opt-p num">{pp}</span>
               </button>
             </div>
@@ -137,7 +137,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
 
             <div class="ship">
               <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg>
-              <span><span data-fmt-solo="ebook">Llega a tu email apenas se confirma el pago, con tu recibo.</span><span data-fmt-solo="print" hidden>Retiro en el local de Caripe. Apartamos tu libro por 3 días.</span></span>
+              <span><span data-fmt-solo="ebook">Llega a tu email apenas se confirma el pago, con tu recibo.</span><span data-fmt-solo="print" hidden><b>Solo retiro en nuestro local de Caripe. No hacemos envíos a domicilio.</b> Apartamos tu libro por 3 días.</span></span>
             </div>
 
             <div class="pays">
@@ -257,7 +257,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
               <tbody>
                 <tr><th scope="row">Precio</th><td class="num">{pe}</td><td class="num">{pp}</td></tr>
                 <tr><th scope="row">Formato</th><td>PDF de 30 páginas, para leer en el celular o imprimir</td><td>Impreso a color</td></tr>
-                <tr><th scope="row">Entrega</th><td><span class="ok"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg>Al instante, por email</span></td><td>Retiro en el local de Caripe</td></tr>
+                <tr><th scope="row">Entrega</th><td><span class="ok"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg>Al instante, por email</span></td><td><b>Solo retiro en el local de Caripe.</b> No hacemos envíos a domicilio.</td></tr>
                 <tr><th scope="row">Disponible en</th><td>Todos los países</td><td>Solo Venezuela</td></tr>
                 <tr><th scope="row">Pago</th><td>Pago Móvil, Binance, tarjeta o PayPal</td><td>Pago Móvil, Binance o en el local</td></tr>
                 <tr><th scope="row"><span class="sr-only">Acción</span></th><td><button type="button" class="btn btn-sm" data-buy={ebook.id}>Comprar ebook</button></td><td><button type="button" class="btn btn-sm btn-line" data-buy={print.id}>Reservar impreso</button></td></tr>
@@ -271,7 +271,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
             <div class="shop-copy">
               <h2 id="taller">Lo escribe un taller de fiestas de verdad</h2>
               <p>En Celebra hacemos piñatas, chupeteras y decoración para cumpleaños en Caripe, estado Monagas. Este libro reúne lo que aprendimos en el taller.</p>
-              <p>Puedes visitarnos, ver el trabajo y retirar ahí tu libro impreso.</p>
+              <p>Puedes visitarnos, ver el trabajo y retirar ahí tu libro impreso. El impreso solo se retira en el local: no hacemos envíos a domicilio.</p>
               <a class="link" href="#local">Ver ubicación y horario</a>
             </div>
             <div class="shots">
@@ -296,7 +296,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
         <section class="sec" aria-labelledby="como">
           <div class="sec-head"><h2 id="como">Comprar toma un par de minutos</h2></div>
           <div class="steps">
-            <div class="step"><span class="step-n num">1</span><h3>Elige cómo pagar</h3><p class="muted">Ves solo los métodos disponibles en tu país.</p></div>
+            <div class="step"><span class="step-n num">1</span><h3>Toca «Quiero mi libro»</h3><p class="muted">Eliges el formato y la forma de pago en un solo paso, sin crear cuenta.</p></div>
             <div class="step"><span class="step-n num">2</span><h3>Paga de forma segura</h3><p class="muted">Las tarjetas se procesan en Lemon Squeezy. Nunca vemos tus datos.</p></div>
             <div class="step"><span class="step-n num">3</span><h3>Recibe tu libro</h3><p class="muted">El ebook y tu recibo llegan a tu email.</p></div>
           </div>
@@ -361,7 +361,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
                   <tr><th scope="row">Domingo</th><td>Cerrado</td></tr>
                 </tbody>
               </table>
-              <p class="muted small">Aquí retiras el libro impreso y tus pedidos de piñatas y chupeteras. WhatsApp del local: <a class="num" href={`https://wa.me/${c.localWhatsapp}`}>{c.localWhatsappDisplay}</a></p>
+              <p class="muted small">Aquí retiras el libro impreso y tus pedidos de piñatas y chupeteras. No hacemos envíos a domicilio. WhatsApp del local: <a class="num" href={`https://wa.me/${c.localWhatsapp}`}>{c.localWhatsappDisplay}</a></p>
             </div>
           </div>
         </section>
@@ -429,12 +429,20 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
   applyPais((document.documentElement.dataset.pais as CountryCode) || 'OTRO');
   initPais();
 
+  // Al cambiar país o formato aparecen o desaparecen secciones arriba; mantenemos el botón tocado en el mismo lugar de la pantalla.
+  function keepPlace(el: HTMLElement, change: () => void) {
+    const before = el.getBoundingClientRect().top;
+    change();
+    const after = el.getBoundingClientRect().top;
+    if (Math.abs(after - before) > 1) window.scrollBy({ top: after - before, behavior: 'instant' as ScrollBehavior });
+  }
+
   document.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     const pf = t.closest<HTMLElement>('[data-pick-fmt]');
-    if (pf) { fmt = pf.dataset.pickFmt as 'ebook' | 'print'; applyFmt(); return; }
+    if (pf) { keepPlace(pf, () => { fmt = pf.dataset.pickFmt as 'ebook' | 'print'; applyFmt(); }); return; }
     const pp = t.closest<HTMLElement>('[data-pick-pais]');
-    if (pp) { elegirPais(pp.dataset.pickPais as CountryCode); return; }
+    if (pp) { keepPlace(pp, () => elegirPais(pp.dataset.pickPais as CountryCode)); return; }
     const pv = t.closest<HTMLElement>('[data-pick-view]');
     if (pv) {
       const v = pv.dataset.pickView!;

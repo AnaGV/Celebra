@@ -82,7 +82,7 @@ import { site, countries } from '../config/site';
     border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
   }
   .co-body {
-    display: grid; gap: 1.4rem; overflow-y: auto;
+    display: grid; gap: 1.4rem; overflow-y: auto; overflow-anchor: none;
     padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
   }
   .co-group { border: 0; margin: 0; padding: 0; display: grid; gap: 0.6rem; min-width: 0; }
@@ -97,7 +97,7 @@ import { site, countries } from '../config/site';
     transition: border-color 0.15s, background 0.15s;
   }
   .co-option input:checked + .co-option-box { border-color: var(--fiesta); background: var(--fiesta-soft); }
-  .co-option input:focus-visible + .co-option-box { outline: 3px solid var(--sol); outline-offset: 2px; }
+  .co-option input:focus-visible + .co-option-box { outline: 3px solid var(--accent); outline-offset: 2px; }
   .co-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; }
   .co-option input:checked + .co-option-box .co-dot { border-color: var(--fiesta); }
   .co-option input:checked + .co-option-box .co-dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--fiesta); }
@@ -111,7 +111,7 @@ import { site, countries } from '../config/site';
   #co-code-msg[data-ok='true'] { color: var(--ok); font-weight: 700; }
   #co-code-msg[data-ok='false'] { color: var(--fiesta); }
   .co-was { text-decoration: line-through; color: var(--muted); font-size: 0.85em; margin-right: 0.35rem; }
-  .co-panel { display: grid; gap: 1rem; }
+  .co-panel { display: grid; gap: 1rem; align-content: start; min-height: 26rem; }
   .co-panel:empty { display: none; }
   .co-form { display: grid; gap: 0.9rem; }
   .co-note { font-size: 0.88rem; color: var(--muted); }
@@ -387,7 +387,7 @@ import { site, countries } from '../config/site';
 
     if (state.method === 'pagar_en_local') {
       panel.innerHTML = `
-        <div class="co-alert">Solo retiro en el local de Caripe. Apartamos tu libro por ${pay.pickup.reservationDays} días.</div>
+        <div class="co-alert"><b>Solo retiro en el local de Caripe. No hacemos envíos a domicilio.</b> Apartamos tu libro por ${pay.pickup.reservationDays} días.</div>
         <form class="co-form" data-form="pagar_en_local" novalidate>
           <div class="field">
             <label for="co-name-pl">Nombre y apellido</label>
@@ -404,6 +404,9 @@ import { site, countries } from '../config/site';
           <button class="btn btn-block" type="submit">Reservar mi libro</button>
           <p class="co-note">Pagas al retirar en efectivo, Pago Móvil o tarjeta en el punto de venta del local.</p>
         </form>`;
+    }
+    if (p.kind === 'fisico' && state.method !== 'pagar_en_local') {
+      panel.insertAdjacentHTML('afterbegin', '<div class="co-alert"><b>Solo retiro en el local de Caripe. No hacemos envíos a domicilio.</b></div>');
     }
   }
 
@@ -602,16 +605,32 @@ import { site, countries } from '../config/site';
   });
 
   productsEl.addEventListener('change', (e) => {
-    state.productId = (e.target as HTMLInputElement).value;
-    state.method = null;
-    state.ref = '';
-    renderMethods();
-    renderPanel();
+    const input = e.target as HTMLInputElement;
+    keepPlace(input, () => {
+      state.productId = input.value;
+      state.method = null;
+      state.ref = '';
+      renderMethods();
+      renderPanel();
+    });
   });
 
+  // Al elegir una opción, el panel de abajo cambia de alto: dejamos la opción tocada donde estaba.
+  function keepPlace(input: HTMLInputElement, change: () => void) {
+    const sel = `input[name="${input.name}"][value="${input.value}"]`;
+    const before = (input.closest('label') ?? input).getBoundingClientRect().top;
+    change();
+    const now = bodyEl.querySelector<HTMLInputElement>(sel);
+    const after = ((now?.closest('label') ?? now) as HTMLElement | null)?.getBoundingClientRect().top ?? before;
+    bodyEl.scrollTop += after - before;
+  }
+
   methodsEl.addEventListener('change', (e) => {
-    state.method = (e.target as HTMLInputElement).value as PaymentMethodId;
-    renderPanel();
+    const input = e.target as HTMLInputElement;
+    keepPlace(input, () => {
+      state.method = input.value as PaymentMethodId;
+      renderPanel();
+    });
   });
 
   codeBtn.addEventListener('click', () => applyCode(codeInput.value));

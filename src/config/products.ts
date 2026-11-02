@@ -36,7 +36,7 @@ export const products: Product[] = [
     shortName: 'Libro impreso',
     priceUsd: 18,
     format: 'Impreso a color · 30 páginas',
-    delivery: 'Retiro en el local de Caripe',
+    delivery: 'Solo retiro en el local de Caripe, sin envíos',
     countries: ['VE'],
     methods: ['pago_movil', 'binance', 'pagar_en_local'],
   },
