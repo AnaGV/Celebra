@@ -1,111 +1,319 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Calculadora de presupuesto para fiestas · Celebra</title>
-<meta name="description" content="Reparte el presupuesto de tu fiesta infantil por rubro y calcula cuánto gastar por niño. Gratis, de Celebra.">
+<meta name="description" content="Reparte el presupuesto de tu fiesta infantil por rubro, anota lo que ya cotizaste y mira cuánto te queda. Gratis, de Celebra.">
+<meta property="og:title" content="Calculadora de presupuesto para fiestas · Celebra">
+<meta property="og:description" content="Reparte el presupuesto, anota lo que ya cotizaste y mira cuánto te queda.">
+<meta property="og:image" content="/img/og.jpg">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
-:root{--bg:#ffffff;--surface:#fff;--sunk:#f4f5f7;--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--plum:#16171a;--accent:#c2185b;--soft:#fdeaf2;--ok:#1a7f4b;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
-.top{display:flex;align-items:center;gap:10px;height:64px;max-width:980px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));font-weight:800;font-size:20px;letter-spacing:-0.03em;color:var(--ink);text-decoration:none}
+/* Colores tomados del logo de Celebra: magenta, celeste, azul, lila y amarillo. */
+:root{--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--panel:#f4f5f7;--accent:#c2185b;--lila:#f3eefd;--lila-line:#ded3f7;--lila-ink:#4b2a86;--cielo:#e8f4fc;--cielo-ink:#14466f;--ok:#1a7f4b;--bad:#b42318;--bad-soft:#fdecea;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
 .topbar{border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:10px;height:64px;max-width:1040px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));font-weight:800;font-size:20px;letter-spacing:-0.03em;color:var(--ink);text-decoration:none}
 .mark{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
-.wrap{max-width:980px;margin:0 auto;padding:40px max(20px,env(safe-area-inset-right,0px)) 64px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
-h1{margin:0;font-weight:800;letter-spacing:-0.025em;color:var(--ink);font-size:clamp(32px,5vw,48px);line-height:1.08;text-wrap:balance}
-.lead{margin:0;color:var(--muted);font-size:18px;max-width:60ch}
+.wrap{max-width:1040px;margin:0 auto;padding:40px max(20px,env(safe-area-inset-right,0px)) 56px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
+h1{margin:0;font-weight:800;letter-spacing:-0.025em;font-size:clamp(32px,5vw,48px);line-height:1.08;text-wrap:balance}
+h2{margin:0;font-weight:800;letter-spacing:-0.02em;font-size:20px}
+.lead{margin:0;color:var(--muted);font-size:18px;max-width:62ch}
+.calc{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:20px;align-items:start}
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:16px}
+.calc-in{background:var(--lila);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .fld{display:flex;flex-direction:column;gap:6px}.fld label{font-weight:700;font-size:14px}
-input,select{height:52px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
-.calc{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:18px;align-items:start}
-.calc-in{background:var(--soft);border:0;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
-.money{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}
-.calc-out{display:flex;flex-direction:column;gap:12px;min-width:0}
-.calc-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.calc-kpis>div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
-.k-l{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.k-v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
-.tbl-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:14px;background:#fff}
-table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
-th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}td.r,th.r{text-align:right}tr:last-child td{border-bottom:0}tr.tot td{font-weight:800;color:var(--ink)}
-.calc-note{margin:0;color:var(--muted);font-size:14px}.calc-actions{display:flex;gap:12px;align-items:center}.calc-copied{color:var(--ok);font-weight:700;font-size:14px}
-.btn-sec{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:700 15px var(--body);cursor:pointer;color:var(--ink)}
-.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:22px 24px;border-radius:18px;background:#fde9a6;color:#4a1a4f;margin-top:8px}
-.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
-.btn-sec:focus-visible,.cta a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input,select{height:52px;border-radius:12px;border:1.5px solid var(--lila-line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(194,24,91,.15)}
+.money{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.kpi.big{grid-column:span 2;background:var(--cielo);border-color:transparent}
+.kpi.big.bad{background:var(--bad-soft)}
+.k-l{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.k-v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi.big .k-v{font-size:28px;color:var(--cielo-ink)}
+.kpi.big.bad .k-v{color:var(--bad)}
+.k-s{font-size:13px;color:var(--muted)}
+.bar{height:10px;border-radius:999px;background:#fff;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#e0457b,#7b4fd6);transition:width .25s ease}
+.kpi.big.bad .bar i{background:var(--bad)}
+.list{display:flex;flex-direction:column;gap:18px;min-width:0}
+.list-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px}
+.list-head p{margin:0;color:var(--muted);font-size:14px;max-width:52ch}
+.grp{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.grp-h{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--panel);font-weight:800;font-size:15px}
+.grp-h span:last-child{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 120px 150px 40px;gap:10px;padding:8px 16px 0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 120px 150px 40px;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.cols + .row{border-top:0}
+.r-name{min-width:0}
+.r-name b{display:block;font-weight:600;font-size:15px}
+.r-name span{display:block;font-size:13px;color:var(--muted)}
+.r-name input{height:40px;font-weight:600}
+.r-sug{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.r-sug small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.r-real input{height:44px;text-align:right;font-variant-numeric:tabular-nums}
+.r-real input.has{border-color:#9fd3b6;background:#f2faf5}
+.del{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.del:hover{color:var(--bad);border-color:var(--bad)}
+.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.add{display:grid;grid-template-columns:minmax(0,1fr) 150px auto;gap:10px;padding:14px 16px;background:var(--cielo);border-radius:16px;align-items:end}
+.add .fld label{color:var(--cielo-ink)}
+.add input{border-color:#c5e0f3}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 20px;border-radius:12px;border:0;background:var(--accent);color:#fff;font:800 16px var(--body);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{filter:brightness(1.06);color:#fff}
+.btn-sec{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:700 15px var(--body);cursor:pointer;color:var(--ink)}
+.btn-sec:hover{border-color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.copied{color:var(--ok);font-weight:700;font-size:14px}
+.note{margin:0;color:var(--muted);font-size:14px}
+.btn:focus-visible,.btn-sec:focus-visible,.del:focus-visible,.cta a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:24px;border-radius:18px;background:var(--lila);color:var(--lila-ink);margin-top:8px}
+.cta b{color:var(--lila-ink)}
+.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
 .foot{text-align:center;color:var(--muted);font-size:13px;padding:0 20px 40px}.foot a{color:var(--muted)}
-@media (max-width:760px){.calc{grid-template-columns:1fr}}@media (max-width:460px){.calc-kpis{grid-template-columns:1fr}}
-</style></head><body><div class="topbar"><a class="top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></span>Celebra</a></div><main class="wrap">
+@media (max-width:860px){.calc{grid-template-columns:1fr}.side{position:static}}
+@media (max-width:620px){
+  .cols{display:none}
+  .row{grid-template-columns:minmax(0,1fr) 40px;grid-template-areas:"n d" "s s" "p p";row-gap:8px}
+  .r-name{grid-area:n}.del{grid-area:d}
+  .r-sug{grid-area:s;text-align:left;display:flex;align-items:baseline}
+  .r-sug small{display:inline;margin-left:auto;margin-right:10px}
+  .r-sug::before{content:"Sugerido";font-size:13px;color:var(--muted);font-weight:500}
+  .r-real{grid-area:p;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px}
+  .r-real::before{content:"Precio real";font-size:13px;color:var(--muted)}
+  .add{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style></head><body>
+<div class="topbar"><a class="top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></span>Celebra</a></div>
+<main class="wrap">
 <h1>¿Cuánto cuesta tu fiesta?</h1>
-<p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía que usamos en el taller Celebra.</p>
-<div class="calc" id="calc">
-  <form class="calc-in" id="calc-form" novalidate>
-    <div class="fld">
-      <label for="calc-total">¿Cuánto vas a gastar en total?</label>
-      <div class="money"><select id="calc-cur" aria-label="Moneda"><option value="USD">USD</option><option value="Bs">Bs</option><option value="CLP">CLP</option></select><input id="calc-total" type="number" inputmode="decimal" min="0" step="1" value="130"></div>
+<p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía del taller Celebra. Cuando ya sepas el precio de algo, anótalo y te mostramos cuánto te queda para lo demás.</p>
+
+<div class="calc">
+  <div class="side">
+    <form class="calc-in" id="calc-form" novalidate>
+      <div class="fld">
+        <label for="calc-total">¿Cuánto vas a gastar en total?</label>
+        <div class="money"><select id="calc-cur" aria-label="Moneda"><option value="USD">USD</option><option value="Bs">Bs</option><option value="CLP">CLP</option></select><input id="calc-total" type="number" inputmode="decimal" min="0" step="any"></div>
+      </div>
+      <div class="fld">
+        <label for="calc-kids">¿Cuántos niños invitas?</label>
+        <input id="calc-kids" type="number" inputmode="numeric" min="1" step="1">
+      </div>
+    </form>
+    <div class="kpis" aria-live="polite">
+      <div class="kpi big" id="k-left-box"><span class="k-l" id="k-left-l">Te queda por gastar</span><b class="k-v" id="k-left">—</b><span class="k-s" id="k-left-s"></span><div class="bar" aria-hidden="true"><i id="k-bar"></i></div></div>
+      <div class="kpi"><span class="k-l">Ya cotizado</span><b class="k-v" id="k-known">—</b></div>
+      <div class="kpi"><span class="k-l">Por niño</span><b class="k-v" id="k-kid">—</b></div>
+      <div class="kpi"><span class="k-l">Cada bolsita</span><b class="k-v" id="k-bag">—</b></div>
+      <div class="kpi"><span class="k-l">Imprevistos</span><b class="k-v" id="k-buf">—</b></div>
     </div>
-    <div class="fld">
-      <label for="calc-kids">¿Cuántos niños invitas?</label>
-      <input id="calc-kids" type="number" inputmode="numeric" min="1" step="1" value="15">
+    <div class="actions">
+      <button type="button" class="btn-sec" id="calc-copy">Copiar para WhatsApp</button>
+      <button type="button" class="btn-sec" id="calc-reset">Empezar de nuevo</button>
+      <span class="copied" id="calc-copied" role="status"></span>
     </div>
-    <div class="fld">
-      <label for="calc-place">¿Alquilas un lugar? (opcional)</label>
-      <input id="calc-place" type="number" inputmode="decimal" min="0" step="1" value="0">
+  </div>
+
+  <div class="list">
+    <div class="list-head">
+      <h2>Tu presupuesto por rubro</h2>
+      <p>El sugerido se recalcula solo: lo que ya cotizaste se descuenta y el resto se reparte entre lo que falta.</p>
     </div>
-  </form>
-  <div class="calc-out">
-    <div class="calc-kpis">
-      <div><span class="k-l">Por niño</span><b class="k-v" id="calc-perkid">—</b></div>
-      <div><span class="k-l">Cada bolsita</span><b class="k-v" id="calc-bag">—</b></div>
-      <div><span class="k-l">Imprevistos</span><b class="k-v" id="calc-buffer">—</b></div>
-    </div>
-    <div class="tbl-wrap"><table class="calc-t" id="calc-table"><thead><tr><th scope="col">Rubro</th><th scope="col" class="r">%</th><th scope="col" class="r">Monto</th></tr></thead><tbody></tbody></table></div>
-    <p class="calc-note" id="calc-note"></p>
-    <div class="calc-actions"><button type="button" class="btn-sec" id="calc-copy">Copiar para WhatsApp</button><span class="calc-copied" id="calc-copied" role="status"></span></div>
+    <div id="groups"></div>
+    <form class="add" id="add-form" novalidate>
+      <div class="fld"><label for="add-name">Agregar otro gasto</label><input id="add-name" type="text" placeholder="Ej. Fotógrafo, inflable, payaso" maxlength="40"></div>
+      <div class="fld"><label for="add-price">Precio (si lo sabes)</label><input id="add-price" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></div>
+      <button type="submit" class="btn">Agregar</button>
+    </form>
+    <p class="note" id="calc-note"></p>
   </div>
 </div>
-<script>
-(function () {
-  const SPLIT = [
-    ['Comida y bebidas', 30], ['Torta', 15], ['Decoración y globos', 12], ['Piñata y relleno', 12],
-    ['Mesa dulce y cotillón', 11], ['Recuerdos (bolsitas)', 10], ['Imprevistos', 10]
-  ];
-  const $ = (id) => document.getElementById(id);
-  const fmt = (n, cur) => {
-    const dec = cur === 'CLP' ? 0 : 2;
-    const s = new Intl.NumberFormat('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n);
-    return cur + ' ' + s;
-  };
-  let summary = '';
-  function calc() {
-    const cur = $('calc-cur').value;
-    const total = Math.max(0, Number($('calc-total').value) || 0);
-    const kids = Math.max(1, Math.round(Number($('calc-kids').value) || 1));
-    const place = Math.min(total, Math.max(0, Number($('calc-place').value) || 0));
-    const rest = total - place;
-    const rows = SPLIT.map(([name, pct]) => [name, pct, rest * pct / 100]);
-    if (place > 0) rows.unshift(['Lugar', null, place]);
-    $('calc-table').tBodies[0].innerHTML = rows.map(([n, p, v]) =>
-      '<tr><td>' + n + '</td><td class="r">' + (p === null ? '—' : p + '%') + '</td><td class="r">' + fmt(v, cur) + '</td></tr>').join('') +
-      '<tr class="tot"><td>Total</td><td class="r">100%</td><td class="r">' + fmt(total, cur) + '</td></tr>';
-    const recuerdos = rest * 0.10;
-    $('calc-perkid').textContent = fmt(total / kids, cur);
-    $('calc-bag').textContent = fmt(recuerdos / (kids + 2), cur);
-    $('calc-buffer').textContent = fmt(rest * 0.10, cur);
-    $('calc-note').textContent = 'Cuenta ' + (kids + 2) + ' bolsitas: ' + kids + ' niños y 2 de repuesto. Si el monto por niño te parece alto, baja invitados o haz más cosas en casa; no recortes la comida.';
-    summary = 'Mi presupuesto para la fiesta (' + kids + ' niños)\n' + rows.map(([n, p, v]) => '• ' + n + ': ' + fmt(v, cur)).join('\n') + '\nTotal: ' + fmt(total, cur) + '\nCalculado con la guía de Celebra';
-  }
-  ['calc-cur', 'calc-total', 'calc-kids', 'calc-place'].forEach((id) => $(id).addEventListener('input', calc));
-  $('calc-form').addEventListener('submit', (e) => e.preventDefault());
-  $('calc-copy').addEventListener('click', () => {
-    const done = () => { $('calc-copied').textContent = 'Copiado'; setTimeout(() => { $('calc-copied').textContent = ''; }, 1800); };
-    const fallback = () => { $('calc-copied').textContent = 'Selecciona la tabla y cópiala'; };
-    try { navigator.clipboard.writeText(summary).then(done, fallback); } catch (e) { fallback(); }
-  });
-  // Moneda sugerida según el país (Cloudflare). La persona la puede cambiar.
-  fetch('/api/pais').then((r) => r.json()).then(({ pais }) => {
-    if (pais === 'CL' && $('calc-total').value === '130') { $('calc-cur').value = 'CLP'; $('calc-total').value = '150000'; calc(); }
-  }).catch(() => {});
-  calc();
-})();
-</script>
 
 <div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/regalo/">Quiero el capítulo gratis</a></div>
-</main><p class="foot">Celebra · Caripe, Monagas, Venezuela · <a href="/">Ver el libro Fiestas que se recuerdan</a></p></body></html>
+</main>
+<p class="foot">Celebra · Caripe, Monagas, Venezuela · <a href="/">Ver el libro Fiestas que se recuerdan</a></p>
+
+<script>
+(function () {
+  // Reparto del libro (capítulo 2), dividido en más detalle. Cada grupo suma lo mismo que en el libro.
+  const DEFAULTS = [
+    { g: 'Comida y bebidas', items: [['Comida salada (tequeños, sándwiches, pasapalos)', 20], ['Bebidas', 7], ['Platos, vasos y servilletas', 3]] },
+    { g: 'Torta', items: [['Torta', 15]] },
+    { g: 'Decoración', items: [['Decoración y globos', 11], ['Invitaciones', 1]] },
+    { g: 'Piñata', items: [['Piñata (materiales)', 8], ['Relleno de la piñata', 4]] },
+    { g: 'Mesa dulce y cotillón', items: [['Mesa dulce y dulces', 8], ['Cotillón (gorritos, pitos)', 3]] },
+    { g: 'Recuerdos', items: [['Recuerdos (bolsitas)', 10, 'bolsitas']] },
+    { g: 'Lugar y extras', items: [['Lugar (si alquilas)', 0]] },
+    { g: 'Imprevistos', items: [['Imprevistos', 10, 'buffer']] },
+  ];
+  const BASE = { USD: 130, Bs: 0, CLP: 150000 };
+  const KEY = 'celebra-calc-v2';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  let uid = 0;
+  const fresh = () => DEFAULTS.flatMap((grp) => grp.items.map(([name, pct, tag]) => ({ id: ++uid, g: grp.g, name, pct, tag: tag || '', real: null, custom: false })));
+
+  let state = { cur: 'USD', total: 130, kids: 15, rows: fresh() };
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && Array.isArray(saved.rows)) { state = saved; uid = Math.max(0, ...state.rows.map((r) => r.id)); }
+  } catch (e) { /* sin almacenamiento: empezamos con los valores del libro */ }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* solo esta visita */ } };
+
+  const fmt = (n, cur) => {
+    const dec = cur === 'CLP' ? 0 : 2;
+    return cur + ' ' + new Intl.NumberFormat('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n || 0);
+  };
+  const num = (v) => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) && n >= 0 ? n : null; };
+
+  function compute() {
+    const T = state.total;
+    const known = state.rows.reduce((s, r) => s + (r.real != null ? r.real : 0), 0);
+    const freePct = state.rows.reduce((s, r) => s + (r.real == null ? r.pct : 0), 0);
+    const pool = Math.max(0, T - known);
+    state.rows.forEach((r) => { r.sug = r.real != null ? r.real : (freePct > 0 ? pool * r.pct / freePct : 0); });
+    return { T, known, left: T - known };
+  }
+
+  function renderRows() {
+    const groups = [];
+    state.rows.forEach((r) => {
+      let g = groups.find((x) => x.name === r.g);
+      if (!g) groups.push(g = { name: r.g, rows: [] });
+      g.rows.push(r);
+    });
+    $('groups').innerHTML = groups.map((g) => `
+      <section class="grp" aria-label="${esc(g.name)}" style="margin-bottom:14px">
+        <div class="grp-h"><span>${esc(g.name)}</span><span data-gsum="${esc(g.name)}"></span></div>
+        <div class="cols" aria-hidden="true"><span>Gasto</span><span style="text-align:right">Sugerido</span><span style="text-align:right">Precio real</span><span></span></div>
+        ${g.rows.map((r) => `
+          <div class="row" data-id="${r.id}">
+            <div class="r-name">${r.custom
+              ? `<input type="text" value="${esc(r.name)}" data-name="${r.id}" aria-label="Nombre del gasto" maxlength="40">`
+              : `<b>${esc(r.name)}</b>${r.tag === 'bolsitas' ? '<span data-bagnote></span>' : ''}`}</div>
+            <div class="r-sug"><small data-pct="${r.id}"></small><span data-sug="${r.id}"></span></div>
+            <div class="r-real"><input type="number" inputmode="decimal" min="0" step="any" placeholder="¿Ya lo sabes?" data-real="${r.id}" aria-label="Precio real de ${esc(r.name)}" value="${r.real != null ? r.real : ''}" class="${r.real != null ? 'has' : ''}"></div>
+            <button type="button" class="del" data-del="${r.id}" aria-label="Quitar ${esc(r.name)}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+          </div>`).join('')}
+      </section>`).join('');
+    update();
+  }
+
+  function update() {
+    const cur = state.cur;
+    const { T, known, left } = compute();
+    state.rows.forEach((r) => {
+      const s = document.querySelector(`[data-sug="${r.id}"]`);
+      const p = document.querySelector(`[data-pct="${r.id}"]`);
+      if (s) s.textContent = r.real != null ? fmt(r.real, cur) : (r.pct > 0 ? fmt(r.sug, cur) : '—');
+      if (p) p.textContent = r.real != null ? 'real' : (r.pct > 0 ? r.pct + '%' : '');
+    });
+    document.querySelectorAll('[data-gsum]').forEach((el) => {
+      const sum = state.rows.filter((r) => r.g === el.dataset.gsum).reduce((s, r) => s + r.sug, 0);
+      el.textContent = fmt(sum, cur);
+    });
+    const kids = Math.max(1, state.kids);
+    const bags = kids + 2;
+    const bagRow = state.rows.find((r) => r.tag === 'bolsitas');
+    const bufRow = state.rows.find((r) => r.tag === 'buffer');
+    document.querySelectorAll('[data-bagnote]').forEach((el) => (el.textContent = `${bags} bolsitas: ${kids} niños y 2 de repuesto`));
+    const over = left < 0;
+    $('k-left-box').classList.toggle('bad', over);
+    $('k-left-l').textContent = over ? 'Te pasaste por' : 'Te queda por gastar';
+    $('k-left').textContent = fmt(Math.abs(left), cur);
+    $('k-left-s').textContent = over ? 'Baja algún precio, quita invitados o sube el presupuesto.' : `De ${fmt(T, cur)} en total`;
+    $('k-bar').style.width = (T > 0 ? Math.min(100, (known / T) * 100) : 0) + '%';
+    $('k-known').textContent = fmt(known, cur);
+    $('k-kid').textContent = fmt(T / kids, cur);
+    $('k-bag').textContent = bagRow ? fmt(bagRow.sug / bags, cur) : '—';
+    $('k-buf').textContent = bufRow ? fmt(bufRow.sug, cur) : '—';
+    $('calc-note').textContent = 'Los porcentajes son la guía del libro y sirven de punto de partida: cambia lo que quieras. Si el monto por niño te parece alto, baja invitados o haz más cosas en casa; no recortes la comida.';
+    save();
+  }
+
+  function syncInputs() {
+    $('calc-cur').value = state.cur;
+    $('calc-total').value = state.total;
+    $('calc-kids').value = state.kids;
+  }
+
+  $('calc-cur').addEventListener('change', () => {
+    const prev = state.cur;
+    state.cur = $('calc-cur').value;
+    // Si la persona no tocó el total de ejemplo, ponemos el ejemplo de esa moneda.
+    if (state.total === BASE[prev] && BASE[state.cur]) { state.total = BASE[state.cur]; $('calc-total').value = state.total; }
+    update();
+  });
+  $('calc-total').addEventListener('input', () => { state.total = num($('calc-total').value) || 0; update(); });
+  $('calc-kids').addEventListener('input', () => { state.kids = Math.max(1, Math.round(num($('calc-kids').value) || 1)); update(); });
+  $('calc-form').addEventListener('submit', (e) => e.preventDefault());
+
+  $('groups').addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset.real) {
+      const r = state.rows.find((x) => x.id === +t.dataset.real);
+      r.real = t.value === '' ? null : num(t.value);
+      t.classList.toggle('has', r.real != null);
+      update();
+    } else if (t.dataset.name) {
+      state.rows.find((x) => x.id === +t.dataset.name).name = t.value;
+      save();
+    }
+  });
+  $('groups').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    state.rows = state.rows.filter((x) => x.id !== +b.dataset.del);
+    renderRows();
+  });
+
+  $('add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('add-name').value.trim();
+    if (!name) { $('add-name').focus(); return; }
+    const price = $('add-price').value === '' ? null : num($('add-price').value);
+    state.rows.push({ id: ++uid, g: 'Lugar y extras', name, pct: 0, tag: '', real: price, custom: true });
+    $('add-name').value = ''; $('add-price').value = '';
+    renderRows();
+    $('add-name').focus();
+  });
+
+  $('calc-reset').addEventListener('click', () => {
+    state = { cur: state.cur, total: BASE[state.cur] || state.total, kids: 15, rows: fresh() };
+    syncInputs();
+    renderRows();
+  });
+
+  $('calc-copy').addEventListener('click', () => {
+    const cur = state.cur;
+    const { T, known, left } = compute();
+    const lines = state.rows.filter((r) => r.sug > 0).map((r) => '• ' + r.name + ': ' + fmt(r.sug, cur) + (r.real != null ? ' ✓' : ''));
+    const text = 'Mi presupuesto para la fiesta (' + state.kids + ' niños)\n' + lines.join('\n') +
+      '\nTotal: ' + fmt(T, cur) + '\nYa cotizado: ' + fmt(known, cur) + '\n' + (left < 0 ? 'Me pasé por: ' : 'Me queda: ') + fmt(Math.abs(left), cur) +
+      '\n(✓ = precio real)\nCalculado con la guía de Celebra: ' + location.origin + '/calculadora/';
+    const done = () => { $('calc-copied').textContent = 'Copiado'; setTimeout(() => { $('calc-copied').textContent = ''; }, 1800); };
+    const fallback = () => { $('calc-copied').textContent = 'No se pudo copiar'; };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  syncInputs();
+  renderRows();
+
+  // Moneda sugerida según el país (Cloudflare), solo si la persona no tiene un presupuesto guardado.
+  let hadSaved = false;
+  try { hadSaved = !!localStorage.getItem(KEY + '-touched'); } catch (e) {}
+  if (!hadSaved) {
+    fetch('/api/pais').then((r) => r.json()).then(({ pais }) => {
+      if (pais === 'CL' && state.cur === 'USD' && state.total === BASE.USD) { state.cur = 'CLP'; state.total = BASE.CLP; syncInputs(); update(); }
+    }).catch(() => {});
+  }
+  document.addEventListener('input', () => { try { localStorage.setItem(KEY + '-touched', '1'); } catch (e) {} }, { once: true });
+})();
+</script>
+</body></html>
