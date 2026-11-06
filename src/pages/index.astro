@@ -173,10 +173,10 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
             <article class="tile t-b">
               <span class="in-book">Capítulo 2</span>
               <h3>Presupuesto antes de comprar</h3>
-              <p class="muted">Decides cuánto vas a gastar y lo repartes por rubro. Así sabes desde el principio si te alcanza, y dónde ahorrar haciendo cosas en casa.</p>
+              <p class="muted">Decides cuánto vas a gastar y lo repartes en 11 rubros, cada uno por separado. Así sabes desde el principio si te alcanza, y dónde ahorrar haciendo cosas en casa.</p>
               <span class="ex-tag">Ejemplo: cumpleaños para 15 niños</span>
               <div class="tpl num">
-                {[['Comida, bebidas y torta', 60], ['Decoración y globos', 15], ['Piñata hecha en casa', 15], ['Mesa dulce y 17 bolsitas', 27], ['Imprevistos (10%)', 13], ['Total de la fiesta', 130]].map(([t, v]) => (
+                {[['Comida', 29], ['Bebidas', 10], ['Torta', 20], ['Decoración con elementos', 8], ['Decoración con globos', 8], ['Piñata', 9], ['Relleno de la piñata', 6], ['Mesa dulce', 9], ['Cotillón', 5], ['17 bolsitas de recuerdo', 13], ['Imprevistos (10%)', 13], ['Total de la fiesta', 130]].map(([t, v]) => (
                   <div class="tpl-r"><span>{t}</span><span>USD {v}</span></div>
                 ))}
               </div>
@@ -587,7 +587,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
   .wk b{font-size:13px;color:var(--accent)}
   .wk span{font-weight:600;font-size:15px}
   .tpl{display:flex;flex-direction:column;margin-top:8px;font-size:15px}
-  .tpl-r{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .tpl-r{display:grid;grid-template-columns:1fr auto;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
   .tpl-r:last-child{border-bottom:0;font-weight:800}
   .c-inner{padding:36px 36px 0;display:flex;flex-direction:column;gap:14px}
   .prints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}

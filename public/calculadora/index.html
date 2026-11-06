@@ -141,19 +141,19 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 
 <script>
 (function () {
-  // Reparto del libro (capítulo 2), dividido en más detalle. Cada grupo suma lo mismo que en el libro.
+  // Reparto del libro (capítulo 2): los mismos 11 rubros y porcentajes que las páginas 6 a 8.
   const DEFAULTS = [
-    { g: 'Comida y bebidas', items: [['Comida salada (tequeños, sándwiches, pasapalos)', 20], ['Bebidas', 7], ['Platos, vasos y servilletas', 3]] },
+    { g: 'Comida y bebidas', items: [['Comida (con platos, vasos y servilletas)', 22], ['Bebidas', 8]] },
     { g: 'Torta', items: [['Torta', 15]] },
-    { g: 'Decoración', items: [['Decoración y globos', 11], ['Invitaciones', 1]] },
-    { g: 'Piñata', items: [['Piñata (materiales)', 8], ['Relleno de la piñata', 4]] },
-    { g: 'Mesa dulce y cotillón', items: [['Mesa dulce y dulces', 8], ['Cotillón (gorritos, pitos)', 3]] },
+    { g: 'Decoración', items: [['Decoración con elementos (banderines, manteles, centros)', 6], ['Decoración con globos', 6]] },
+    { g: 'Piñata', items: [['Piñata', 7], ['Relleno de la piñata', 5]] },
+    { g: 'Mesa dulce y cotillón', items: [['Mesa dulce', 7], ['Cotillón (gorritos, pitos, matracas)', 4]] },
     { g: 'Recuerdos', items: [['Recuerdos (bolsitas)', 10, 'bolsitas']] },
     { g: 'Lugar y extras', items: [['Lugar (si alquilas)', 0]] },
     { g: 'Imprevistos', items: [['Imprevistos', 10, 'buffer']] },
   ];
   const BASE = { USD: 130, Bs: 0, CLP: 150000 };
-  const KEY = 'celebra-calc-v2';
+  const KEY = 'celebra-calc-v3';
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   let uid = 0;
