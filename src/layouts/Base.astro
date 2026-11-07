@@ -58,5 +58,18 @@ const pixelId = site.tracking.metaPixelId;
   <body>
     {site.demoMode && <div class="demo-ribbon">VISTA PREVIA · los pagos todavía están en modo de prueba</div>}
     <slot />
+    <script is:inline>
+      // Enlaces a secciones sin "#" en la barra de direcciones.
+      (function(){
+        var clean=function(){ if(location.hash) history.replaceState(null,'',location.pathname+location.search); };
+        var go=function(id,smooth){ var el=id&&document.getElementById(id); if(!el) return false; el.scrollIntoView({behavior:smooth?'smooth':'auto',block:'start'}); return true; };
+        if(location.hash){ var id=decodeURIComponent(location.hash.slice(1)); addEventListener('load',function(){ go(id,false); clean(); }); }
+        document.addEventListener('click',function(e){
+          var a=e.target.closest&&e.target.closest('a[href*="#"]'); if(!a||e.defaultPrevented||e.metaKey||e.ctrlKey) return;
+          var u=new URL(a.href,location.href); if(u.origin!==location.origin||u.pathname!==location.pathname||!u.hash) return;
+          if(go(decodeURIComponent(u.hash.slice(1)),!matchMedia('(prefers-reduced-motion: reduce)').matches)){ e.preventDefault(); clean(); }
+        });
+      })();
+    </script>
   </body>
 </html>
