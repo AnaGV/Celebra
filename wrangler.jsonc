@@ -10,7 +10,7 @@
   },
   "observability": { "enabled": true },
   // Fotos de referencia del formulario: se borran al abrirlas o a las 72 horas.
-  "r2_buckets": [{ "binding": "FOTOS", "bucket_name": "celebra-fotos" }]
+  "r2_buckets": [{ "binding": "FOTOS", "bucket_name": "celebra-fotos-cotizaciones" }]
   // Los secretos (N8N_BASE_URL, CELEBRA_FORM_KEY, TURNSTILE_SECRET) se cargan en
   // Cloudflare > Workers > celebra > Configuración > Variables y secretos. Nunca aquí.
 }
