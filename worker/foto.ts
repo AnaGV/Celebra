@@ -11,7 +11,7 @@
  * y, por si acaso, también se revisa aquí).
  */
 
-const MAX_BYTES = 2_500_000;
+const MAX_BYTES = 1_500_000; // la foto ya llega achicada (~200-500 KB); 1,5 MB es el techo
 const MAX_EDAD_MS = 72 * 60 * 60 * 1000;
 const BOTS = /whatsapp|facebookexternalhit|facebot|meta-externalagent|twitterbot|telegrambot|slackbot|discordbot|linkedinbot|skypeuripreview|googlebot|bingbot|bot\b|crawler|spider|preview/i;
 
@@ -33,10 +33,28 @@ export async function subirFoto(request: Request, env: any): Promise<Response> {
   const origin = request.headers.get('origin');
   if (origin && new URL(origin).host !== url.host) return json({ error: 'Origen no permitido' }, 403);
 
-  const largo = Number(request.headers.get('content-length') || 0);
-  if (largo > MAX_BYTES) return json({ error: 'La foto es muy grande' }, 413);
-  const datos = await request.arrayBuffer();
-  if (datos.byteLength === 0 || datos.byteLength > MAX_BYTES) return json({ error: 'La foto es muy grande' }, 413);
+  if ((request.headers.get('content-type') || '').split(';')[0].trim() !== 'image/jpeg') return json({ error: 'Formato no válido' }, 415);
+  // Se exige el tamaño por adelantado y se corta antes de leer si es grande.
+  const cl = request.headers.get('content-length');
+  if (!cl) return json({ error: 'Falta el tamaño' }, 411);
+  const largo = Number(cl);
+  if (!Number.isFinite(largo) || largo <= 0 || largo > MAX_BYTES) return json({ error: 'La foto es muy grande' }, 413);
+  // Lectura con tope: aunque mientan en el tamaño, nunca se guardan más de MAX_BYTES en memoria.
+  const reader = request.body!.getReader();
+  const partes: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_BYTES) { await reader.cancel(); return json({ error: 'La foto es muy grande' }, 413); }
+    partes.push(value);
+  }
+  if (total === 0) return json({ error: 'Foto vacía' }, 400);
+  const u8 = new Uint8Array(total);
+  let off = 0;
+  for (const p of partes) { u8.set(p, off); off += p.byteLength; }
+  const datos = u8.buffer;
   const b = new Uint8Array(datos, 0, 3);
   if (!(b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff)) return json({ error: 'Formato no válido' }, 415);
 

@@ -133,7 +133,7 @@ const hoy = new Date().toISOString().slice(0, 10);
             <div class="h-ref">
               <span class="h-ref-t">Foto de referencia <span>(opcional)</span></span>
               <label class="h-ref-box">
-                <input type="file" name="foto" accept="image/*" />
+                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
                 <span class="h-ref-empty"><svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4zM12 17a4 4 0 100-8 4 4 0 000 8z"></path></svg>Sube una imagen de lo que te gusta</span>
                 <img class="h-ref-img" alt="Tu foto de referencia" hidden />
               </label>
@@ -246,6 +246,7 @@ const hoy = new Date().toISOString().slice(0, 10);
   let subiendo = null;
   const achicar = async (file) => {
     const bmp = await createImageBitmap(file);
+    if (bmp.width * bmp.height > 60_000_000) throw new Error('enorme');
     const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
     const cv = document.createElement('canvas');
     cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
@@ -258,6 +259,13 @@ const hoy = new Date().toISOString().slice(0, 10);
     const img = $('.h-ref-img');
     fotoUrl = '';
     if (!file) { img.hidden = true; $('.h-ref-empty').hidden = false; estado.hidden = true; return; }
+    // Límites antes de procesar: solo imágenes y hasta 20 MB (las fotos de celular pesan 2-8 MB).
+    if (!/^image\//.test(file.type) || file.size > 20 * 1024 * 1024) {
+      foto.value = ''; img.hidden = true; $('.h-ref-empty').hidden = false;
+      estado.hidden = false; estado.dataset.s = 'err';
+      estado.textContent = !/^image\//.test(file.type) ? 'Ese archivo no es una imagen.' : 'La foto pesa más de 20 MB. Elige otra o una captura de pantalla.';
+      return;
+    }
     img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
     estado.hidden = false; estado.textContent = 'Subiendo tu foto…'; estado.dataset.s = 'up';
     btn.disabled = true; btn.textContent = 'Subiendo tu foto…';
