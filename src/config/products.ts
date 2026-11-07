@@ -24,7 +24,7 @@ export const products: Product[] = [
     name: 'Fiestas que se recuerdan (ebook)',
     shortName: 'Ebook',
     priceUsd: 7, // precio recomendado de lanzamiento (ver revisión de precio)
-    format: 'PDF · 31 páginas',
+    format: 'PDF · 32 páginas',
     delivery: 'Llega a tu email apenas se confirma el pago',
     countries: 'ALL',
     lemonCheckoutUrl: '',
@@ -35,7 +35,7 @@ export const products: Product[] = [
     name: 'Fiestas que se recuerdan (libro impreso)',
     shortName: 'Libro impreso',
     priceUsd: 18,
-    format: 'Impreso a color · 31 páginas',
+    format: 'Impreso a color · 32 páginas',
     delivery: 'Solo retiro en el local de Caripe, sin envíos',
     countries: ['VE'],
     methods: ['pago_movil', 'binance', 'pagar_en_local'],
