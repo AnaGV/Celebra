@@ -6,6 +6,7 @@
 import { onRequestPost as lead } from '../functions/api/lead';
 import { onRequestPost as codigo } from '../functions/api/codigo';
 import { onRequestPost as orders } from '../functions/api/orders';
+import { subirFoto, verFoto } from './foto';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
   '/api/lead': lead,
@@ -21,6 +22,11 @@ export default {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return handler({ request, env, waitUntil: ctx.waitUntil.bind(ctx), params: {}, data: {} });
     }
+    if (url.pathname === '/api/foto') {
+      if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
+      return subirFoto(request, env);
+    }
+    if (url.pathname.startsWith('/ref/')) return verFoto(request, env, url.pathname.slice(5).replace(/\/$/, ''));
     if (url.pathname === '/api/pais') {
       const c = (request as any).cf?.country ?? request.headers.get('cf-ipcountry') ?? '';
       const pais = c === 'VE' ? 'VE' : c === 'CL' ? 'CL' : 'OTRO';

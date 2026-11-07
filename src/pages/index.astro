@@ -137,7 +137,7 @@ const hoy = new Date().toISOString().slice(0, 10);
                 <span class="h-ref-empty"><svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4zM12 17a4 4 0 100-8 4 4 0 000 8z"></path></svg>Sube una imagen de lo que te gusta</span>
                 <img class="h-ref-img" alt="Tu foto de referencia" hidden />
               </label>
-              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres.</p>
+              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la vemos.</p>
             </div>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
             <button class="h-btn" type="submit">
@@ -145,7 +145,7 @@ const hoy = new Date().toISOString().slice(0, 10);
               Enviar por WhatsApp
             </button>
             <p class="h-form-err" role="alert" hidden></p>
-            <div class="h-form-ok" role="status" hidden><b>¡Listo! Se abrió WhatsApp con tu pedido.</b> Antes de enviarlo, toca el clip 📎 y adjunta tu foto de referencia.</div>
+            <div class="h-form-ok" role="status" hidden><b>No pudimos subir tu foto.</b> En WhatsApp, toca el clip 📎 y adjúntala antes de enviar el mensaje.</div>
           </form>
         </div>
       </section>
@@ -244,8 +244,27 @@ const hoy = new Date().toISOString().slice(0, 10);
     img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
   });
 
-  // Enviar → abre WhatsApp con el mensaje armado.
-  f.addEventListener('submit', (e) => {
+  // Achica la foto en el navegador (máx. 1600 px, JPEG) antes de subirla.
+  const achicar = async (file) => {
+    const bmp = await createImageBitmap(file);
+    const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+    const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, cv.width, cv.height);
+    cx.drawImage(bmp, 0, 0, cv.width, cv.height);
+    return new Promise((ok) => cv.toBlob(ok, 'image/jpeg', 0.82));
+  };
+  const subirFoto = async (file) => {
+    const blob = await achicar(file);
+    const r = await fetch('/api/foto', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob });
+    if (!r.ok) throw new Error('subida');
+    return (await r.json()).url;
+  };
+
+  // Enviar → (sube la foto) → abre WhatsApp con el mensaje armado.
+  const btn = $('button[type="submit"]');
+  const btnHtml = btn.innerHTML;
+  f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(f);
     const d = Object.fromEntries(fd);
@@ -258,9 +277,21 @@ const hoy = new Date().toISOString().slice(0, 10);
     const tipo = d.tipo === 'otra' ? (String(d.tipoOtra || '').trim() || 'Otra') : d.tipo;
     const necesito = fd.getAll('necesito').map((x) => x === 'pack' ? d.pack : x === 'otro' ? (String(d.otro || '').trim() || 'Otra cosa') : x);
     const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-    const conFoto = foto.files && foto.files.length > 0;
-    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + (conFoto ? '\n📷 Te mando una foto de referencia.' : '');
-    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
-    $('.h-form-ok').hidden = !conFoto;
+    const file = foto.files && foto.files[0];
+    // La ventana se abre ya (antes de esperar la subida) para que el celular no la bloquee.
+    const win = window.open('', '_blank');
+    let linea = '';
+    let subio = false;
+    if (file) {
+      btn.disabled = true; btn.textContent = 'Subiendo tu foto…';
+      try { const url = await subirFoto(file); linea = `\n📷 Foto de referencia (se borra al abrirla, guárdala): ${url}`; subio = true; }
+      catch { linea = '\n📷 Te mando una foto de referencia.'; }
+      btn.disabled = false; btn.innerHTML = btnHtml;
+    }
+    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + linea;
+    const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
+    if (win) { win.opener = null; win.location.href = wa; } else { location.href = wa; }
+    // Solo si la foto no se pudo subir, le pedimos adjuntarla a mano.
+    $('.h-form-ok').hidden = !(file && !subio);
   });
 </script>

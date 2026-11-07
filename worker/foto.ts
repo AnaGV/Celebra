@@ -1,0 +1,91 @@
+/**
+ * Fotos de referencia que se autodestruyen.
+ *
+ * POST /api/foto   → guarda una foto (JPEG, ya achicada en el navegador) en R2
+ *                    y devuelve el link https://somoscelebrave.com/ref/<id>.
+ * GET  /ref/<id>   → la primera persona que lo abre ve la foto y la foto se borra
+ *                    en ese momento. Los "robots" de vista previa (WhatsApp,
+ *                    Facebook…) no cuentan como abrirla y no ven la foto.
+ *
+ * Si nadie la abre, se borra a las 72 horas (regla de ciclo de vida del bucket
+ * y, por si acaso, también se revisa aquí).
+ */
+
+const MAX_BYTES = 2_500_000;
+const MAX_EDAD_MS = 72 * 60 * 60 * 1000;
+const BOTS = /whatsapp|facebookexternalhit|facebot|meta-externalagent|twitterbot|telegrambot|slackbot|discordbot|linkedinbot|skypeuripreview|googlebot|bingbot|bot\b|crawler|spider|preview/i;
+
+const ID_RE = /^[A-Za-z0-9]{16}$/;
+
+function nuevoId(): string {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(b, (x) => abc[x % abc.length]).join('');
+}
+
+function json(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+}
+
+export async function subirFoto(request: Request, env: any): Promise<Response> {
+  if (!env.FOTOS) return json({ error: 'Fotos no configuradas' }, 503);
+  const url = new URL(request.url);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== url.host) return json({ error: 'Origen no permitido' }, 403);
+
+  const largo = Number(request.headers.get('content-length') || 0);
+  if (largo > MAX_BYTES) return json({ error: 'La foto es muy grande' }, 413);
+  const datos = await request.arrayBuffer();
+  if (datos.byteLength === 0 || datos.byteLength > MAX_BYTES) return json({ error: 'La foto es muy grande' }, 413);
+  const b = new Uint8Array(datos, 0, 3);
+  if (!(b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff)) return json({ error: 'Formato no válido' }, 415);
+
+  const id = nuevoId();
+  await env.FOTOS.put(`ref/${id}`, datos, {
+    httpMetadata: { contentType: 'image/jpeg' },
+    customMetadata: { subida: String(Date.now()) },
+  });
+  return json({ url: `${url.origin}/ref/${id}` });
+}
+
+function pagina(titulo: string, cuerpo: string, status = 200): Response {
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${titulo}</title>
+<meta property="og:title" content="Foto de referencia · Celebra"><meta property="og:description" content="Ábrela para verla. Se borra al abrirla."><meta property="og:image" content="https://somoscelebrave.com/img/og-celebra.jpg">
+<link rel="icon" href="/favicon.ico"><style>body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f7f3ff;color:#16171a;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}main{max-width:560px;width:100%;background:#fff;border-radius:20px;padding:22px;box-shadow:0 18px 40px -28px rgba(43,29,92,.5);text-align:center}h1{font-size:22px;margin:0 0 8px;color:#2b1d5c}p{margin:0 0 14px;color:#5c6070;line-height:1.5}img{max-width:100%;border-radius:12px;display:block;margin:0 auto 16px}a.b{display:inline-flex;min-height:50px;align-items:center;padding:0 22px;border-radius:12px;background:#6043e1;color:#fff;font-weight:700;text-decoration:none}.aviso{background:#fbe6ee;color:#8a1f48;border-radius:12px;padding:12px 14px;font-size:15px;margin-bottom:16px}</style></head><body><main>${cuerpo}</main></body></html>`;
+  return new Response(html, {
+    status,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store, private', 'x-robots-tag': 'noindex, nofollow', 'referrer-policy': 'no-referrer' },
+  });
+}
+
+function aBase64(buf: ArrayBuffer): string {
+  const bytes = new Uint8Array(buf);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+export async function verFoto(request: Request, env: any, id: string): Promise<Response> {
+  const ua = request.headers.get('user-agent') || '';
+  if (request.method === 'HEAD' || BOTS.test(ua)) {
+    return pagina('Foto de referencia · Celebra', '<h1>Foto de referencia</h1><p>Ábrela para verla.</p>');
+  }
+  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos de referencia se borran apenas se abren, o a las 72 horas. Pídele a la clienta que la envíe de nuevo por WhatsApp.</p>', 404);
+  if (!env.FOTOS || !ID_RE.test(id)) return noEsta();
+
+  const key = `ref/${id}`;
+  const obj = await env.FOTOS.get(key);
+  if (!obj) return noEsta();
+  const subida = Number(obj.customMetadata?.subida || 0);
+  if (subida && Date.now() - subida > MAX_EDAD_MS) {
+    await env.FOTOS.delete(key);
+    return noEsta();
+  }
+  const datos = await obj.arrayBuffer();
+  await env.FOTOS.delete(key);
+  const src = `data:image/jpeg;base64,${aBase64(datos)}`;
+  return pagina(
+    'Foto de referencia · Celebra',
+    `<h1>Foto de referencia</h1><div class="aviso"><b>Guárdala ahora:</b> esta foto ya se borró de la página y no se puede volver a abrir. Mantén presionada la imagen y toca <b>Guardar</b>, o usa el botón.</div><img src="${src}" alt="Foto de referencia enviada por la clienta"><a class="b" href="${src}" download="referencia-${id}.jpg">Descargar foto</a>`,
+  );
+}
