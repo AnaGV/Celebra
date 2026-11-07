@@ -11,7 +11,7 @@ const propios = servicios.filter((s) => s.kind === 'propio');
 const aliados = servicios.filter((s) => s.kind === 'aliado');
 ---
 
-<Base title="Servicios para fiestas en Caripe · Celebra" description="Piñatas, chupeteras, decoración, invitaciones digitales y recuerdos hechos en el taller Celebra, más tortas, sonido y mobiliario de proveedores aliados de Caripe.">
+<Base image="/img/og-celebra.jpg" title="Servicios para fiestas en Caripe · Celebra" description="Piñatas, chupeteras, decoración, invitaciones digitales y recuerdos hechos en el taller Celebra, más tortas, sonido y mobiliario de proveedores aliados de Caripe.">
   <div class="home">
     <HomeNav />
     <main>
@@ -36,7 +36,7 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-ali">
-        <div class="h-head rv"><span class="h-kicker" style="color:#1a7f4b">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p>Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
+        <div class="h-head rv"><span class="h-kicker" style="color:#0f6fa3">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p>Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
         <div class="h-servs">
           {aliados.map((s, i) => (
             <div class="h-serv rv" style={`--d:${(i % 4) * 60}ms`}>
@@ -48,9 +48,9 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-unete">
-        <div class="h-res rv" style="background:#eaf7f0">
+        <div class="h-res rv" style="background:#e3f5ff">
           <div class="h-res-info">
-            <span class="h-kicker" style="color:#1a7f4b">Para proveedores</span>
+            <span class="h-kicker" style="color:#0f6fa3">Para proveedores</span>
             <h2 id="t-unete">¿Ofreces un servicio para fiestas?</h2>
             <p class="h-lead" style="font-size:18px">Tortas, sonido, animación, mobiliario, fotografía… Publica tu negocio en Celebra y llega a las familias que están organizando su fiesta en Caripe.</p>
           </div>

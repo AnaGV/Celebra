@@ -19,6 +19,8 @@ export interface TipoFiesta {
   ink: string;
   /** Dibujo SVG (viewBox 0 0 160 160). */
   art: string;
+  /** Ilustración de la marca (public/img/marca). */
+  img: string;
 }
 
 const S = 'stroke="#4a1a4f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"';
@@ -31,8 +33,9 @@ export const tipos: TipoFiesta[] = [
     intro: 'El cumpleaños es nuestra especialidad: piñatas a medida, chupeteras y todo para que la mesa principal combine con la temática que tu peque elija.',
     hacemos: ['Piñata temática a medida', 'Chupetera a juego', 'Cartel con nombre y edad', 'Kit de arco de globos', 'Bolsitas de recuerdo'],
     tematicas: ['Estrellita arcoíris', 'Dinosaurios', 'Sirenas', 'Superhéroes', 'Unicornio', 'Granja'],
-    bg: '#fdeaf2',
-    ink: '#c2185b',
+    bg: '#fbe6ee',
+    ink: '#b8285f',
+    img: '/img/marca/globos.webp',
     art: `<rect x="40" y="78" width="80" height="50" rx="8" fill="#f8bbd0" ${S}/><rect x="52" y="56" width="56" height="24" rx="6" fill="#c5e3f6" ${S}/><path d="M80 30v24M66 36v18M94 36v18" ${S}/><path d="M80 22c-4 4-4 8 0 10 4-2 4-6 0-10zM66 28c-4 4-4 8 0 10 4-2 4-6 0-10zM94 28c-4 4-4 8 0 10 4-2 4-6 0-10z" fill="#fde9a6" ${S}/><path d="M40 100q10 8 20 0t20 0 20 0 20 0" fill="none" ${S}/>`,
   },
   {
@@ -42,8 +45,9 @@ export const tipos: TipoFiesta[] = [
     intro: 'Para esperar al bebé con todo: decoración en tonos suaves, carteles y la piñata o caja para revelar si es niña o niño.',
     hacemos: ['Piñata de revelación', 'Cartel de bienvenida', 'Kit de globos en tonos pastel', 'Centros de mesa', 'Recuerdos para invitados'],
     tematicas: ['Ositos', 'Nubes y estrellas', 'Safari bebé', 'Flores', '¿Niña o niño?'],
-    bg: '#eef6fd',
-    ink: '#2f5fb3',
+    bg: '#e3f5ff',
+    ink: '#0f6fa3',
+    img: '/img/marca/regalo.webp',
     art: `<path d="M50 70h60l-6 50H56z" fill="#c5e3f6" ${S}/><path d="M50 70q30-40 60 0" fill="#e0d1f5" ${S}/><circle cx="62" cy="128" r="9" fill="#ffffff" ${S}/><circle cx="98" cy="128" r="9" fill="#ffffff" ${S}/><path d="M110 70l14-14" ${S}/><path d="M36 40l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#fde9a6" ${S}/>`,
   },
   {
@@ -53,8 +57,9 @@ export const tipos: TipoFiesta[] = [
     intro: 'Celebraciones delicadas, con decoración en blanco, dorado y tonos claros, carteles con el nombre y recuerdos para los invitados.',
     hacemos: ['Cartel con nombre y fecha', 'Centros de mesa', 'Kit de globos blanco y dorado', 'Recuerdos personalizados', 'Decoración de mesa principal'],
     tematicas: ['Palomas', 'Ángeles', 'Flores blancas', 'Dorado y blanco'],
-    bg: '#fff8e6',
-    ink: '#9a6a00',
+    bg: '#fef9dc',
+    ink: '#866a00',
+    img: '/img/marca/varita.webp',
     art: `<path d="M44 92c10-30 40-36 62-22-8 2-12 8-12 14 14-4 24 0 30 8-16 0-26 6-34 14-14 14-40 10-46-14z" fill="#ffffff" ${S}/><circle cx="96" cy="72" r="2.5" fill="#4a1a4f"/><path d="M106 70l10-2-8 8" fill="#fde9a6" ${S}/><path d="M60 44l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#fde9a6" ${S}/>`,
   },
   {
@@ -64,8 +69,9 @@ export const tipos: TipoFiesta[] = [
     intro: 'Para quinceañeras y graduados: carteles grandes, globos con los colores elegidos, centros de mesa y detalles para las fotos.',
     hacemos: ['Cartel gigante con nombre', 'Kit de globos y números', 'Centros de mesa', 'Fondo para fotos', 'Recuerdos'],
     tematicas: ['Princesa', 'Dorado y negro', 'París', 'Neón', 'Promoción con los colores del colegio'],
-    bg: '#f3edfb',
-    ink: '#6b3fb3',
+    bg: '#f1eaff',
+    ink: '#6043e1',
+    img: '/img/marca/corona.webp',
     art: `<path d="M44 96l10-40 16 22 10-30 10 30 16-22 10 40z" fill="#fde9a6" ${S}/><rect x="44" y="96" width="72" height="12" rx="3" fill="#e0d1f5" ${S}/><circle cx="54" cy="54" r="5" fill="#f8bbd0" ${S}/><circle cx="80" cy="44" r="5" fill="#c5e3f6" ${S}/><circle cx="106" cy="54" r="5" fill="#c8f0dc" ${S}/>`,
   },
 ];

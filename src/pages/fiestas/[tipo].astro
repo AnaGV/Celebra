@@ -16,7 +16,7 @@ const otros = tipos.filter((x) => x.slug !== t.slug);
 const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
 ---
 
-<Base title={`${t.name} en Caripe · Celebra`} description={`${t.intro} Taller Celebra en Caripe, Monagas.`}>
+<Base image="/img/og-celebra.jpg" title={`${t.name} en Caripe · Celebra`} description={`${t.intro} Taller Celebra en Caripe, Monagas.`}>
   <div class="home">
     <HomeNav />
     <main>
@@ -30,7 +30,7 @@ const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde 
             <a class="h-btn h-btn-line" href={wa} target="_blank" rel="noopener">Cotizar por WhatsApp</a>
           </div>
         </div>
-        <div class="h-page-art rv" style={`--bg:${t.bg};--d:100ms`}><svg viewBox="0 0 160 160" aria-hidden="true" set:html={t.art}></svg></div>
+        <div class="h-page-art rv" style={`--bg:${t.bg};--d:100ms`}><img class="h-float" src={t.img} alt="" /></div>
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-hac">
@@ -66,7 +66,7 @@ const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde 
           {otros.map((o, i) => (
             <a class="h-banner rv" href={`/fiestas/${o.slug}/`} style={`--bg:${o.bg};--ink:${o.ink};--d:${i * 70}ms;min-height:180px`}>
               <span class="h-banner-txt"><b>{o.name}</b><span class="h-banner-cta">Ver más →</span></span>
-              <svg class="h-banner-art" viewBox="0 0 160 160" aria-hidden="true" set:html={o.art}></svg>
+              <img class="h-banner-art" src={o.img} alt="" loading="lazy" />
             </a>
           ))}
         </div>

@@ -17,6 +17,7 @@ const hoy = new Date().toISOString().slice(0, 10);
 ---
 
 <Base
+  image="/img/og-celebra.jpg"
   title="Celebra · Taller de fiestas en Caripe: piñatas, packs y decoración"
   description="Piñatas a medida, chupeteras, packs por número de invitados y decoración para cumpleaños, baby shower, bautizos y XV años en Caripe, Monagas. Reserva tu fecha por WhatsApp."
 >
@@ -25,10 +26,15 @@ const hoy = new Date().toISOString().slice(0, 10);
 
     <main>
       <section class="h-wrap h-top" id="fiestas" aria-labelledby="t-top">
-        <div class="h-top-head rv">
-          <span class="h-kicker">Taller de fiestas · Caripe, Monagas</span>
-          <h1 id="t-top">¿Qué fiesta estás <em>organizando?</em></h1>
-          <p class="h-lead">Piñatas, chupeteras y decoración hechas a mano en nuestro taller. Elige tu celebración y te mostramos todo lo que podemos hacer.</p>
+        <div class="h-intro">
+          <div class="h-top-head rv">
+            <span class="h-kicker">Taller de fiestas · Caripe, Monagas</span>
+            <h1 id="t-top">¿Qué fiesta estás <em>organizando?</em></h1>
+            <p class="h-lead">Piñatas, chupeteras y decoración hechas a mano en nuestro taller. Elige tu celebración y te mostramos todo lo que podemos hacer.</p>
+          </div>
+          <div class="h-intro-art rv" style="--d:120ms" aria-hidden="true">
+            <img class="h-logo-big" src="/img/marca/logo.webp" width="900" height="536" alt="" fetchpriority="high" />
+          </div>
         </div>
         <div class="h-banners">
           {tipos.map((t, i) => (
@@ -38,7 +44,7 @@ const hoy = new Date().toISOString().slice(0, 10);
                 <span>{t.short}</span>
                 <span class="h-banner-cta">Ver más →</span>
               </span>
-              <svg class="h-banner-art" viewBox="0 0 160 160" aria-hidden="true" set:html={t.art}></svg>
+              <img class="h-banner-art" src={t.img} alt="" loading="lazy" />
             </a>
           ))}
         </div>
@@ -124,13 +130,13 @@ const hoy = new Date().toISOString().slice(0, 10);
 
       <section class="h-sec h-wrap" aria-labelledby="t-sal">
         <div class="h-duo">
-          <a class="h-tile rv" href="/salones/" style="--bg:#eaf7f0;--ink:#1a7f4b">
+          <a class="h-tile rv" href="/salones/" style="--bg:#e3f5ff;--ink:#0f6fa3">
             <span class="h-kicker">Salones en Caripe</span>
             <b id="t-sal">¿Dónde hacer la fiesta?</b>
             <span>Los salones y espacios de eventos de Caripe, reunidos en un solo lugar. ¿Tienes un salón? Publícalo con nosotras.</span>
             <span class="h-banner-cta">Ver salones →</span>
           </a>
-          <a class="h-tile rv" href="/calculadora/" style="--bg:#eef3fd;--ink:#3a5bb8;--d:80ms">
+          <a class="h-tile rv" href="/calculadora/" style="--bg:#fef9dc;--ink:#866a00;--d:80ms">
             <span class="h-kicker">Cotiza gratis</span>
             <b>Calcula el presupuesto de tu fiesta</b>
             <span>Pon cuánto quieres gastar y cuántos niños vienen. La calculadora lo reparte en torta, comida, piñata, decoración y más.</span>
