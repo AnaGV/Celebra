@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/pages/index.astro"
+        ],
+        "createdAt": "2026-11-07T22:24:43.045Z",
+        "reason": "Claude: .h-ref-img is a hidden preview whose src is set by JS from the user's chosen file; never rendered empty"
+      }
+    ]
+  }
+}
