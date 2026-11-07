@@ -245,3 +245,29 @@
 .h-date input:valid + .h-date-ph,.h-date input:focus + .h-date-ph{display:none}
 .h-wa{transition:opacity .25s ease,transform .25s ease}
 .h-wa.off{opacity:0;transform:scale(.8);pointer-events:none}
+
+/* ── Formulario: qué necesitas y foto de referencia ── */
+.h-form textarea{min-height:80px}
+.h-need{border:0;margin:0;padding:0;min-width:0}
+.h-need legend{font-weight:700;font-size:14px;color:var(--ink);padding:0;margin-bottom:8px}
+.h-need legend span{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:2px}
+.h-chk{display:flex;flex-wrap:wrap;gap:8px}
+.h-chk label{display:block;cursor:pointer;font-weight:600}
+.h-chk input{position:absolute;opacity:0;width:1px;height:1px;min-height:0}
+.h-chk span{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:#ffffff;font-size:14.5px;color:var(--ink);transition:background .15s,border-color .15s,color .15s}
+.h-chk input:checked + span{background:var(--accent);border-color:var(--accent);color:#ffffff}
+.h-chk input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.h-cond{padding-left:12px;border-left:3px solid var(--lila)}
+.h-ref{display:flex;flex-direction:column;gap:6px}
+.h-ref-t{font-weight:700;font-size:14px}
+.h-ref-t span{font-weight:500;color:var(--muted)}
+.h-ref-box{position:relative;display:grid!important;place-items:center;min-height:96px;border:2px dashed #cfc2f2;border-radius:14px;background:#f7f3ff;cursor:pointer;overflow:hidden}
+.h-ref-box:hover{border-color:var(--accent)}
+.h-ref-box input{position:absolute;inset:0;opacity:0;cursor:pointer;min-height:0}
+.h-ref-box:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.h-ref-empty{display:flex;align-items:center;gap:10px;color:var(--accent);font-weight:700;font-size:15px;padding:0 16px;text-align:center}
+.h-ref-img{max-height:180px;width:auto;max-width:100%;border-radius:10px;margin:10px}
+.h-ref-note{font-size:13px;color:var(--muted);font-weight:500}
+.h-form-ok{padding:14px 16px;border-radius:12px;background:#e3f5ff;color:#0f4d73;font-size:14.5px}
+.h-form-ok b{display:block;margin-bottom:2px}
+.home [hidden]{display:none!important}

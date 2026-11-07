@@ -69,7 +69,7 @@ const hoy = new Date().toISOString().slice(0, 10);
               <p class="h-pack-inv">{p.invitados}</p>
               <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
               <p class="h-pack-price">{precio(p.priceUsd)}</p>
-              <a class="h-btn h-btn-line" href="#reservar" data-pick={p.id}>Reservar este pack</a>
+              <a class="h-btn h-btn-line" href="#reservar" data-pick={p.id}>Cotizar este pack</a>
             </article>
           ))}
         </div>
@@ -97,9 +97,9 @@ const hoy = new Date().toISOString().slice(0, 10);
         <div class="h-res rv">
           <div class="h-res-info">
             <span class="h-kicker">Reservar</span>
-            <h2 id="t-res">Reserva la fecha de tu fiesta</h2>
+            <h2 id="t-res">Cotiza y reserva la fecha de tu fiesta</h2>
             <ol class="h-res-steps">
-              <li><b>Completa los datos</b> y envíalos por WhatsApp.</li>
+              <li><b>Cuéntanos qué necesitas:</b> un pack completo o solo la piñata, la chupetera o el cotillón.</li>
               <li><b>Te confirmamos disponibilidad</b> el mismo día, con el precio final por escrito.</li>
               <li><b>Con un abono reservamos tu fecha</b> y empezamos a trabajar a mano.</li>
               <li><b>Retiras en el local</b> el día acordado.</li>
@@ -108,22 +108,44 @@ const hoy = new Date().toISOString().slice(0, 10);
           </div>
           <form class="h-form" id="res-form" novalidate>
             <label>Tipo de fiesta
-              <select name="tipo">{tipos.map((t) => <option>{t.name}</option>)}<option>Otra</option></select>
+              <select name="tipo">{tipos.map((t) => <option>{t.name}</option>)}<option value="otra">Otra</option></select>
             </label>
+            <label class="h-cond" data-show-if="otra" hidden>¿Qué celebras?<input type="text" name="tipoOtra" placeholder="Ej. Aniversario, despedida, día del niño…" /></label>
             <div class="h-form-2">
               <label class="h-date">Fecha de la fiesta<input type="date" name="fecha" min={hoy} required /><span class="h-date-ph" aria-hidden="true">Elige el día</span></label>
               <label>Invitados<input type="number" name="invitados" min="1" inputmode="numeric" placeholder="Ej. 25" /></label>
             </div>
-            <label>Pack
-              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados.replace(" invitados", "").toLowerCase()}</option>)}<option value="Solo piñata o algo puntual">Solo piñata o algo puntual</option></select>
+            <fieldset class="h-need">
+              <legend>¿Qué necesitas? <span>Marca todo lo que quieras cotizar</span></legend>
+              <div class="h-chk">
+                {['Piñata', 'Chupetera', 'Cotillón', 'Bolsitas de recuerdo', 'Globos y decoración', 'Cartel con nombre', 'Invitación digital'].map((x) => (
+                  <label><input type="checkbox" name="necesito" value={x} /><span>{x}</span></label>
+                ))}
+                <label><input type="checkbox" name="necesito" value="pack" data-pack-toggle /><span>Un pack completo</span></label>
+                <label><input type="checkbox" name="necesito" value="otro" data-otro-toggle /><span>Otra cosa</span></label>
+              </div>
+            </fieldset>
+            <label class="h-cond" data-pack-field hidden>¿Cuál pack?
+              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados.replace(' invitados', '').toLowerCase()}</option>)}</select>
             </label>
+            <label class="h-cond" data-otro-field hidden>¿Qué otra cosa necesitas?<input type="text" name="otro" placeholder="Ej. centro de mesa, fondo para fotos…" /></label>
             <label>Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
+            <div class="h-ref">
+              <span class="h-ref-t">Foto de referencia <span>(opcional)</span></span>
+              <label class="h-ref-box">
+                <input type="file" name="foto" accept="image/*" />
+                <span class="h-ref-empty"><svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4zM12 17a4 4 0 100-8 4 4 0 000 8z"></path></svg>Sube una imagen de lo que te gusta</span>
+                <img class="h-ref-img" alt="Tu foto de referencia" hidden />
+              </label>
+              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres.</p>
+            </div>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
             <button class="h-btn" type="submit">
               <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
               Enviar por WhatsApp
             </button>
-            <p class="h-form-err" role="alert" hidden>Falta la fecha y tu nombre.</p>
+            <p class="h-form-err" role="alert" hidden></p>
+            <div class="h-form-ok" role="status" hidden><b>¡Listo! Se abrió WhatsApp con tu pedido.</b> Antes de enviarlo, toca el clip 📎 y adjunta tu foto de referencia.</div>
           </form>
         </div>
       </section>
@@ -190,27 +212,55 @@ const hoy = new Date().toISOString().slice(0, 10);
 </Base>
 
 <script define:vars={{ waNum: c.localWhatsapp }}>
+  const f = document.getElementById('res-form');
+  const $ = (q) => f.querySelector(q);
+  const packToggle = $('[data-pack-toggle]');
+  const otroToggle = $('[data-otro-toggle]');
+  const sync = () => {
+    $('[data-show-if="otra"]').hidden = $('select[name="tipo"]').value !== 'otra';
+    $('[data-pack-field]').hidden = !packToggle.checked;
+    $('[data-otro-field]').hidden = !otroToggle.checked;
+  };
+  f.addEventListener('change', sync);
+  sync();
+
   // Selector de invitados → resalta el pack recomendado.
-  const pick = (id) => {
+  const pick = (id, marcar) => {
     document.querySelectorAll('.h-guest').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pack === id)));
     document.querySelectorAll('.h-pack').forEach((c) => c.classList.toggle('on', c.dataset.packCard === id));
-    const sel = document.querySelector('#res-form select[name="pack"]');
     const card = document.querySelector(`[data-pack-card="${id}"] h3`);
-    if (sel && card) sel.value = card.textContent;
+    if (card) $('select[name="pack"]').value = card.textContent;
+    if (marcar) { packToggle.checked = true; sync(); }
   };
-  document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack)));
-  document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick)));
+  document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack, false)));
+  document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick, true)));
 
-  // Reservar → abre WhatsApp con el mensaje armado.
-  const f = document.getElementById('res-form');
+  // Vista previa de la foto de referencia.
+  const foto = $('input[name="foto"]');
+  foto.addEventListener('change', () => {
+    const file = foto.files && foto.files[0];
+    const img = $('.h-ref-img');
+    if (!file) { img.hidden = true; $('.h-ref-empty').hidden = false; return; }
+    img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
+  });
+
+  // Enviar → abre WhatsApp con el mensaje armado.
   f.addEventListener('submit', (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(f));
-    const err = f.querySelector('.h-form-err');
-    if (!d.fecha || !String(d.nombre).trim()) { err.hidden = false; return; }
+    const fd = new FormData(f);
+    const d = Object.fromEntries(fd);
+    const err = $('.h-form-err');
+    const falta = [];
+    if (!d.fecha) falta.push('la fecha');
+    if (!String(d.nombre || '').trim()) falta.push('tu nombre');
+    if (falta.length) { err.textContent = 'Falta ' + falta.join(' y ') + '.'; err.hidden = false; return; }
     err.hidden = true;
+    const tipo = d.tipo === 'otra' ? (String(d.tipoOtra || '').trim() || 'Otra') : d.tipo;
+    const necesito = fd.getAll('necesito').map((x) => x === 'pack' ? d.pack : x === 'otro' ? (String(d.otro || '').trim() || 'Otra cosa') : x);
     const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-    const txt = `¡Hola Celebra! Quiero reservar una fecha.\n• Fiesta: ${d.tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Pack: ${d.pack}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}`;
+    const conFoto = foto.files && foto.files.length > 0;
+    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + (conFoto ? '\n📷 Te mando una foto de referencia.' : '');
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+    $('.h-form-ok').hidden = !conFoto;
   });
 </script>
