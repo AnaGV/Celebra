@@ -92,8 +92,8 @@
     },
     {
       "parameters": {
-        "fromEmail": "somoscelebra.ve@gmail.com",
-        "toEmail": "somoscelebra.ve@gmail.com",
+        "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
+        "toEmail": "pagos@somoscelebrave.com",
         "subject": "=Nueva venta: {{ $json.producto }} ({{ $json.total_usd }} USD)",
         "emailFormat": "text",
         "text": "=Pedido #{{ $json.pedido }}\nCliente: {{ $json.cliente }} <{{ $json.email }}>\nProducto: {{ $json.producto }} {{ $json.variante }}\nTotal: {{ $json.total_usd }} {{ $json.moneda }}\nPaís: {{ $json.pais }}\nReferencia: {{ $json.referencia }}",

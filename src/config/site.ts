@@ -17,7 +17,9 @@ export const site = {
     name: 'Celebra',
     tagline: 'Libros y piñatas hechos en Caripe',
     authorName: 'Celebra',
-    email: 'somoscelebra.ve@gmail.com',
+    email: 'contacto@somoscelebrave.com',
+    supportEmail: 'soporte@somoscelebrave.com',
+    paymentsEmail: 'pagos@somoscelebrave.com',
   },
 
   contact: {

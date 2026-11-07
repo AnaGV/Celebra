@@ -488,7 +488,7 @@ import { site, countries } from '../config/site';
             isReserve
               ? `Muéstralo al retirar en el local. La reserva vence en ${pay.pickup.reservationDays} días.`
               : p.kind === 'digital'
-                ? `Cuando verifiquemos el pago, te enviaremos el ebook a <strong>${esc(data.email ?? '')}</strong>. Suele tomar menos de 2 horas en horario laboral.`
+                ? `Cuando verifiquemos el pago, te enviaremos el ebook a <strong>${esc(data.email ?? '')}</strong>. Suele tomar menos de 2 horas en horario laboral. ¿Dudas con tu pago? Escríbenos a ${site.brand.paymentsEmail}.`
                 : `Cuando verifiquemos el pago te avisaremos para que retires tu libro en el local de Caripe.`
           }</p>
           ${demoNote}
@@ -497,7 +497,7 @@ import { site, countries } from '../config/site';
     } catch {
       btn.disabled = false;
       btn.textContent = 'Reintentar envío';
-      panel.insertAdjacentHTML('beforeend', `<div class="co-alert">No pudimos enviar tu comprobante. Revisa tu conexión y vuelve a intentarlo, o escríbenos por WhatsApp con tu referencia ${state.ref}.</div>`);
+      panel.insertAdjacentHTML('beforeend', `<div class="co-alert">No pudimos enviar tu comprobante. Revisa tu conexión y vuelve a intentarlo, o escríbenos a ${site.brand.paymentsEmail} o por WhatsApp con tu referencia ${state.ref}.</div>`);
     }
   }
 

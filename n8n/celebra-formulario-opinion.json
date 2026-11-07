@@ -140,7 +140,7 @@
     {
       "parameters": {
         "fromEmail": "=Celebra <{{ $env.MAIL_FROM }}>",
-        "toEmail": "={{ $env.MAIL_FROM }}",
+        "toEmail": "contacto@somoscelebrave.com",
         "subject": "=Nueva opinión del libro: {{ $json.estrellas }} estrellas de {{ $json.nombre }}",
         "emailFormat": "text",
         "text": "={{ $json.nombre }} ({{ $json.ciudad }}) · {{ $json.estrellas }} estrellas\nPermiso para publicar: {{ $json.permiso }}\n\n{{ $json.opinion }}\n\nPara mostrarla en la web, en la hoja Opiniones cambia publicada a sí.",
