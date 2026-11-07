@@ -137,6 +137,7 @@ const hoy = new Date().toISOString().slice(0, 10);
                 <span class="h-ref-empty"><svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4zM12 17a4 4 0 100-8 4 4 0 000 8z"></path></svg>Sube una imagen de lo que te gusta</span>
                 <img class="h-ref-img" alt="Tu foto de referencia" hidden />
               </label>
+              <p class="h-ref-estado" role="status" hidden></p>
               <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la vemos.</p>
             </div>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
@@ -235,16 +236,14 @@ const hoy = new Date().toISOString().slice(0, 10);
   document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack, false)));
   document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick, true)));
 
-  // Vista previa de la foto de referencia.
+  // Foto de referencia: se achica y se sube apenas la eligen (no al enviar),
+  // así el botón Enviar abre WhatsApp al instante y el celular no lo bloquea.
   const foto = $('input[name="foto"]');
-  foto.addEventListener('change', () => {
-    const file = foto.files && foto.files[0];
-    const img = $('.h-ref-img');
-    if (!file) { img.hidden = true; $('.h-ref-empty').hidden = false; return; }
-    img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
-  });
-
-  // Achica la foto en el navegador (máx. 1600 px, JPEG) antes de subirla.
+  const btn = $('button[type="submit"]');
+  const btnHtml = btn.innerHTML;
+  const estado = $('.h-ref-estado');
+  let fotoUrl = '';
+  let subiendo = null;
   const achicar = async (file) => {
     const bmp = await createImageBitmap(file);
     const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
@@ -254,18 +253,35 @@ const hoy = new Date().toISOString().slice(0, 10);
     cx.drawImage(bmp, 0, 0, cv.width, cv.height);
     return new Promise((ok) => cv.toBlob(ok, 'image/jpeg', 0.82));
   };
-  const subirFoto = async (file) => {
-    const blob = await achicar(file);
-    const r = await fetch('/api/foto', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob });
-    if (!r.ok) throw new Error('subida');
-    return (await r.json()).url;
-  };
+  foto.addEventListener('change', async () => {
+    const file = foto.files && foto.files[0];
+    const img = $('.h-ref-img');
+    fotoUrl = '';
+    if (!file) { img.hidden = true; $('.h-ref-empty').hidden = false; estado.hidden = true; return; }
+    img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
+    estado.hidden = false; estado.textContent = 'Subiendo tu foto…'; estado.dataset.s = 'up';
+    btn.disabled = true; btn.textContent = 'Subiendo tu foto…';
+    const yo = (subiendo = (async () => {
+      const blob = await achicar(file);
+      const r = await fetch('/api/foto', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob });
+      if (!r.ok) throw new Error('subida');
+      return (await r.json()).url;
+    })());
+    try {
+      const url = await yo;
+      if (subiendo !== yo) return; // eligieron otra foto mientras tanto
+      fotoUrl = url; estado.textContent = '✓ Foto lista'; estado.dataset.s = 'ok';
+    } catch {
+      if (subiendo !== yo) return;
+      estado.textContent = 'No pudimos subir la foto. Podrás adjuntarla en WhatsApp.'; estado.dataset.s = 'err';
+    }
+    btn.disabled = false; btn.innerHTML = btnHtml;
+  });
 
-  // Enviar → (sube la foto) → abre WhatsApp con el mensaje armado.
-  const btn = $('button[type="submit"]');
-  const btnHtml = btn.innerHTML;
-  f.addEventListener('submit', async (e) => {
+  // Enviar → abre WhatsApp con el mensaje armado (sin esperas, dentro del toque).
+  f.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (btn.disabled) return;
     const fd = new FormData(f);
     const d = Object.fromEntries(fd);
     const err = $('.h-form-err');
@@ -277,21 +293,13 @@ const hoy = new Date().toISOString().slice(0, 10);
     const tipo = d.tipo === 'otra' ? (String(d.tipoOtra || '').trim() || 'Otra') : d.tipo;
     const necesito = fd.getAll('necesito').map((x) => x === 'pack' ? d.pack : x === 'otro' ? (String(d.otro || '').trim() || 'Otra cosa') : x);
     const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-    const file = foto.files && foto.files[0];
-    // La ventana se abre ya (antes de esperar la subida) para que el celular no la bloquee.
-    const win = window.open('', '_blank');
-    let linea = '';
-    let subio = false;
-    if (file) {
-      btn.disabled = true; btn.textContent = 'Subiendo tu foto…';
-      try { const url = await subirFoto(file); linea = `\n📷 Foto de referencia (se borra al abrirla, guárdala): ${url}`; subio = true; }
-      catch { linea = '\n📷 Te mando una foto de referencia.'; }
-      btn.disabled = false; btn.innerHTML = btnHtml;
-    }
+    const hayFoto = foto.files && foto.files.length > 0;
+    const linea = fotoUrl ? `\n📷 Foto de referencia (se borra al abrirla, guárdala): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
     const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + linea;
     const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
-    if (win) { win.opener = null; win.location.href = wa; } else { location.href = wa; }
-    // Solo si la foto no se pudo subir, le pedimos adjuntarla a mano.
-    $('.h-form-ok').hidden = !(file && !subio);
+    $('.h-form-ok').hidden = !(hayFoto && !fotoUrl);
+    // En el celular, abrir en la misma pestaña es lo que hace saltar a la app de WhatsApp.
+    if (matchMedia('(pointer: coarse)').matches) location.href = wa;
+    else window.open(wa, '_blank', 'noopener');
   });
 </script>

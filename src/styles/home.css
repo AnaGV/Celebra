@@ -272,3 +272,7 @@
 .h-form-ok b{display:block;margin-bottom:2px}
 .home [hidden]{display:none!important}
 .h-book .h-kicker{color:var(--rosa-ink)}
+.h-ref-estado{font-size:14px;font-weight:700;color:var(--muted)}
+.h-ref-estado[data-s="ok"]{color:#1a7f4b}
+.h-ref-estado[data-s="err"]{color:var(--rosa-ink)}
+.h-form .h-btn[disabled]{opacity:.7;cursor:progress}
