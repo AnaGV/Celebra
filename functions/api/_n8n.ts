@@ -4,7 +4,7 @@
  */
 
 export interface N8nEnv {
-  N8N_BASE_URL?: string; // https://n8n.TU-DOMINIO.com
+  N8N_BASE_URL?: string; // https://n8n.somoscelebrave.com
   CELEBRA_FORM_KEY?: string; // la misma clave que CELEBRA_FORM_KEY en el VPS de n8n
   TURNSTILE_SECRET?: string; // opcional: anti-bots de Cloudflare
 }

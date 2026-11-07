@@ -27,9 +27,9 @@ El cobro y la entrega del ebook los hace Lemon Squeezy. Si n8n está caído, la 
 3. **Google Sheets**: crea una hoja con una pestaña `Pedidos` y estas columnas en la fila 1:
    `fecha, pedido, identificador, referencia, pais, cliente, email, producto, variante, total_usd, moneda, metodo, email_hash, event_time`.
    En el nodo, conecta tu cuenta de Google y reemplaza `ID_DE_TU_GOOGLE_SHEET` (está en la URL de la hoja).
-4. **Email**: en el nodo *Avisarme por email*, crea una credencial SMTP con tu correo de Hostinger y cambia `TU-DOMINIO.com`.
-5. **Meta CAPI**: en el nodo HTTP, cambia `TU-DOMINIO.com` por tu dominio. El token se crea en Administrador de eventos → tu Pixel → Configuración → API de conversiones.
-6. Activa el workflow y copia la **URL de producción** del webhook (`https://n8n.TU-DOMINIO.com/webhook/lemon-squeezy`).
+4. **Email**: en el nodo *Avisarme por email*, crea una credencial SMTP de Gmail (somoscelebra.ve@gmail.com con contraseña de aplicación).
+5. **Meta CAPI**: en el nodo HTTP, cambia `somoscelebrave.com` por tu dominio. El token se crea en Administrador de eventos → tu Pixel → Configuración → API de conversiones.
+6. Activa el workflow y copia la **URL de producción** del webhook (`https://n8n.somoscelebrave.com/webhook/lemon-squeezy`).
 7. En Lemon Squeezy: **Settings → Webhooks → +**, pega esa URL, define el *Signing secret* (el mismo de `LEMON_SIGNING_SECRET`) y marca el evento `order_created`.
 8. Prueba en **modo test** de Lemon Squeezy: haz una compra de prueba y revisa que aparezca la fila, el email y el evento en el Administrador de eventos de Meta (pestaña *Probar eventos*).
 
@@ -69,8 +69,8 @@ LEMON_EBOOK_VARIANT_ID=67890
 LEMON_TEST_MODE=true                            # false cuando vendas de verdad
 LEAD_DISCOUNT_CENTS=200                         # USD 2; igual que leadDiscountUsd en site.ts
 LEAD_CODE_HOURS=48
-SITE_DOMAIN=TU-DOMINIO.com
-MAIL_FROM=hola@TU-DOMINIO.com
+SITE_DOMAIN=somoscelebrave.com
+MAIL_FROM=somoscelebra.ve@gmail.com
 IG_VIDEO_PINATA=https://www.instagram.com/reel/...
 EBOOK_PATH=/home/node/.n8n-files/fiestas-que-se-recuerdan.pdf
 N8N_DEFAULT_BINARY_DATA_MODE=filesystem

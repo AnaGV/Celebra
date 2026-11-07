@@ -78,7 +78,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ $json.event_time }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://TU-DOMINIO.com/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"{{ $json.moneda }}\", \"value\": {{ $json.total_usd }}, \"content_name\": \"{{ $json.producto }}\" }\n  }]\n}",
+        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ $json.event_time }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://somoscelebrave.com/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"{{ $json.moneda }}\", \"value\": {{ $json.total_usd }}, \"content_name\": \"{{ $json.producto }}\" }\n  }]\n}",
         "options": {}
       },
       "id": "a4",
@@ -92,8 +92,8 @@
     },
     {
       "parameters": {
-        "fromEmail": "hola@TU-DOMINIO.com",
-        "toEmail": "hola@TU-DOMINIO.com",
+        "fromEmail": "somoscelebra.ve@gmail.com",
+        "toEmail": "somoscelebra.ve@gmail.com",
         "subject": "=Nueva venta: {{ $json.producto }} ({{ $json.total_usd }} USD)",
         "emailFormat": "text",
         "text": "=Pedido #{{ $json.pedido }}\nCliente: {{ $json.cliente }} <{{ $json.email }}>\nProducto: {{ $json.producto }} {{ $json.variante }}\nTotal: {{ $json.total_usd }} {{ $json.moneda }}\nPaís: {{ $json.pais }}\nReferencia: {{ $json.referencia }}",

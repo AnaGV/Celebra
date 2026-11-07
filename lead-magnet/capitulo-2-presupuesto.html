@@ -45,7 +45,8 @@ th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute
 td.r,th.r{text-align:right}
 tr.tot td{font-weight:800;color:var(--plum);border-bottom:0;font-size:16px}
 .bar{height:12px;border-radius:6px}
-.blank td{height:40px}
+.blank td{height:31px;padding-top:4px;padding-bottom:4px}
+.tight td,.tight th{padding-top:4px;padding-bottom:4px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .card{border-radius:16px;padding:16px 16px 14px;border:1.5px solid var(--line);background:#fff}
@@ -135,18 +136,22 @@ a{color:var(--mag)}
 <div class="rain"></div>
 <span class="kicker">Guía de reparto</span>
 <h2>¿Cuánto poner <em>en cada cosa?</em></h2>
-<p class="lead">Una fiesta en casa para niños se reparte más o menos así. Es una guía de partida, no una ley: si la torta es lo que más le ilusiona a tu hijo, súbele y bájale a otra cosa.</p>
+<p class="lead">Una fiesta en casa para niños se reparte más o menos así. Cada cosa va por separado, porque se compra en lugares distintos. Es una guía de partida, no una ley: si la torta es lo que más le ilusiona a tu hijo, súbele y bájale a otra cosa.</p>
 
-<table style="margin-top:14px">
-<thead><tr><th>Rubro</th><th style="width:44%"></th><th class="r">% del total</th></tr></thead>
+<table class="tight" style="margin-top:14px">
+<thead><tr><th>Rubro</th><th style="width:40%"></th><th class="r">% del total</th></tr></thead>
 <tbody>
-<tr><td>Comida y bebidas</td><td><div class="bar" style="width:100%;background:var(--pink)"></div></td><td class="r">30%</td></tr>
-<tr><td>Torta</td><td><div class="bar" style="width:50%;background:var(--peach)"></div></td><td class="r">15%</td></tr>
-<tr><td>Decoración y globos</td><td><div class="bar" style="width:40%;background:var(--lemon)"></div></td><td class="r">12%</td></tr>
-<tr><td>Piñata y relleno</td><td><div class="bar" style="width:40%;background:var(--mint)"></div></td><td class="r">12%</td></tr>
-<tr><td>Mesa dulce y cotillón</td><td><div class="bar" style="width:36%;background:var(--sky)"></div></td><td class="r">11%</td></tr>
-<tr><td>Recuerdos (bolsitas)</td><td><div class="bar" style="width:33%;background:var(--lilac)"></div></td><td class="r">10%</td></tr>
-<tr><td>Imprevistos</td><td><div class="bar" style="width:33%;background:#e6dce8"></div></td><td class="r">10%</td></tr>
+<tr><td>Comida <span class="muted" style="font-size:12.5px">(con platos, vasos y servilletas)</span></td><td><div class="bar" style="width:100%;background:var(--pink)"></div></td><td class="r">22%</td></tr>
+<tr><td>Bebidas</td><td><div class="bar" style="width:36%;background:#fbd3e0"></div></td><td class="r">8%</td></tr>
+<tr><td>Torta</td><td><div class="bar" style="width:68%;background:var(--peach)"></div></td><td class="r">15%</td></tr>
+<tr><td>Decoración con elementos <span class="muted" style="font-size:12.5px">(banderines, manteles, centros)</span></td><td><div class="bar" style="width:27%;background:var(--lemon)"></div></td><td class="r">6%</td></tr>
+<tr><td>Decoración con globos</td><td><div class="bar" style="width:27%;background:#fff1bf"></div></td><td class="r">6%</td></tr>
+<tr><td>Piñata</td><td><div class="bar" style="width:32%;background:var(--mint)"></div></td><td class="r">7%</td></tr>
+<tr><td>Relleno de la piñata</td><td><div class="bar" style="width:23%;background:#def7ea"></div></td><td class="r">5%</td></tr>
+<tr><td>Mesa dulce</td><td><div class="bar" style="width:32%;background:var(--sky)"></div></td><td class="r">7%</td></tr>
+<tr><td>Cotillón <span class="muted" style="font-size:12.5px">(gorritos, pitos, matracas)</span></td><td><div class="bar" style="width:18%;background:#dceefa"></div></td><td class="r">4%</td></tr>
+<tr><td>Recuerdos (bolsitas)</td><td><div class="bar" style="width:45%;background:var(--lilac)"></div></td><td class="r">10%</td></tr>
+<tr><td>Imprevistos</td><td><div class="bar" style="width:45%;background:#e6dce8"></div></td><td class="r">10%</td></tr>
 <tr class="tot"><td>Total</td><td></td><td class="r">100%</td></tr>
 </tbody>
 </table>
@@ -172,14 +177,18 @@ a{color:var(--mag)}
 <h2>Cumpleaños para <em>15 niños</em></h2>
 <p class="lead">Valentina cumple 6. Fiesta en casa, temática estrellita arcoíris, 15 niños y algunos adultos. Total que la familia decidió gastar: <b>USD 130</b>.</p>
 
-<table style="margin-top:10px">
+<table class="tight" style="margin-top:10px">
 <thead><tr><th>Rubro</th><th class="r">Presupuesto</th><th class="r">Gastado</th><th>Cómo se ahorró</th></tr></thead>
 <tbody>
-<tr><td>Comida y bebidas</td><td class="r">40</td><td class="r">38</td><td class="muted">Tequeños y sándwiches hechos en casa</td></tr>
+<tr><td>Comida</td><td class="r">29</td><td class="r">27</td><td class="muted">Tequeños y sándwiches hechos en casa</td></tr>
+<tr><td>Bebidas</td><td class="r">10</td><td class="r">10</td><td class="muted">Jugo natural en jarras, no latas</td></tr>
 <tr><td>Torta</td><td class="r">20</td><td class="r">20</td><td class="muted">Torta sencilla + topper impreso</td></tr>
-<tr><td>Decoración y globos</td><td class="r">15</td><td class="r">13</td><td class="muted">Arco de globos armado la noche antes</td></tr>
-<tr><td>Piñata y relleno</td><td class="r">15</td><td class="r">14</td><td class="muted">Piñata estrella de cartón reciclado</td></tr>
-<tr><td>Mesa dulce y cotillón</td><td class="r">14</td><td class="r">12</td><td class="muted">Cajas forradas como bases de altura</td></tr>
+<tr><td>Decoración con elementos</td><td class="r">8</td><td class="r">7</td><td class="muted">Banderines y centros de mesa impresos</td></tr>
+<tr><td>Decoración con globos</td><td class="r">8</td><td class="r">7</td><td class="muted">Arco de globos armado la noche antes</td></tr>
+<tr><td>Piñata</td><td class="r">9</td><td class="r">8</td><td class="muted">Piñata estrella de cartón reciclado</td></tr>
+<tr><td>Relleno de la piñata</td><td class="r">6</td><td class="r">6</td><td class="muted">Caramelos comprados al mayor</td></tr>
+<tr><td>Mesa dulce</td><td class="r">9</td><td class="r">8</td><td class="muted">Cajas forradas como bases de altura</td></tr>
+<tr><td>Cotillón</td><td class="r">5</td><td class="r">4</td><td class="muted">Gorritos hechos con cartulina</td></tr>
 <tr><td>Recuerdos (17 bolsitas)</td><td class="r">13</td><td class="r">13</td><td class="muted">Bolsitas armadas en casa</td></tr>
 <tr><td>Imprevistos (10%)</td><td class="r">13</td><td class="r">6</td><td class="muted">Hielo y más platos</td></tr>
 <tr class="tot"><td>Total (USD)</td><td class="r">130</td><td class="r">116</td><td></td></tr>
@@ -225,11 +234,15 @@ a{color:var(--mag)}
 <table class="blank">
 <thead><tr><th>Rubro</th><th class="r" style="width:15%">%</th><th class="r" style="width:18%">Presupuesto</th><th class="r" style="width:18%">Gastado</th><th style="width:22%">Notas</th></tr></thead>
 <tbody>
-<tr><td>Comida y bebidas</td><td class="r muted">30%</td><td></td><td></td><td></td></tr>
+<tr><td>Comida</td><td class="r muted">22%</td><td></td><td></td><td></td></tr>
+<tr><td>Bebidas</td><td class="r muted">8%</td><td></td><td></td><td></td></tr>
 <tr><td>Torta</td><td class="r muted">15%</td><td></td><td></td><td></td></tr>
-<tr><td>Decoración y globos</td><td class="r muted">12%</td><td></td><td></td><td></td></tr>
-<tr><td>Piñata y relleno</td><td class="r muted">12%</td><td></td><td></td><td></td></tr>
-<tr><td>Mesa dulce y cotillón</td><td class="r muted">11%</td><td></td><td></td><td></td></tr>
+<tr><td>Decoración con elementos</td><td class="r muted">6%</td><td></td><td></td><td></td></tr>
+<tr><td>Decoración con globos</td><td class="r muted">6%</td><td></td><td></td><td></td></tr>
+<tr><td>Piñata</td><td class="r muted">7%</td><td></td><td></td><td></td></tr>
+<tr><td>Relleno de la piñata</td><td class="r muted">5%</td><td></td><td></td><td></td></tr>
+<tr><td>Mesa dulce</td><td class="r muted">7%</td><td></td><td></td><td></td></tr>
+<tr><td>Cotillón</td><td class="r muted">4%</td><td></td><td></td><td></td></tr>
 <tr><td>Recuerdos</td><td class="r muted">10%</td><td></td><td></td><td></td></tr>
 <tr><td>Imprevistos</td><td class="r muted">10%</td><td></td><td></td><td></td></tr>
 <tr><td>Lugar (si alquilas)</td><td class="r muted"></td><td></td><td></td><td></td></tr>
@@ -237,7 +250,7 @@ a{color:var(--mag)}
 </tbody>
 </table>
 <div class="grid2" style="margin-top:16px;grid-template-columns:1fr 1.1fr">
-<div><div class="chk"><span class="cb"></span>Decidí el total</div><div class="chk"><span class="cb"></span>Aparté el 10% para imprevistos</div><div class="chk"><span class="cb"></span>Repartí por rubro</div><div class="chk"><span class="cb"></span>Calculé recuerdos y comida por niño</div><div class="chk"><span class="cb"></span>Cotizé al menos 2 opciones de lo más caro</div></div>
+<div><div class="chk"><span class="cb"></span>Decidí el total</div><div class="chk"><span class="cb"></span>Aparté el 10% para imprevistos</div><div class="chk"><span class="cb"></span>Repartí por rubro</div><div class="chk"><span class="cb"></span>Calculé recuerdos y comida por niño</div><div class="chk"><span class="cb"></span>Coticé al menos 2 opciones de lo más caro</div></div>
 <div class="paste" style="height:150px">Pega aquí tus cotizaciones</div>
 </div>
 <div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>7</span></div>
@@ -267,9 +280,9 @@ a{color:var(--mag)}
 <div class="box" style="margin-top:20px;border:2px dashed var(--mag);background:#fff;text-align:center;padding:22px">
 <p class="note" style="font-size:30px;margin:0 0 6px">Tienes un regalo esperándote</p>
 <p style="margin:0 0 14px;font-size:15.5px">Revisa el email con el que recibiste este capítulo: ahí está <b>tu código de descuento</b> para el libro completo. Es personal, se usa una sola vez y vence a las 48 horas.</p>
-<a class="btn" href="https://TU-DOMINIO.com/?utm_source=capitulo2&amp;utm_medium=pdf&amp;utm_campaign=lead">Quiero el libro completo</a>
+<a class="btn" href="https://somoscelebrave.com/?utm_source=capitulo2&amp;utm_medium=pdf&amp;utm_campaign=lead">Quiero el libro completo</a>
 </div>
-<p class="muted" style="font-size:13px;margin-top:18px;text-align:center">¿Prefieres que la cuenta se haga sola? Usa la calculadora gratis en <b>TU-DOMINIO.com/calculadora</b>.<br>Celebra · Taller de fiestas en Caripe, Monagas · Instagram @[TU_USUARIO]</p>
+<p class="muted" style="font-size:13px;margin-top:18px;text-align:center">¿Prefieres que la cuenta se haga sola? Usa la calculadora gratis en <b>somoscelebrave.com/calculadora</b>.<br>Celebra · Taller de fiestas en Caripe, Monagas · Instagram @[TU_USUARIO]</p>
 <div class="run"><span>Fiestas que se recuerdan · Capítulo de regalo</span><span>8</span></div>
 </section>
 
