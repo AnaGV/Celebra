@@ -1,0 +1,77 @@
+---
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import HomeNav from '../../components/HomeNav.astro';
+import '../../styles/home.css';
+import { site } from '../../config/site';
+import { tipos, packs } from '../../config/celebra';
+
+export function getStaticPaths() {
+  return tipos.map((t) => ({ params: { tipo: t.slug }, props: { t } }));
+}
+const { t } = Astro.props;
+const c = site.contact;
+const wa = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(`¡Hola Celebra! Quiero cotizar para un ${t.name.toLowerCase()}. Fecha: … Invitados: … Temática: …`)}`;
+const otros = tipos.filter((x) => x.slug !== t.slug);
+const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
+---
+
+<Base title={`${t.name} en Caripe · Celebra`} description={`${t.intro} Taller Celebra en Caripe, Monagas.`}>
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-page-hero">
+        <div class="h-top-head rv" style="margin:0">
+          <a class="h-crumb" href="/#fiestas">← Todas las fiestas</a>
+          <h1>{t.name}</h1>
+          <p class="h-lead">{t.intro}</p>
+          <div class="h-btns">
+            <a class="h-btn" href="/#reservar">Reservar fecha</a>
+            <a class="h-btn h-btn-line" href={wa} target="_blank" rel="noopener">Cotizar por WhatsApp</a>
+          </div>
+        </div>
+        <div class="h-page-art rv" style={`--bg:${t.bg};--d:100ms`}><svg viewBox="0 0 160 160" aria-hidden="true" set:html={t.art}></svg></div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-hac">
+        <div class="h-head rv"><span class="h-kicker">Lo que hacemos</span><h2 id="t-hac">Para tu {t.name.toLowerCase()}</h2></div>
+        <ul class="h-list">{t.hacemos.map((x, i) => <li class="rv" style={`--d:${i * 50}ms`}>{x}</li>)}</ul>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-tem">
+        <div class="h-head rv"><span class="h-kicker">Ideas</span><h2 id="t-tem">Temáticas que nos piden</h2><p>¿Tienes otra en mente? Mándanos una foto de referencia y la hacemos.</p></div>
+        <div class="h-tags rv">{t.tematicas.map((x) => <span>{x}</span>)}</div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-pk">
+        <div class="h-head rv"><span class="h-kicker">Packs</span><h2 id="t-pk">Según tus invitados</h2></div>
+        <div class="h-packs">
+          {packs.map((p, i) => (
+            <article class:list={['h-pack rv', { on: p.destacado }]} style={`--d:${i * 70}ms`}>
+              <span class="h-pack-tag">El más pedido</span>
+              <h3>{p.name}</h3>
+              <p class="h-pack-inv">{p.invitados}</p>
+              <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
+              <p class="h-pack-price">{precio(p.priceUsd)}</p>
+              <a class="h-btn h-btn-line" href="/#reservar">Reservar</a>
+            </article>
+          ))}
+        </div>
+        <p class="h-fine rv">Solo retiro en el local de Caripe. No hacemos envíos a domicilio.</p>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-otr">
+        <div class="h-head rv"><span class="h-kicker">Otras celebraciones</span><h2 id="t-otr">También hacemos</h2></div>
+        <div class="h-banners" style="grid-template-rows:none">
+          {otros.map((o, i) => (
+            <a class="h-banner rv" href={`/fiestas/${o.slug}/`} style={`--bg:${o.bg};--ink:${o.ink};--d:${i * 70}ms;min-height:180px`}>
+              <span class="h-banner-txt"><b>{o.name}</b><span class="h-banner-cta">Ver más →</span></span>
+              <svg class="h-banner-art" viewBox="0 0 160 160" aria-hidden="true" set:html={o.art}></svg>
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

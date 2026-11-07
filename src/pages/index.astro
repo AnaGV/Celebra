@@ -1,140 +1,146 @@
 ---
 import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
 import { site } from '../config/site';
 import { mainProduct } from '../config/products';
+import { tipos, packs, servicios } from '../config/celebra';
 
 const c = site.contact;
 const loc = site.location;
 const wa = (txt: string) => `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(txt)}`;
-const waPedido = wa('¡Hola Celebra! Quiero cotizar para una fiesta. Fecha: … Temática: … Número de niños: …');
-const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
-const estrella = 'M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z';
-
-const productos = [
-  {
-    t: 'Piñatas a medida',
-    d: 'Hechas a mano en el taller con la temática, los colores y el tamaño que elijas: estrellas, números, personajes y más.',
-    bg: '#fdeaf2',
-    svg: `<path d="M60 14l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4z" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="2"/><path d="M38 52h44M42 62h36M47 72h26" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M60 14V2" stroke="#4a1a4f" stroke-width="2"/><path d="M50 95l-3 14M60 97v14M70 95l3 14" stroke="#c2185b" stroke-width="3" stroke-linecap="round"/>`,
-  },
-  {
-    t: 'Chupeteras',
-    d: 'Para la mesa dulce o como centro de mesa, a juego con la piñata y los colores de la fiesta.',
-    bg: '#fff6dc',
-    svg: `<rect x="30" y="70" width="60" height="34" rx="8" fill="#fde9a6" stroke="#4a1a4f" stroke-width="2"/><path d="M42 70V36M60 70V26M78 70V40" stroke="#4a1a4f" stroke-width="2"/><circle cx="42" cy="32" r="11" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="2"/><circle cx="60" cy="22" r="12" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"/><circle cx="78" cy="36" r="11" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="2"/><path d="M36 30a6 6 0 0112 0M54 20a6 6 0 0112 0M72 34a6 6 0 0112 0" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
-  },
-  {
-    t: 'Decoración por encargo',
-    d: 'Arcos de globos, carteles con el nombre y detalles para la mesa principal, pensados para que todo combine.',
-    bg: '#eef6fd',
-    svg: `<path d="M18 104C18 54 38 26 60 26s42 28 42 78" fill="none" stroke="#4a1a4f" stroke-width="2" stroke-dasharray="1 0"/><circle cx="20" cy="96" r="9" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="24" cy="74" r="9" fill="#fde9a6" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="33" cy="54" r="9" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="46" cy="38" r="9" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="60" cy="32" r="9" fill="#e0d1f5" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="74" cy="38" r="9" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="87" cy="54" r="9" fill="#fde9a6" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="96" cy="74" r="9" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="1.5"/><circle cx="100" cy="96" r="9" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="1.5"/><rect x="40" y="66" width="40" height="18" rx="4" fill="#ffffff" stroke="#c2185b" stroke-width="2"/><path d="M48 75h24" stroke="#c2185b" stroke-width="2.5" stroke-linecap="round"/>`,
-  },
-];
-
-const pasos = [
-  ['Escríbenos por WhatsApp', 'Cuéntanos la fecha, la temática y cuántos niños vienen. Si tienes una foto de referencia, mándala.'],
-  ['Te enviamos la cotización', 'Con el precio final por escrito. Con un abono reservamos tu fecha.'],
-  ['Lo hacemos a mano', 'En el taller, con tus colores. Te mandamos avances por WhatsApp.'],
-  ['Lo retiras en el local', 'En Caripe, el día y la hora que acordemos.'],
-];
+const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
+const propios = servicios.filter((s) => s.kind === 'propio');
+const aliados = servicios.filter((s) => s.kind === 'aliado');
+const hoy = new Date().toISOString().slice(0, 10);
 ---
 
 <Base
-  title="Celebra · Taller de fiestas en Caripe: piñatas, chupeteras y decoración"
-  description="Piñatas a medida, chupeteras y decoración por encargo, hechas a mano en Caripe, Monagas. Cotiza por WhatsApp y retira en el local."
+  title="Celebra · Taller de fiestas en Caripe: piñatas, packs y decoración"
+  description="Piñatas a medida, chupeteras, packs por número de invitados y decoración para cumpleaños, baby shower, bautizos y XV años en Caripe, Monagas. Reserva tu fecha por WhatsApp."
 >
   <div class="home">
-    <div class="rainbow" aria-hidden="true"></div>
-    <header class="h-nav">
-      <div class="h-wrap h-nav-in">
-        <a class="h-brand" href="/" aria-label="Celebra, inicio">
-          <span class="h-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"><path d={star}></path></svg></span>
-          Celebra
-        </a>
-        <nav class="h-links" aria-label="Secciones">
-          <a href="#hacemos">Lo que hacemos</a>
-          <a href="#pedir">Cómo pedir</a>
-          <a href="/libro/">El libro</a>
-          <a href="/calculadora/">Calculadora</a>
-        </nav>
-        <a class="h-btn h-btn-sm" href={waPedido} target="_blank" rel="noopener">Cotizar</a>
-      </div>
-    </header>
+    <HomeNav />
 
     <main>
-      <section class="h-hero h-wrap">
-        <div class="h-hero-txt">
+      <section class="h-wrap h-top" id="fiestas" aria-labelledby="t-top">
+        <div class="h-top-head rv">
           <span class="h-kicker">Taller de fiestas · Caripe, Monagas</span>
-          <h1>Piñatas y decoración <em>hechas a mano</em> para la fiesta de tu peque</h1>
-          <p class="h-lead">Hacemos la piñata, la chupetera y los detalles con la temática y los colores que elijas. Cotizas por WhatsApp y retiras en nuestro local.</p>
-          <div class="h-btns">
-            <a class="h-btn" href={waPedido} target="_blank" rel="noopener">
-              <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
-              Pide tu cotización
-            </a>
-            <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener">Ver trabajos en Instagram</a>
-          </div>
-          <p class="h-note"><b>Solo retiro en el local.</b> No hacemos envíos a domicilio.</p>
+          <h1 id="t-top">¿Qué fiesta estás <em>organizando?</em></h1>
+          <p class="h-lead">Piñatas, chupeteras y decoración hechas a mano en nuestro taller. Elige tu celebración y te mostramos todo lo que podemos hacer.</p>
         </div>
-        <div class="h-art" aria-hidden="true">
-          <svg viewBox="0 0 420 420" width="100%">
-            <circle cx="210" cy="210" r="190" fill="#fdeaf2"></circle>
-            <path d="M60 300a150 150 0 01300 0" fill="none" stroke="#f8bbd0" stroke-width="22"></path>
-            <path d="M82 300a128 128 0 01256 0" fill="none" stroke="#fde9a6" stroke-width="22"></path>
-            <path d="M104 300a106 106 0 01212 0" fill="none" stroke="#c8f0dc" stroke-width="22"></path>
-            <path d="M126 300a84 84 0 01168 0" fill="none" stroke="#c5e3f6" stroke-width="22"></path>
-            <path d="M210 40v62" stroke="#4a1a4f" stroke-width="3"></path>
-            <path d="M210 100l26 53 58 8-42 41 10 58-52-27-52 27 10-58-42-41 58-8z" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="3"></path>
-            <path d="M162 196h96M170 218h80M182 240h56" stroke="#ffffff" stroke-width="9" stroke-linecap="round"></path>
-            <circle cx="195" cy="172" r="5" fill="#4a1a4f"></circle><circle cx="225" cy="172" r="5" fill="#4a1a4f"></circle>
-            <path d="M199 186q11 9 22 0" fill="none" stroke="#4a1a4f" stroke-width="3" stroke-linecap="round"></path>
-            <path d="M188 286l-6 34M210 290v36M232 286l6 34" stroke="#c2185b" stroke-width="5" stroke-linecap="round"></path>
-            <ellipse cx="78" cy="118" rx="26" ry="31" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2.5"></ellipse><path d="M78 149q-6 30 4 60" fill="none" stroke="#4a1a4f" stroke-width="2"></path>
-            <ellipse cx="346" cy="128" rx="24" ry="29" fill="#fde9a6" stroke="#4a1a4f" stroke-width="2.5"></ellipse><path d="M346 157q6 28-4 56" fill="none" stroke="#4a1a4f" stroke-width="2"></path>
-            <path d={estrella} transform="translate(310 300) scale(1.6)" fill="#c2185b"></path>
-            <path d={estrella} transform="translate(70 290) scale(1.1)" fill="#e0d1f5" stroke="#4a1a4f" stroke-width="1"></path>
-          </svg>
+        <div class="h-banners">
+          {tipos.map((t, i) => (
+            <a class:list={['h-banner rv', { big: i === 0 }]} href={`/fiestas/${t.slug}/`} style={`--bg:${t.bg};--ink:${t.ink};--d:${i * 70}ms`}>
+              <span class="h-banner-txt">
+                <b>{t.name}</b>
+                <span>{t.short}</span>
+                <span class="h-banner-cta">Ver más →</span>
+              </span>
+              <svg class="h-banner-art" viewBox="0 0 160 160" aria-hidden="true" set:html={t.art}></svg>
+            </a>
+          ))}
         </div>
       </section>
 
-      <section class="h-sec h-wrap" id="hacemos" aria-labelledby="t-hacemos">
-        <div class="h-head">
-          <span class="h-kicker">Lo que hacemos</span>
-          <h2 id="t-hacemos">Todo para la mesa principal, hecho en el taller</h2>
-          <p>Cada encargo es único. Dinos la temática y armamos el conjunto para que piñata, chupetera y decoración combinen.</p>
+      <section class="h-sec h-wrap" id="packs" aria-labelledby="t-packs">
+        <div class="h-head rv">
+          <span class="h-kicker">Packs listos</span>
+          <h2 id="t-packs">¿Cuántos invitados tendrás?</h2>
+          <p>Elige una cantidad y te recomendamos el pack que mejor te conviene. Todos se adaptan a tu temática y se retiran en el local.</p>
         </div>
-        <div class="h-cards">
-          {productos.map((p) => (
-            <article class="h-card">
-              <div class="h-card-art" style={`background:${p.bg}`}><svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true" set:html={p.svg}></svg></div>
-              <h3>{p.t}</h3>
-              <p>{p.d}</p>
-              <a class="h-link" href={wa(`¡Hola Celebra! Quiero cotizar: ${p.t.toLowerCase()}.`)} target="_blank" rel="noopener">Cotizar {p.t.toLowerCase()} →</a>
+        <div class="h-guests rv" role="radiogroup" aria-label="Número de invitados">
+          {packs.map((p, i) => (
+            <button type="button" class="h-guest" role="radio" aria-checked={p.destacado ? 'true' : 'false'} data-pack={p.id}>{p.invitados}</button>
+          ))}
+        </div>
+        <div class="h-packs">
+          {packs.map((p, i) => (
+            <article class:list={['h-pack rv', { on: p.destacado }]} data-pack-card={p.id} style={`--d:${i * 70}ms`}>
+              <span class="h-pack-tag">Recomendado para ti</span>
+              <h3>{p.name}</h3>
+              <p class="h-pack-inv">{p.invitados}</p>
+              <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
+              <p class="h-pack-price">{precio(p.priceUsd)}</p>
+              <a class="h-btn h-btn-line" href="#reservar" data-pick={p.id}>Reservar este pack</a>
             </article>
           ))}
         </div>
+        <p class="h-fine rv">Todos los packs son <b>solo con retiro en el local de Caripe</b>. No hacemos envíos a domicilio.</p>
       </section>
 
-      <section class="h-sec h-wrap" id="pedir" aria-labelledby="t-pedir">
-        <div class="h-head">
-          <span class="h-kicker">Cómo pedir</span>
-          <h2 id="t-pedir">Así de simple es encargar</h2>
-          <p>Pide con <b>2 a 3 semanas de anticipación</b>: todo se hace a mano y las fechas de fin de semana se llenan primero.</p>
+      <section class="h-sec h-wrap" id="servicios" aria-labelledby="t-serv">
+        <div class="h-head rv">
+          <span class="h-kicker">Servicios</span>
+          <h2 id="t-serv">Todo para tu fiesta, en un solo lugar</h2>
+          <p>Lo que hacemos en el taller y los proveedores de Caripe que trabajan con nosotras.</p>
         </div>
-        <ol class="h-steps">
-          {pasos.map(([t, d], i) => (
-            <li><span class="h-num">{i + 1}</span><div><b>{t}</b><p>{d}</p></div></li>
+        <div class="h-servs">
+          {[...propios, ...aliados].map((s, i) => (
+            <div class="h-serv rv" style={`--d:${(i % 4) * 60}ms`}>
+              <span class:list={['h-serv-ico', s.kind]}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={s.icon}></path></svg></span>
+              <div><b>{s.name}</b><p>{s.desc}</p>{s.kind === 'aliado' && <span class="h-badge">Proveedor aliado</span>}</div>
+            </div>
           ))}
-        </ol>
-        <div class="h-alert" role="note">
-          <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16v10H4zM3 10l2-5h14l2 5M10 20v-5h4v5"></path></svg>
-          <p><b>Solo retiro en el local de Caripe.</b> No hacemos envíos a domicilio. Coordinamos contigo el día y la hora de retiro.</p>
+        </div>
+        <div class="h-btns rv" style="margin-top:24px"><a class="h-btn h-btn-line" href="/servicios/">Ver todos los servicios</a></div>
+      </section>
+
+      <section class="h-sec h-wrap" id="reservar" aria-labelledby="t-res">
+        <div class="h-res rv">
+          <div class="h-res-info">
+            <span class="h-kicker">Reservar</span>
+            <h2 id="t-res">Reserva la fecha de tu fiesta</h2>
+            <ol class="h-res-steps">
+              <li><b>Completa los datos</b> y envíalos por WhatsApp.</li>
+              <li><b>Te confirmamos disponibilidad</b> el mismo día, con el precio final por escrito.</li>
+              <li><b>Con un abono reservamos tu fecha</b> y empezamos a trabajar a mano.</li>
+              <li><b>Retiras en el local</b> el día acordado.</li>
+            </ol>
+            <p class="h-fine">Pide con 2 a 3 semanas de anticipación: los fines de semana se llenan primero.</p>
+          </div>
+          <form class="h-form" id="res-form" novalidate>
+            <label>Tipo de fiesta
+              <select name="tipo">{tipos.map((t) => <option>{t.name}</option>)}<option>Otra</option></select>
+            </label>
+            <div class="h-form-2">
+              <label>Fecha de la fiesta<input type="date" name="fecha" min={hoy} required /></label>
+              <label>Invitados<input type="number" name="invitados" min="1" inputmode="numeric" placeholder="Ej. 25" /></label>
+            </div>
+            <label>Pack
+              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados}</option>)}<option value="Solo piñata o algo puntual">Solo piñata o algo puntual</option></select>
+            </label>
+            <label>Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
+            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+            <button class="h-btn" type="submit">
+              <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
+              Enviar por WhatsApp
+            </button>
+            <p class="h-form-err" role="alert" hidden>Falta la fecha y tu nombre.</p>
+          </form>
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-sal">
+        <div class="h-duo">
+          <a class="h-tile rv" href="/salones/" style="--bg:#eaf7f0;--ink:#1a7f4b">
+            <span class="h-kicker">Salones en Caripe</span>
+            <b id="t-sal">¿Dónde hacer la fiesta?</b>
+            <span>Los salones y espacios de eventos de Caripe, reunidos en un solo lugar. ¿Tienes un salón? Publícalo con nosotras.</span>
+            <span class="h-banner-cta">Ver salones →</span>
+          </a>
+          <a class="h-tile rv" href="/calculadora/" style="--bg:#eef3fd;--ink:#3a5bb8;--d:80ms">
+            <span class="h-kicker">Cotiza gratis</span>
+            <b>Calcula el presupuesto de tu fiesta</b>
+            <span>Pon cuánto quieres gastar y cuántos niños vienen. La calculadora lo reparte en torta, comida, piñata, decoración y más.</span>
+            <span class="h-banner-cta">Usar la calculadora →</span>
+          </a>
         </div>
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-libro">
-        <div class="h-book">
+        <div class="h-book rv">
           <a class="h-book-cover" href="/libro/" tabindex="-1" aria-hidden="true"><img src="/img/portada-a.jpg" width="900" height="1355" alt="" loading="lazy" /></a>
           <div class="h-book-txt">
             <span class="h-kicker">¿Prefieres hacerla tú misma?</span>
@@ -149,35 +155,24 @@ const pasos = [
         </div>
       </section>
 
-      <section class="h-sec h-wrap" aria-labelledby="t-calc">
-        <div class="h-calc">
-          <div>
-            <span class="h-kicker">Gratis</span>
-            <h2 id="t-calc">Calcula el presupuesto de tu fiesta</h2>
-            <p>Pon cuánto quieres gastar y cuántos niños vienen. La calculadora lo reparte en torta, comida, piñata, decoración y más, y te dice cuánto te queda.</p>
-          </div>
-          <a class="h-btn" href="/calculadora/">Usar la calculadora</a>
-        </div>
-      </section>
-
       <section class="h-sec h-wrap" id="local" aria-labelledby="t-local">
-        <div class="h-head">
+        <div class="h-head rv">
           <span class="h-kicker">Visítanos</span>
           <h2 id="t-local">Nuestro local en Caripe</h2>
         </div>
         <div class="h-visit">
-          <div class="h-vbox">
+          <div class="h-vbox rv">
             <h3>Horario</h3>
             <dl>{loc.hours.map((h) => (<><dt>{h.days}</dt><dd>{h.time}</dd></>))}</dl>
           </div>
-          <div class="h-vbox">
+          <div class="h-vbox rv" style="--d:70ms">
             <h3>Dónde estamos</h3>
-            <p>Caripe, estado Monagas, Venezuela.</p>
+            <p>Caripe, estado Monagas, Venezuela. Solo retiro en el local, no hacemos envíos.</p>
             <a class="h-link" href={c.googleMaps} target="_blank" rel="noopener">Ver la ubicación en Google Maps →</a>
           </div>
-          <div class="h-vbox">
+          <div class="h-vbox rv" style="--d:140ms">
             <h3>Escríbenos</h3>
-            <a class="h-link" href={waPedido} target="_blank" rel="noopener">WhatsApp {c.localWhatsappDisplay}</a>
+            <a class="h-link" href={wa('¡Hola Celebra!')} target="_blank" rel="noopener">WhatsApp {c.localWhatsappDisplay}</a>
             <a class="h-link" href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
             <a class="h-link" href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
           </div>
@@ -188,96 +183,28 @@ const pasos = [
   </div>
 </Base>
 
-<style is:global>
-  .home{--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--accent:#c2185b;--plum:#4a1a4f;font-family:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:#ffffff;font-size:17px;line-height:1.55}
-  .home *{box-sizing:border-box}
-  .home h1,.home h2,.home h3{margin:0;font-weight:800;letter-spacing:-0.025em;line-height:1.08;text-wrap:balance}
-  .home p{margin:0}
-  .rainbow{height:6px;background:linear-gradient(90deg,#f8bbd0 0 16.6%,#ffd8b5 16.6% 33.3%,#fde9a6 33.3% 50%,#c8f0dc 50% 66.6%,#c5e3f6 66.6% 83.3%,#e0d1f5 83.3%)}
-  .h-wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
-  .h-nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.6) blur(12px);-webkit-backdrop-filter:saturate(1.6) blur(12px);border-bottom:1px solid var(--line)}
-  .h-nav-in{display:flex;align-items:center;gap:32px;height:68px}
-  .h-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-0.03em;text-decoration:none;color:var(--ink);margin-right:auto}
-  .h-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center}
-  .h-links{display:flex;gap:28px;font-size:15px;font-weight:600}
-  .h-links a{text-decoration:none;color:var(--muted)}
-  .h-links a:hover{color:var(--ink)}
-  .h-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;border-radius:12px;background:var(--accent);color:#ffffff;font:700 17px/1 'Figtree',system-ui,sans-serif;text-decoration:none;transition:filter .15s ease,box-shadow .15s ease}
-  .h-btn:hover{filter:brightness(1.06);box-shadow:0 10px 24px -12px var(--accent)}
-  .h-btn:focus-visible,.h-link:focus-visible,.h-links a:focus-visible,.h-brand:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
-  .h-btn-line{background:#ffffff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
-  .h-btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--ink);filter:none}
-  .h-btn-sm{min-height:42px;padding:0 18px;font-size:15px;border-radius:10px}
-  .h-ico{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-  .h-btns{display:flex;flex-wrap:wrap;gap:10px}
-  .h-kicker{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-  .h-link{color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-color:#f3b6cf;text-underline-offset:4px;text-decoration-thickness:2px}
-  .h-link:hover{text-decoration-color:var(--accent)}
+<script define:vars={{ waNum: c.localWhatsapp }}>
+  // Selector de invitados → resalta el pack recomendado.
+  const pick = (id) => {
+    document.querySelectorAll('.h-guest').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pack === id)));
+    document.querySelectorAll('.h-pack').forEach((c) => c.classList.toggle('on', c.dataset.packCard === id));
+    const sel = document.querySelector('#res-form select[name="pack"]');
+    const card = document.querySelector(`[data-pack-card="${id}"] h3`);
+    if (sel && card) sel.value = card.textContent;
+  };
+  document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack)));
+  document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick)));
 
-  .h-hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;align-items:center;padding-top:56px}
-  .h-hero-txt{display:flex;flex-direction:column;gap:22px}
-  .h-hero h1{font-size:clamp(36px,5.4vw,64px)}
-  .h-hero h1 em{font-style:normal;color:var(--accent)}
-  .h-lead{font-size:20px;color:var(--muted);max-width:34em}
-  .h-note{font-size:15px;color:var(--muted)}
-  .h-note b{color:var(--ink)}
-  .h-art{max-width:460px;justify-self:center;width:100%}
-
-  .h-sec{padding-top:112px}
-  .h-head{display:flex;flex-direction:column;gap:14px;max-width:720px;margin-bottom:40px}
-  .h-head h2,.h-book h2,.h-calc h2{font-size:clamp(30px,4vw,44px)}
-  .h-head p{font-size:19px;color:var(--muted)}
-  .h-head p b{color:var(--ink)}
-
-  .h-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-  .h-card{display:flex;flex-direction:column;gap:12px;padding:22px;border:1px solid var(--line);border-radius:18px;background:#ffffff}
-  .h-card-art{border-radius:14px;display:grid;place-items:center;padding:26px 0;margin-bottom:6px}
-  .h-card h3{font-size:22px}
-  .h-card p{color:var(--muted);flex:1}
-
-  .h-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
-  .h-steps li{display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:18px;background:#faf7fb}
-  .h-steps b{font-size:18px;display:block;margin-bottom:4px}
-  .h-steps p{color:var(--muted);font-size:16px}
-  .h-num{width:40px;height:40px;border-radius:50%;background:var(--plum);color:#ffffff;display:grid;place-items:center;font-weight:800}
-  .h-alert{display:flex;gap:14px;align-items:flex-start;margin-top:20px;padding:18px 22px;border-radius:14px;background:#fdeaf2;color:var(--plum)}
-  .h-alert b{color:var(--accent)}
-
-  .h-book{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:56px;align-items:center;padding:48px;border-radius:24px;background:#fff8e6}
-  .h-book-cover img{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;border-radius:4px 10px 10px 4px;box-shadow:0 30px 60px -28px rgba(22,23,26,.55)}
-  .h-book-txt{display:flex;flex-direction:column;gap:18px}
-  .h-book-txt>p{font-size:18px;color:var(--muted)}
-  .h-price{font-size:16px!important}
-  .h-price b{color:var(--ink);font-size:22px}
-
-  .h-calc{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:40px 48px;border-radius:24px;background:#eef3fd}
-  .h-calc>div{display:flex;flex-direction:column;gap:12px;max-width:640px}
-  .h-calc p{color:var(--muted);font-size:18px}
-  .h-calc .h-kicker{color:#3a5bb8}
-
-  .h-visit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-  .h-vbox{display:flex;flex-direction:column;gap:10px;padding:22px;border:1px solid var(--line);border-radius:18px}
-  .h-vbox h3{font-size:20px}
-  .h-vbox p{color:var(--muted)}
-  .h-vbox dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px}
-  .h-vbox dt{color:var(--muted)}
-  .h-vbox dd{margin:0;font-weight:700}
-
-  @media (max-width:980px){
-    .h-links{display:none}
-    .h-hero{grid-template-columns:1fr;gap:32px;padding-top:36px}
-    .h-art{max-width:320px}
-    .h-cards,.h-visit{grid-template-columns:1fr}
-    .h-steps{grid-template-columns:1fr 1fr}
-    .h-book{grid-template-columns:1fr;gap:28px;padding:32px 24px}
-    .h-book-cover img{max-width:200px}
-    .h-calc{flex-direction:column;align-items:flex-start;padding:32px 24px}
-    .h-sec{padding-top:80px}
-  }
-  @media (max-width:560px){
-    .h-steps{grid-template-columns:1fr}
-    .h-lead{font-size:18px}
-    .h-btn{width:100%}
-    .h-nav .h-btn{width:auto}
-  }
-</style>
+  // Reservar → abre WhatsApp con el mensaje armado.
+  const f = document.getElementById('res-form');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f));
+    const err = f.querySelector('.h-form-err');
+    if (!d.fecha || !String(d.nombre).trim()) { err.hidden = false; return; }
+    err.hidden = true;
+    const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+    const txt = `¡Hola Celebra! Quiero reservar una fecha.\n• Fiesta: ${d.tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Pack: ${d.pack}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}`;
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+  });
+</script>

@@ -1,0 +1,90 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { site } from '../config/site';
+import { salones } from '../config/celebra';
+const c = site.contact;
+---
+
+<Base title="Salones de eventos en Caripe · Celebra" description="Los salones y espacios para fiestas de Caripe, Monagas, en un solo lugar. ¿Tienes un salón? Publícalo en Celebra.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-page-hero">
+        <div class="h-top-head rv" style="margin:0">
+          <span class="h-kicker">Salones en Caripe</span>
+          <h1>¿Dónde hacer la fiesta?</h1>
+          <p class="h-lead">Estamos reuniendo los salones y espacios para eventos de Caripe en un solo lugar, con su capacidad, lo que incluyen y cómo contactarlos.</p>
+          <div class="h-btns"><a class="h-btn" href="#publica">Tengo un salón</a></div>
+        </div>
+        <div class="h-page-art rv" style="--bg:#eaf7f0;--d:100ms">
+          <svg viewBox="0 0 160 160" aria-hidden="true"><path d="M30 70l50-34 50 34" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="2.5" stroke-linejoin="round"></path><rect x="40" y="70" width="80" height="58" fill="#ffffff" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="70" y="94" width="20" height="34" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="48" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><rect x="96" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><path d="M36 64q22 12 44 0t44 0" fill="none" stroke="#c2185b" stroke-width="2.5"></path></svg>
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-list">
+        <div class="h-head rv"><span class="h-kicker">Directorio</span><h2 id="t-list">Salones disponibles</h2></div>
+        {salones.length === 0 ? (
+          <div class="h-empty rv">
+            <b>Muy pronto, los primeros salones</b>
+            <p>Estamos hablando con los dueños de los salones de Caripe. Mientras tanto, escríbenos y te recomendamos uno según tu fecha y tus invitados.</p>
+            <a class="h-btn h-btn-line" href={`https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('¡Hola Celebra! Busco un salón en Caripe para una fiesta. Fecha: … Invitados: …')}`} target="_blank" rel="noopener">Pedir una recomendación</a>
+          </div>
+        ) : (
+          <div class="h-packs">
+            {salones.map((s) => (
+              <article class="h-pack rv">
+                {s.foto && <img src={s.foto} alt={`Salón ${s.name}`} loading="lazy" style="border-radius:12px;aspect-ratio:4/3;object-fit:cover;width:100%" />}
+                <h3>{s.name}</h3>
+                <p class="h-pack-inv">{s.zona} · {s.capacidad}</p>
+                <ul>{s.incluye.map((x) => <li>{x}</li>)}</ul>
+                <a class="h-btn h-btn-line" href={`https://wa.me/${s.whatsapp}`} target="_blank" rel="noopener">Contactar</a>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="h-sec h-wrap" id="publica" aria-labelledby="t-pub">
+        <div class="h-res rv" style="background:#eaf7f0">
+          <div class="h-res-info">
+            <span class="h-kicker" style="color:#1a7f4b">Para dueños de salones</span>
+            <h2 id="t-pub">Publica tu salón en Celebra</h2>
+            <p class="h-lead" style="font-size:18px">Las familias que organizan una fiesta en Caripe nos buscan a nosotras: aparece justo cuando están eligiendo dónde celebrar.</p>
+            <ul class="h-res-steps" style="list-style:disc">
+              <li>Ficha con fotos, capacidad, lo que incluye y tu WhatsApp.</li>
+              <li>Te recomendamos a los clientes que nos piden salón.</li>
+              <li>Te contamos las condiciones por WhatsApp.</li>
+            </ul>
+          </div>
+          <form class="h-form" id="pub-form" data-tipo="salón" novalidate>
+            <label>Nombre del salón<input type="text" name="negocio" required /></label>
+            <div class="h-form-2">
+              <label>Capacidad<input type="text" name="capacidad" placeholder="Ej. 80 personas" /></label>
+              <label>Sector<input type="text" name="zona" placeholder="Ej. Centro" /></label>
+            </div>
+            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+            <button class="h-btn" type="submit">Quiero publicar mi salón</button>
+            <p class="h-form-err" role="alert" hidden>Falta el nombre del salón y tu nombre.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script define:vars={{ waNum: c.localWhatsapp }}>
+  const f = document.getElementById('pub-form');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f));
+    const err = f.querySelector('.h-form-err');
+    if (!String(d.negocio).trim() || !String(d.nombre).trim()) { err.hidden = false; return; }
+    err.hidden = true;
+    const txt = `¡Hola Celebra! Quiero publicar mi salón en la página.\n• Salón: ${d.negocio}\n• Capacidad: ${d.capacidad || '-'}\n• Sector: ${d.zona || '-'}\n• Mi nombre: ${d.nombre}`;
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+  });
+</script>

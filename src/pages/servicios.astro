@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { site } from '../config/site';
+import { servicios } from '../config/celebra';
+const c = site.contact;
+const wa = (t: string) => `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(t)}`;
+const propios = servicios.filter((s) => s.kind === 'propio');
+const aliados = servicios.filter((s) => s.kind === 'aliado');
+---
+
+<Base title="Servicios para fiestas en Caripe · Celebra" description="Piñatas, chupeteras, decoración, invitaciones digitales y recuerdos hechos en el taller Celebra, más tortas, sonido y mobiliario de proveedores aliados de Caripe.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-top">
+        <div class="h-top-head rv">
+          <span class="h-kicker">Servicios</span>
+          <h1>Todo para tu fiesta, <em>en un solo lugar</em></h1>
+          <p class="h-lead">Lo que hacemos a mano en el taller, y los proveedores de Caripe que trabajan con nosotras para que no tengas que buscar por todos lados.</p>
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" style="padding-top:24px" aria-labelledby="t-prop">
+        <div class="h-head rv"><span class="h-kicker">Hecho en el taller</span><h2 id="t-prop">Lo hacemos nosotras</h2></div>
+        <div class="h-servs">
+          {propios.map((s, i) => (
+            <div class="h-serv rv" style={`--d:${(i % 4) * 60}ms`}>
+              <span class="h-serv-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={s.icon}></path></svg></span>
+              <div><b>{s.name}</b><p>{s.desc}</p><a class="h-link" style="font-size:14px" href={wa(`¡Hola Celebra! Quiero cotizar: ${s.name.toLowerCase()}.`)} target="_blank" rel="noopener">Cotizar</a></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-ali">
+        <div class="h-head rv"><span class="h-kicker" style="color:#1a7f4b">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p>Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
+        <div class="h-servs">
+          {aliados.map((s, i) => (
+            <div class="h-serv rv" style={`--d:${(i % 4) * 60}ms`}>
+              <span class="h-serv-ico aliado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={s.icon}></path></svg></span>
+              <div><b>{s.name}</b><p>{s.desc}</p><a class="h-link" style="font-size:14px" href={wa(`¡Hola Celebra! Busco ${s.name.toLowerCase()} para una fiesta.`)} target="_blank" rel="noopener">Pedir recomendación</a></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-unete">
+        <div class="h-res rv" style="background:#eaf7f0">
+          <div class="h-res-info">
+            <span class="h-kicker" style="color:#1a7f4b">Para proveedores</span>
+            <h2 id="t-unete">¿Ofreces un servicio para fiestas?</h2>
+            <p class="h-lead" style="font-size:18px">Tortas, sonido, animación, mobiliario, fotografía… Publica tu negocio en Celebra y llega a las familias que están organizando su fiesta en Caripe.</p>
+          </div>
+          <form class="h-form" id="pub-form" novalidate>
+            <label>Nombre del negocio<input type="text" name="negocio" required /></label>
+            <label>Qué servicio ofreces<input type="text" name="servicio" placeholder="Ej. Tortas, sonido, animación" /></label>
+            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+            <button class="h-btn" type="submit">Quiero publicar mi negocio</button>
+            <p class="h-form-err" role="alert" hidden>Falta el nombre del negocio y tu nombre.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script define:vars={{ waNum: c.localWhatsapp }}>
+  const f = document.getElementById('pub-form');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f));
+    const err = f.querySelector('.h-form-err');
+    if (!String(d.negocio).trim() || !String(d.nombre).trim()) { err.hidden = false; return; }
+    err.hidden = true;
+    const txt = `¡Hola Celebra! Quiero publicar mi negocio en la página.\n• Negocio: ${d.negocio}\n• Servicio: ${d.servicio || '-'}\n• Mi nombre: ${d.nombre}`;
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+  });
+</script>
