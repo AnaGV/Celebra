@@ -40,4 +40,12 @@ const links = [
     const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -8% 0px' });
     els.forEach((e) => io.observe(e));
   }
+  // Oculta el botón flotante de WhatsApp mientras se ve un formulario (no tapa el botón de enviar).
+  const wa = document.querySelector('.h-wa');
+  const forms = document.querySelectorAll('.h-form');
+  if (wa && forms.length && 'IntersectionObserver' in window) {
+    const vis = new Set();
+    const fo = new IntersectionObserver((ents) => { ents.forEach((en) => (en.isIntersecting ? vis.add(en.target) : vis.delete(en.target))); wa.classList.toggle('off', vis.size > 0); });
+    forms.forEach((f) => fo.observe(f));
+  }
 </script>

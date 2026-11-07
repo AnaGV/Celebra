@@ -111,11 +111,11 @@ const hoy = new Date().toISOString().slice(0, 10);
               <select name="tipo">{tipos.map((t) => <option>{t.name}</option>)}<option>Otra</option></select>
             </label>
             <div class="h-form-2">
-              <label>Fecha de la fiesta<input type="date" name="fecha" min={hoy} required /></label>
+              <label class="h-date">Fecha de la fiesta<input type="date" name="fecha" min={hoy} required /><span class="h-date-ph" aria-hidden="true">Elige el día</span></label>
               <label>Invitados<input type="number" name="invitados" min="1" inputmode="numeric" placeholder="Ej. 25" /></label>
             </div>
             <label>Pack
-              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados}</option>)}<option value="Solo piñata o algo puntual">Solo piñata o algo puntual</option></select>
+              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados.replace(" invitados", "").toLowerCase()}</option>)}<option value="Solo piñata o algo puntual">Solo piñata o algo puntual</option></select>
             </label>
             <label>Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
