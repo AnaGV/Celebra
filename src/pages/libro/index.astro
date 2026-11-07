@@ -1,0 +1,727 @@
+---
+import Base from '../../layouts/Base.astro';
+import Checkout from '../../components/Checkout.astro';
+import Footer from '../../components/Footer.astro';
+import { site } from '../../config/site';
+import { products, mainProduct } from '../../config/products';
+
+const ebook = mainProduct;
+const print = products.find((p) => p.kind === 'fisico')!;
+const pe = `USD ${ebook.priceUsd}`;
+const pp = `USD ${print.priceUsd}`;
+const c = site.contact;
+
+const IC = {
+  card: 'M3 6h18v12H3zM3 10h18M7 15h4',
+  phone: 'M8 2h8a1 1 0 011 1v18a1 1 0 01-1 1H8a1 1 0 01-1-1V3a1 1 0 011-1zM11 18h2',
+  coin: 'M12 3a9 9 0 100 18 9 9 0 000-18zM9 9h4.5a2 2 0 010 4H9h5a2 2 0 010 4H9M11 7v2M11 17v2',
+  wallet: 'M3 7h16a2 2 0 012 2v8a2 2 0 01-2 2H3zM3 7l12-3v3M16 13h2',
+  tap: 'M7 3h10a1 1 0 011 1v16a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM9 9a4 4 0 016 0M10.5 11a2 2 0 013 0',
+  store: 'M4 10h16v10H4zM3 10l2-5h14l2 5M10 20v-5h4v5',
+};
+const M = {
+  pm: { name: 'Pago Móvil', note: 'En bolívares, a la tasa del día', icon: IC.phone, bg: '#e7f1fb', fg: '#1d4ed8' },
+  bn: { name: 'Binance Pay', note: 'En USDT, desde tu app de Binance', icon: IC.coin, bg: '#f9eeda', fg: '#9a6a00' },
+  cd: { name: 'Tarjeta Visa o Mastercard', note: 'Crédito o débito habilitada para compras internacionales', icon: IC.card, bg: '#efedff', fg: '#5b3fd1' },
+  ap: { name: 'Apple Pay o Google Pay', note: 'Desde tu celular, si lo tienes activado', icon: IC.tap, bg: '#f0efec', fg: '#16171a' },
+  pp: { name: 'PayPal', note: 'Con tu cuenta o tarjeta guardada', icon: IC.wallet, bg: '#e7f1fb', fg: '#0b4fa3' },
+  lc: { name: 'Pago en el local', note: 'Solo libro impreso, al retirarlo en Caripe', icon: IC.store, bg: '#fdeaf2', fg: '#c2185b' },
+};
+type K = keyof typeof M;
+const byCountry: Record<'VE' | 'CL' | 'OTRO', { methods: K[]; hero: string[]; announce: string; t: string; s: string; d: string }> = {
+  VE: { methods: ['pm', 'bn', 'cd', 'pp', 'lc'], hero: ['Pago Móvil', 'Binance', 'Tarjeta', 'PayPal'], announce: 'En Venezuela pagas con Pago Móvil, Binance o tarjeta. El ebook llega a tu email.', t: 'Pagas en bolívares o USDT', s: 'Pago Móvil, Binance o tarjeta', d: 'Al confirmar tu pago' },
+  CL: { methods: ['cd', 'ap', 'pp', 'bn'], hero: ['Tarjeta', 'Apple Pay', 'PayPal', 'Binance'], announce: 'Recibe el ebook en tu email al instante. Pagas con tarjeta, PayPal o Binance.', t: 'Pagas con tu tarjeta', s: 'Visa, Mastercard o PayPal', d: 'Al instante tras pagar' },
+  OTRO: { methods: ['cd', 'ap', 'pp', 'bn'], hero: ['Tarjeta', 'Apple Pay', 'PayPal', 'Binance'], announce: 'Recibe el ebook en tu email al instante, estés donde estés.', t: 'Pagas con tarjeta o PayPal', s: 'También con Binance (USDT)', d: 'Al instante tras pagar' },
+};
+const paises = ['VE', 'CL', 'OTRO'] as const;
+const nombrePais = { VE: 'Venezuela', CL: 'Chile', OTRO: 'Otro país' };
+
+const faqs = [
+  ['¿Cómo recibo el ebook?', 'Apenas se confirma el pago te llega un email con el botón de descarga y tu recibo. Con Binance o Pago Móvil lo enviamos al verificar el pago, normalmente en menos de 2 horas en horario laboral.'],
+  ['No me llegó el email, ¿qué hago?', 'Revisa spam o promociones. Si no está, escríbenos a soporte@somoscelebrave.com o por WhatsApp con tu código de pedido y te lo reenviamos.'],
+  ['¿Puedo pagar desde Venezuela?', 'Sí. Puedes pagar con Pago Móvil en bolívares, con Binance Pay (USDT) o con tarjeta internacional y PayPal.'],
+  ['¿Y desde Chile u otro país?', 'Sí. Pagas con tarjeta Visa o Mastercard, Apple Pay, Google Pay, PayPal o Binance Pay. La página te muestra solo los métodos de tu país.'],
+  ['¿En qué formato viene?', 'En PDF. Lo lees en el celular, la tablet o el computador, y puedes imprimir las hojas de listas y plantillas.'],
+  ['¿Hacen envíos del libro impreso?', 'No. El libro impreso se retira en nuestro local de Caripe. Puedes reservarlo online y pagar al retirarlo.'],
+  ['¿Puedo pedir un reembolso?', 'Como es un libro digital que recibes al instante, no hacemos devoluciones una vez entregado. Si no te llega o el archivo no abre, te ayudamos por WhatsApp; y si no logramos entregártelo, te devolvemos el dinero.'],
+];
+
+const toc = [
+  ['1', 'Tu idea primero'], ['2', 'Presupuesto real'], ['3', 'Diseño, colores y temática'], ['4', 'La invitación, y cómo hacerla con IA en minutos'],
+  ['5', 'Proveedores: qué reservar y qué no'], ['6', 'Lo mínimo de una fiesta'], ['7', 'El plan de 6 semanas'],
+  ['8', 'El día antes y el día hora por hora'], ['+', 'Guía visual: piñata, globos, mesa, recuerdos e impresiones en grande'], ['+', 'Lista de compras para imprimir'],
+];
+const check = 'M20 6L9 17l-5-5';
+const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
+---
+
+<Base
+  title="Fiestas que se recuerdan · Haz tú misma la fiesta de tu hijo y gasta menos"
+  description="La guía del taller Celebra para organizar el cumpleaños paso a paso: presupuesto, piñata, decoración y el día hora por hora. Ebook en PDF desde USD 7."
+>
+  <div class="pg">
+    <div class="announce">{paises.map((p) => <span data-solo={p}>{byCountry[p].announce}</span>)}</div>
+
+    <header class="nav">
+      <div class="wrap nav-in">
+        <a class="brand" href="#inicio" aria-label="Celebra, inicio">
+          <span class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"><path d={star}></path></svg></span>
+          Celebra
+        </a>
+        <nav class="nav-links" aria-label="Secciones">
+          <a href="#libro">El libro</a>
+          <a href="#muestra">Capítulo gratis</a>
+          <a href="#preguntas">Preguntas</a>
+          <a href="#local">Local en Caripe</a>
+        </nav>
+        <button type="button" class="btn btn-sm" data-buy={ebook.id}>Comprar</button>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <div class="wrap">
+        <section class="hero" aria-label="Producto">
+          <div class="gallery">
+            <div class="stage" data-view="0">
+              <img class="cover-img js-cover" data-v="0" src="/img/portada-a.jpg" width="900" height="1355" alt="Portada del libro Fiestas que se recuerdan: piñata estrella arcoíris hecha en casa" fetchpriority="high" />
+              <div class="devices" data-v="1" hidden role="img" aria-label="Páginas reales del libro en una tablet y un celular">
+                <div class="tablet"><img src="/img/libro-ejemplo.jpg" alt="Página del ejemplo resuelto: cumpleaños para 15 niños" loading="lazy" /></div>
+                <div class="phone"><img src="/img/libro-pinata.jpg" alt="Página del paso a paso de la piñata estrella" loading="lazy" /></div>
+              </div>
+              <div class="sheet" data-v="2" hidden><img src="/img/libro-plantilla.jpg" alt="Plantilla de presupuesto para imprimir y pegar en la nevera" loading="lazy" /></div>
+              <div class="real" data-v="3" hidden>
+                <img src="/img/pinata-real.jpg" alt="Estructura real de la piñata estrella hecha en el taller Celebra" loading="lazy" />
+                <span>Así queda la estructura de la piñata estrella antes de forrarla. El paso a paso está en el libro.</span>
+              </div>
+            </div>
+            <div class="thumbs" role="group" aria-label="Vistas del libro">
+              {[['Portada', 'portada-a'], ['Interior', 'interior'], ['Imprimibles', 'imprimibles'], ['Piñata', 'pinata']].map(([l, img], i) => (
+                <button type="button" class:list={['thumb', { on: i === 0 }]} data-pick-view={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+                  <img class:list={[{ 'js-cover-th': i === 0 }]} src={`/img/th-${img}.jpg`} width="320" height="320" alt="" loading="lazy" />
+                  <span>{l}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="buy" data-fmt="ebook">
+            <div class="buy-head">
+              <span class="book-name">Fiestas que se recuerdan · ebook</span>
+              <h1>Haz tú misma la fiesta de tu hijo y gasta menos</h1>
+              <p class="lead">La guía de nuestro taller para organizar el cumpleaños paso a paso: el presupuesto, la piñata, la decoración y el día hora por hora.</p>
+            </div>
+            <div class="price">
+              <b class="num" data-fmt-solo="ebook">{pe}</b><span class="muted" data-fmt-solo="ebook">Pago único, sin suscripción</span>
+              <b class="num" data-fmt-solo="print" hidden>{pp}</b><span class="muted" data-fmt-solo="print" hidden>Pagas online o al retirar</span>
+            </div>
+            <p class="incl"><b>31 páginas en PDF</b> · plantillas para imprimir · molde de la piñata incluido</p>
+
+            <div class="opts" role="radiogroup" aria-label="Formato" data-solo="VE">
+              <span class="opt-label">Formato</span>
+              <button type="button" role="radio" aria-checked="true" class="opt on" data-pick-fmt="ebook">
+                <span class="dot" aria-hidden="true"></span>
+                <span><span class="opt-t">Ebook</span><span class="opt-s">PDF de 31 páginas, llega a tu email</span></span>
+                <span class="opt-p num">{pe}</span>
+              </button>
+              <button type="button" role="radio" aria-checked="false" class="opt" data-pick-fmt="print">
+                <span class="dot" aria-hidden="true"></span>
+                <span><span class="opt-t">Libro impreso</span><span class="opt-s">Solo retiro en nuestro local de Caripe. Sin envíos a domicilio</span></span>
+                <span class="opt-p num">{pp}</span>
+              </button>
+            </div>
+
+            <div class="buy-actions">
+              <button type="button" class="btn js-main-buy" data-buy={ebook.id}><span data-fmt-solo="ebook">Quiero mi libro</span><span data-fmt-solo="print" hidden>Reservar libro impreso</span></button>
+              <a class="link" href="#muestra">Leer el capítulo 2 gratis</a>
+            </div>
+
+            <div class="ship">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg>
+              <span><span data-fmt-solo="ebook">Llega a tu email apenas se confirma el pago, con tu recibo.</span><span data-fmt-solo="print" hidden><b>Solo retiro en nuestro local de Caripe. No hacemos envíos a domicilio.</b> Apartamos tu libro por 3 días.</span></span>
+            </div>
+
+            <div class="pays">
+              <span>Paga con</span>
+              {paises.map((p) => <span class="pays-set" data-solo={p}>{byCountry[p].hero.map((m) => <span class="pill">{m}</span>)}</span>)}
+            </div>
+          </div>
+        </section>
+
+        <section class="trust" aria-label="Cómo funciona la compra">
+          <div class="trust-i"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg><div><b>Llega a tu email</b>{paises.map((p) => <span data-solo={p}>{byCountry[p].d}</span>)}</div></div>
+          <div class="trust-i"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M9 8h6M9 12h6"></path></svg><div><b>Recibo de compra</b><span>Con tu número de pedido, por email</span></div></div>
+          <div class="trust-i"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3z"></path><path d="M3 10h18"></path><path d="M7 14h4"></path></svg><div>{paises.map((p) => <span class="trust-pay" data-solo={p}><b>{byCountry[p].t}</b><span>{byCountry[p].s}</span></span>)}</div></div>
+          <div class="trust-i"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0116 0v4a2 2 0 01-2 2h-2v-6h4M4 12v4a2 2 0 002 2h2v-6H4"></path></svg><div><b>Soporte por WhatsApp</b><span>Si no te llega o no abre, lo resolvemos</span></div></div>
+        </section>
+
+        <section class="sec" id="libro">
+          <div class="sec-head">
+            <h2>Un adelanto de lo que hay dentro</h2>
+            <p>Estas son cuatro herramientas del libro. Cada una te ahorra dinero o tiempo antes de la fiesta.</p>
+          </div>
+          <div class="bento">
+            <article class="tile t-a">
+              <span class="in-book">Capítulo 7</span>
+              <h3>Un plan de 6 semanas</h3>
+              <p class="muted">Qué hacer cada semana para llegar al día de la fiesta con todo listo y sin correr. Cada semana trae su lista para ir marcando.</p>
+              <div class="weeks">
+                {[['6', 'La idea y el presupuesto'], ['5', 'Temática y colores'], ['4', 'Invitaciones y reservas'], ['3', 'Piñata y decoración'], ['2', 'Detalles y recuerdos'], ['1', 'Confirmar y comprar']].map(([n, t]) => (
+                  <div class="wk"><b>Semana {n}</b><span>{t}</span></div>
+                ))}
+              </div>
+            </article>
+            <article class="tile t-b">
+              <span class="in-book">Capítulo 2</span>
+              <h3>Presupuesto antes de comprar</h3>
+              <p class="muted">Decides cuánto vas a gastar y lo repartes en 11 rubros, cada uno por separado. Así sabes desde el principio si te alcanza, y dónde ahorrar haciendo cosas en casa.</p>
+              <span class="ex-tag">Ejemplo: cumpleaños para 15 niños</span>
+              <div class="tpl num">
+                {[['Comida', 29], ['Bebidas', 10], ['Torta', 20], ['Decoración con elementos', 8], ['Decoración con globos', 8], ['Piñata', 9], ['Relleno de la piñata', 6], ['Mesa dulce', 9], ['Cotillón', 5], ['17 bolsitas de recuerdo', 13], ['Imprevistos (10%)', 13], ['Total de la fiesta', 130]].map(([t, v]) => (
+                  <div class="tpl-r"><span>{t}</span><span>USD {v}</span></div>
+                ))}
+              </div>
+              <p class="tpl-note">Cifras de ejemplo. En el libro completas la plantilla con tus propios números.</p>
+            </article>
+            <article class="tile t-c">
+              <div class="c-inner">
+                <span class="in-book">Guía visual</span>
+                <h3>La piñata estrella, paso a paso</h3>
+                <p class="muted">Cómo armarla con cartón reciclado: las dos caras, los laterales, los refuerzos y los flecos. Cada paso tiene su dibujo y el enlace al video en nuestro Instagram.</p>
+              </div>
+              <div class="parts"><img src="/img/pinata-partes.jpg" alt="Vista con las partes de la piñata estrella: pieza frontal, laterales, pieza posterior, tiras de refuerzo y cordón" loading="lazy" /></div>
+            </article>
+            <article class="tile t-d">
+              <span class="in-book">Para imprimir</span>
+              <h3>Hojas para imprimir y pegar en la nevera</h3>
+              <p class="muted">El libro trae páginas pensadas para imprimir: las imprimes, las pegas a la vista y vas marcando a medida que avanzas. Nadie de la familia se pierde.</p>
+              <div class="prints">
+                <div class="print"><b>Lista de compras</b><div class="chk"><span class="box done"></span>Globos</div><div class="chk"><span class="box"></span>Velas</div><div class="chk"><span class="box"></span>Bolsitas</div></div>
+                <div class="print"><b>El día, hora por hora</b><div class="chk"><span class="box done"></span>15:00 llegada</div><div class="chk"><span class="box"></span>16:30 piñata</div><div class="chk"><span class="box"></span>17:00 torta</div></div>
+                <div class="print"><b>Plan de la semana</b><div class="chk"><span class="box done"></span>Encargué la torta</div><div class="chk"><span class="box"></span>Armé la piñata</div><div class="chk"><span class="box"></span>Confirmé invitados</div></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="quien">
+          <div class="sec-head"><h2 id="quien">Pensado para dos tipos de lectoras</h2></div>
+          <div class="who">
+            <div class="who-c">
+              <div class="who-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"></circle><circle cx="17" cy="9" r="2.2"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 20c.2-2.4 1.5-4.2 3.5-4.2s3 1.4 3 4.2"></path></svg></div>
+              <h3>Familias que organizan un cumpleaños</h3>
+              <ul class="ticks">
+                {['Sabes cuánto vas a gastar antes de empezar', 'Haces la piñata y la decoración en casa', 'Llegas al día de la fiesta sin carreras'].map((t) => <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg><span>{t}</span></li>)}
+              </ul>
+            </div>
+            <div class="who-c">
+              <div class="who-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16v10H4z"></path><path d="M3 10l2-5h14l2 5"></path><path d="M10 20v-5h4v5"></path></svg></div>
+              <h3>Emprendedoras de decoración</h3>
+              <ul class="ticks">
+                {['Aprendes las técnicas que usamos en el taller', 'Calculas costos para poner precio a tus piñatas', 'Ofreces paquetes completos de fiesta a tus clientas'].map((t) => <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg><span>{t}</span></li>)}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="indice">
+          <div class="sec-head"><h2 id="indice">8 capítulos y una guía visual</h2><p>Del primer boceto de la idea hasta que se va el último invitado.</p></div>
+          <div class="toc">
+            {toc.map(([n, t]) => <div class="toc-r"><span class="toc-n num">{n}</span><span class="toc-t">{t}</span></div>)}
+          </div>
+        </section>
+
+        <section class="lead-band" id="muestra" aria-labelledby="gratis">
+          <div class="lead-copy">
+            <h2 id="gratis">Lee el capítulo de presupuesto gratis</h2>
+            <p>8 páginas en PDF: la regla del taller para que el dinero alcance, un ejemplo resuelto para 15 niños y la plantilla para imprimir. Te llega al email junto con un descuento para el libro completo.</p>
+          </div>
+          <form class="form" id="lead-form" data-origen="landing" novalidate>
+            <div class="field"><label for="lead-name">Tu nombre</label><input id="lead-name" name="nombre" class="input" type="text" autocomplete="given-name" placeholder="Ej. Daniela" /></div>
+            <div class="field"><label for="lead-email">Tu email</label><input id="lead-email" name="email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="tu@email.com" required /></div>
+            <div class="hp" aria-hidden="true"><label>Empresa <input name="empresa" tabindex="-1" autocomplete="off" /></label></div>
+            <p class="err" data-lead-error role="alert" hidden></p>
+            <button type="submit" class="btn" style="width:100%">Enviarme el capítulo</button>
+            <span class="form-note">Sin spam. Te das de baja con un clic. <a href="/privacidad">Privacidad</a></span>
+          </form>
+          <div class="lead-done" id="lead-done" hidden>
+            <b>¡Listo! Revisa tu email.</b>
+            <span>Te enviamos el capítulo a <b id="lead-done-email"></b>. Si no lo ves en un par de minutos, revisa promociones o spam.</span>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="cmp" data-solo="VE" hidden>
+          <div class="sec-head"><h2 id="cmp">Ebook o libro impreso</h2><p>El mismo contenido en los dos formatos. Elige cómo quieres leerlo.</p></div>
+          <div class="cmp-box">
+            <table class="cmp">
+              <thead><tr><th scope="col"><span class="sr-only">Detalle</span></th><th scope="col">Ebook</th><th scope="col">Libro impreso</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Precio</th><td class="num">{pe}</td><td class="num">{pp}</td></tr>
+                <tr><th scope="row">Formato</th><td>PDF de 31 páginas, para leer en el celular o imprimir</td><td>Impreso a color</td></tr>
+                <tr><th scope="row">Entrega</th><td><span class="ok"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={check}></path></svg>Al instante, por email</span></td><td><b>Solo retiro en el local de Caripe.</b> No hacemos envíos a domicilio.</td></tr>
+                <tr><th scope="row">Disponible en</th><td>Todos los países</td><td>Solo Venezuela</td></tr>
+                <tr><th scope="row">Pago</th><td>Pago Móvil, Binance, tarjeta o PayPal</td><td>Pago Móvil, Binance o en el local</td></tr>
+                <tr><th scope="row"><span class="sr-only">Acción</span></th><td><button type="button" class="btn btn-sm" data-buy={ebook.id}>Comprar ebook</button></td><td><button type="button" class="btn btn-sm btn-line" data-buy={print.id}>Reservar impreso</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="taller">
+          <div class="shop">
+            <div class="shop-copy">
+              <h2 id="taller">Lo escribe un taller de fiestas de verdad</h2>
+              <p>En Celebra hacemos piñatas, chupeteras y decoración para cumpleaños en Caripe, estado Monagas. Este libro reúne lo que aprendimos en el taller.</p>
+              <p>Puedes visitarnos, ver el trabajo y retirar ahí tu libro impreso. El impreso solo se retira en el local: no hacemos envíos a domicilio.</p>
+              <a class="link" href="#local">Ver ubicación y horario</a>
+            </div>
+            <div class="shots">
+              <div class="s1"><img src="/img/pinata-real.jpg" alt="Piñata estrella en proceso en el taller Celebra" loading="lazy" /></div>
+              <div class="s2"><div class="photo">Pronto: foto del local</div></div>
+              <div class="s3"><div class="photo">Pronto: una mesa dulce terminada</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="ops">
+          <div class="sec-head">
+            <h2 id="ops">Lo que dicen nuestras clientas</h2>
+            <p>Publicamos solo opiniones reales, y todas están en nuestra ficha de Google Maps, donde puedes leerlas completas. Si ya leíste el libro, nos ayuda mucho que dejes la tuya.</p>
+            <div class="row-btns">
+              <a class="btn btn-sm" href={c.googleMaps} target="_blank" rel="noopener">Ver opiniones en Google</a>
+              <a class="btn btn-sm btn-line" href={c.googleReview} target="_blank" rel="noopener">Dejar mi opinión</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="como">
+          <div class="sec-head"><h2 id="como">Comprar toma un par de minutos</h2></div>
+          <div class="steps">
+            <div class="step"><span class="step-n num">1</span><h3>Toca «Quiero mi libro»</h3><p class="muted">Eliges el formato y la forma de pago en un solo paso, sin crear cuenta.</p></div>
+            <div class="step"><span class="step-n num">2</span><h3>Paga de forma segura</h3><p class="muted">Las tarjetas se procesan en Lemon Squeezy. Nunca vemos tus datos.</p></div>
+            <div class="step"><span class="step-n num">3</span><h3>Recibe tu libro</h3><p class="muted">El ebook y tu recibo llegan a tu email.</p></div>
+          </div>
+          <div class="regions">
+            <div class="ctry"><span class="ctry-l">¿Desde dónde compras?</span>
+              <div class="seg" role="group" aria-label="País">
+                {paises.map((p) => <button type="button" class="seg-b" data-pick-pais={p} aria-pressed="false">{nombrePais[p]}</button>)}
+              </div>
+            </div>
+            {paises.map((p) => (
+              <div class="mgrid" data-solo={p}>
+                {byCountry[p].methods.map((k) => (
+                  <div class="mcard"><span class="mic" style={`background:${M[k].bg};color:${M[k].fg}`}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d={M[k].icon}></path></svg></span><div><b>{M[k].name}</b><span>{M[k].note}</span></div></div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="guar" aria-labelledby="garantia">
+          <div class="seal" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" style="width:40px;height:40px;stroke:#ffffff"><path d="M4 12a8 8 0 0116 0v4a2 2 0 01-2 2h-2v-6h4M4 12v4a2 2 0 002 2h2v-6H4"></path></svg></div>
+          <div class="guar-copy">
+            <h3 id="garantia">Te acompañamos hasta que tengas tu libro</h3>
+            <p>Si el email no te llega, el archivo no abre o no lo puedes descargar, escríbenos por WhatsApp con tu número de pedido y te lo resolvemos. Si no logramos entregártelo, te devolvemos el dinero.</p>
+          </div>
+        </section>
+
+        <section class="sec" id="preguntas" aria-labelledby="faq-h">
+          <div class="faq-wrap">
+            <div class="faq-side">
+              <h2 id="faq-h">Preguntas frecuentes</h2>
+              <p>¿Otra duda? Escríbenos por WhatsApp: <a class="num strong" href={`https://wa.me/${c.whatsapp}`}>{c.whatsappDisplay}</a> para el libro y los pagos, o <a class="num strong" href={`https://wa.me/${c.localWhatsapp}`}>{c.localWhatsappDisplay}</a> para el local de Caripe.</p>
+            </div>
+            <div class="faq">
+              {faqs.map(([q, a], i) => (
+                <details class="faq-i" open={i === 0}>
+                  <summary class="faq-q"><span>{q}</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
+                  <p class="faq-a">{a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="sec" id="local" aria-labelledby="local-h">
+          <div class="sec-head"><h2 id="local-h">Visítanos en Caripe</h2></div>
+          <div class="local">
+            <div class="map" role="img" aria-label="Mapa de referencia del local">
+              <div class="map-roads"></div>
+              <span class="pin"></span>
+              <a class="btn btn-sm btn-line map-cta" href={c.googleMaps} target="_blank" rel="noopener">Ver Celebra en Google Maps</a>
+            </div>
+            <div class="local-info">
+              <div class="local-h">
+                <h3>Taller Celebra</h3>
+                <p class="muted">Caripe, estado Monagas, Venezuela. La ubicación exacta está en Google Maps.</p>
+              </div>
+              <table class="hours">
+                <caption class="sr-only">Horario</caption>
+                <tbody>
+                  <tr><th scope="row">Lunes a sábado</th><td class="num">9:00 a 20:00</td></tr>
+                  <tr><th scope="row">Domingo</th><td>Cerrado</td></tr>
+                </tbody>
+              </table>
+              <p class="muted small">Aquí retiras el libro impreso y tus pedidos de piñatas y chupeteras. No hacemos envíos a domicilio. WhatsApp del local: <a class="num" href={`https://wa.me/${c.localWhatsapp}`}>{c.localWhatsappDisplay}</a></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="final" aria-labelledby="final-h">
+          <img class="cover-img js-cover" src="/img/portada-a.jpg" width="900" height="1355" alt="Portada del libro Fiestas que se recuerdan" loading="lazy" />
+          <div class="final-copy">
+            <h2 id="final-h">Tu próxima fiesta empieza con este libro</h2>
+            <p>Ebook a {pe}. Lo recibes en tu email y pagas con el método de tu país.</p>
+            <button type="button" class="btn" data-buy={ebook.id}>Quiero mi libro</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <Footer />
+
+    <div class="mbar">
+      <div><b><span data-fmt-solo="ebook">Ebook</span><span data-fmt-solo="print" hidden>Libro impreso</span></b><span class="num"><span data-fmt-solo="ebook">{pe}</span><span data-fmt-solo="print" hidden>{pp}</span></span></div>
+      <button type="button" class="btn btn-sm js-main-buy" data-buy={ebook.id}>Comprar</button>
+    </div>
+  </div>
+
+  <Checkout />
+</Base>
+
+<script>
+  import { track } from '../../lib/analytics';
+  import { products, mainProduct } from '../../config/products';
+  import { initPais, elegirPais } from '../../lib/pais';
+  import { wireLeadForm } from '../../lib/lead';
+  import type { CountryCode } from '../../config/site';
+
+  track('ViewContent', { content_ids: [mainProduct.id], value: mainProduct.priceUsd, currency: 'USD' });
+
+  // Portada A/B para los anuncios: ?portada=b muestra la portada "colgada".
+  const portada = new URLSearchParams(location.search).get('portada');
+  if (portada === 'b') {
+    document.querySelectorAll<HTMLImageElement>('.js-cover').forEach((img) => (img.src = '/img/portada-b.jpg'));
+    document.querySelectorAll<HTMLImageElement>('.js-cover-th').forEach((img) => (img.src = '/img/th-portada-b.jpg'));
+  }
+
+  // País: muestra solo lo que corresponde (métodos de pago, formato impreso, avisos).
+  const printId = products.find((p) => p.kind === 'fisico')!.id;
+  let fmt: 'ebook' | 'print' = 'ebook';
+  function applyFmt() {
+    document.querySelectorAll<HTMLElement>('[data-fmt-solo]').forEach((el) => (el.hidden = el.dataset.fmtSolo !== fmt));
+    document.querySelectorAll<HTMLButtonElement>('[data-pick-fmt]').forEach((b) => {
+      const on = b.dataset.pickFmt === fmt;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    document.querySelectorAll<HTMLElement>('.js-main-buy').forEach((b) => (b.dataset.buy = fmt === 'print' ? printId : mainProduct.id));
+  }
+  function applyPais(p: CountryCode) {
+    document.querySelectorAll<HTMLElement>('[data-solo]').forEach((el) => (el.hidden = !el.dataset.solo!.split(' ').includes(p)));
+    document.querySelectorAll<HTMLButtonElement>('[data-pick-pais]').forEach((b) => {
+      const on = b.dataset.pickPais === p;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (p !== 'VE' && fmt === 'print') { fmt = 'ebook'; applyFmt(); }
+  }
+  window.addEventListener('celebra:pais', (e) => applyPais((e as CustomEvent<CountryCode>).detail));
+  applyPais((document.documentElement.dataset.pais as CountryCode) || 'OTRO');
+  initPais();
+
+  // Al cambiar país o formato aparecen o desaparecen secciones arriba; mantenemos el botón tocado en el mismo lugar de la pantalla.
+  function keepPlace(el: HTMLElement, change: () => void) {
+    const before = el.getBoundingClientRect().top;
+    change();
+    const after = el.getBoundingClientRect().top;
+    if (Math.abs(after - before) > 1) window.scrollBy({ top: after - before, behavior: 'instant' as ScrollBehavior });
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const pf = t.closest<HTMLElement>('[data-pick-fmt]');
+    if (pf) { keepPlace(pf, () => { fmt = pf.dataset.pickFmt as 'ebook' | 'print'; applyFmt(); }); return; }
+    const pp = t.closest<HTMLElement>('[data-pick-pais]');
+    if (pp) { keepPlace(pp, () => elegirPais(pp.dataset.pickPais as CountryCode)); return; }
+    const pv = t.closest<HTMLElement>('[data-pick-view]');
+    if (pv) {
+      const v = pv.dataset.pickView!;
+      document.querySelectorAll<HTMLElement>('.stage [data-v]').forEach((el) => (el.hidden = el.dataset.v !== v));
+      document.querySelectorAll<HTMLElement>('[data-pick-view]').forEach((b) => {
+        b.classList.toggle('on', b === pv);
+        b.setAttribute('aria-pressed', b === pv ? 'true' : 'false');
+      });
+    }
+  });
+
+  const form = document.getElementById('lead-form') as HTMLFormElement;
+  wireLeadForm(form, (email) => {
+    form.hidden = true;
+    document.getElementById('lead-done-email')!.textContent = email;
+    document.getElementById('lead-done')!.hidden = false;
+  });
+</script>
+
+<style is:global>
+  [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .pg { --ink:#16171a; --muted:#5c6070; --line:#e3e5ea; --panel:#f4f5f7; --soft:#fdeaf2; --ok:#1a7f4b; --accent:#c2185b; font-family:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif; color:var(--ink); background:#ffffff; font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .pg *{box-sizing:border-box}
+  .pg ::selection{background:var(--soft);color:var(--ink)}
+  .pg a{color:var(--ink)}
+  .pg .wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .pg h1,.pg h2,.pg h3{margin:0;font-weight:800;letter-spacing:-0.025em;line-height:1.08;text-wrap:balance;font-family:inherit}
+  .pg h2{font-size:clamp(30px,4vw,46px)}
+  .pg h3{font-size:20px;letter-spacing:-0.01em;line-height:1.25;font-weight:700}
+  .pg p{margin:0}
+  .pg .muted{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums}
+  .strong{font-weight:700;color:var(--ink)}
+  .small{font-size:15px}
+  .sec{padding-top:112px}
+  .sec-head{display:flex;flex-direction:column;gap:14px;max-width:720px;margin-bottom:44px}
+  .sec-head p{font-size:19px;color:var(--muted)}
+  .row-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .pg .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;border-radius:12px;border:0;background:var(--accent);color:#ffffff;font:700 17px/1 'Figtree',system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease,filter .2s ease;white-space:nowrap}
+  .pg .btn:hover{color:#ffffff;filter:brightness(1.06);box-shadow:0 10px 24px -12px var(--accent);transform:none}
+  .pg .btn:active{transform:scale(.985)}
+  .pg .btn:focus-visible,.opt:focus-visible,.thumb:focus-visible,.faq-q:focus-visible,.link:focus-visible,.seg-b:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+  .pg .btn-line{background:#ffffff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+  .pg .btn-line:hover{color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);filter:none}
+  .pg .btn-sm{min-height:42px;padding:0 18px;font-size:15px;border-radius:10px}
+  .link{color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;text-decoration-thickness:2px}
+  .link:hover{text-decoration-color:var(--ink)}
+  .ico{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+  .announce{background:var(--ink);color:#ffffff;font-size:14px;text-align:center;padding:10px 20px}
+  .nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.6) blur(12px);-webkit-backdrop-filter:saturate(1.6) blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;gap:32px;height:68px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-0.03em;text-decoration:none;color:var(--ink);margin-right:auto}
+  .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center}
+  .nav-links{display:flex;gap:28px;font-size:15px;font-weight:600}
+  .pg .nav-links a{text-decoration:none;color:var(--muted)}
+  .pg .nav-links a:hover{color:var(--ink)}
+
+  .hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;padding-top:40px;align-items:start}
+  .gallery{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .stage{position:relative;aspect-ratio:1/1;max-width:100%;border-radius:16px;background:var(--panel);display:grid;place-items:center;overflow:hidden}
+  .thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .thumb{position:relative;aspect-ratio:1/1;border-radius:12px;background:var(--panel);border:2px solid transparent;cursor:pointer;padding:0;overflow:hidden;font:600 13px/1.25 'Figtree',sans-serif;color:var(--ink);text-align:center}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85;transition:opacity .15s ease}
+  .thumb span{position:absolute;left:6px;right:6px;bottom:6px;padding:5px 6px;border-radius:8px;background:rgba(255,255,255,.92)}
+  .thumb.on{border-color:var(--ink)}
+  .thumb.on img,.thumb:hover img{opacity:1}
+  .thumb.on span{font-weight:800}
+  @media (max-width:720px){.thumb span{font-size:11px;padding:4px;left:4px;right:4px;bottom:4px}}
+  .thumb:hover{border-color:var(--line)}
+  .thumb.on:hover{border-color:var(--ink)}
+  .cover-img{width:72%;height:auto;aspect-ratio:2/3;object-fit:cover;border-radius:4px 10px 10px 4px;box-shadow:0 30px 60px -28px rgba(22,23,26,.55),0 4px 10px -4px rgba(22,23,26,.25);display:block}
+  .stage .cover-img{position:absolute;top:6%;bottom:6%;left:50%;transform:translateX(-50%);height:88%;width:auto;max-width:none}
+  .real{position:relative;width:100%;height:100%}
+  .real img{width:100%;height:100%;object-fit:cover;display:block}
+  .real span{position:absolute;left:16px;bottom:16px;right:16px;background:rgba(255,255,255,.92);border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px;color:var(--ink)}
+  .devices{position:relative;width:92%;height:84%}
+  .tablet{position:absolute;left:0;top:4%;width:64%;aspect-ratio:3/4;border-radius:22px;background:#1d1a22;padding:3.2%;box-shadow:0 30px 60px -28px rgba(22,23,26,.55)}
+  .phone{position:absolute;right:2%;bottom:0;width:34%;aspect-ratio:9/18;border-radius:26px;background:#1d1a22;padding:2.6%;box-shadow:0 30px 60px -24px rgba(22,23,26,.6)}
+  .tablet img,.phone img{width:100%;height:100%;object-fit:cover;object-position:50% 0;border-radius:12px;display:block;background:#ffffff}
+  .phone img{border-radius:18px;object-fit:contain;object-position:50% 0}
+  .book-name{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .incl{font-size:15px;color:var(--muted);margin-top:-10px}
+  .incl b{color:var(--ink)}
+  .spread-k{font-weight:700;color:var(--accent);font-size:clamp(9px,.9vw,11px)}
+  .sheet{height:86%;aspect-ratio:8.5/11;background:#ffffff;border-radius:4px;box-shadow:0 24px 50px -26px rgba(22,23,26,.45);overflow:hidden}
+  .sheet img{width:100%;height:100%;object-fit:cover;display:block}
+  .sheet-h{font-weight:800;font-size:clamp(14px,1.7vw,22px);letter-spacing:-0.02em}
+  .chk{display:flex;align-items:center;gap:9px;color:var(--ink);font-weight:500}
+  .box{width:1.15em;height:1.15em;border:1.5px solid var(--ink);border-radius:3px;flex:none}
+  .box.done{background:var(--ink);box-shadow:inset 0 0 0 2px #ffffff}
+  .photo{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:24px;font-weight:600;font-size:15px;background:repeating-linear-gradient(135deg,var(--panel) 0 14px,#eceef2 14px 28px)}
+
+  .buy{display:flex;flex-direction:column;gap:22px;position:sticky;top:92px}
+  .buy-head{display:flex;flex-direction:column;gap:14px}
+  .buy h1{font-size:clamp(36px,4.2vw,52px)}
+  .buy .lead{font-size:19px;color:var(--muted)}
+  .price{display:flex;align-items:baseline;gap:12px}
+  .price b{font-size:34px;font-weight:800;letter-spacing:-0.02em}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt-label{font-weight:700;font-size:15px}
+  .opt{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;width:100%;text-align:left;padding:16px 18px;border-radius:12px;background:#ffffff;border:1.5px solid var(--line);cursor:pointer;font:inherit;color:var(--ink);transition:border-color .15s ease}
+  .opt:hover{border-color:#c9ccd4}
+  .opt.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.5px solid #b9bdc7;display:grid;place-items:center}
+  .opt.on .dot{border-color:var(--ink)}
+  .opt.on .dot::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--ink)}
+  .opt-t{font-weight:700;display:block}
+  .opt-s{font-size:14px;color:var(--muted);display:block;margin-top:2px}
+  .opt-p{font-weight:700}
+  .ship{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--panel);font-size:15px}
+  .ship .ico{color:var(--ok);margin-top:1px}
+  .pays{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+  .pays-set{display:contents}
+  .pill{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:13px;background:#ffffff}
+  .buy-actions{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .buy-actions .link{align-self:center;font-size:15px}
+
+  .trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:72px;padding:28px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .trust-i{display:flex;gap:14px;align-items:flex-start;min-width:0}
+  .trust-i .ico{width:26px;height:26px}
+  .trust-i b{display:block;font-size:16px}
+  .trust-i span{font-size:14px;color:var(--muted)}
+  .trust-i .trust-pay{display:block;font-size:inherit;color:inherit}
+  .trust-i .trust-pay span{display:block}
+
+  .bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+  .tile{border-radius:16px;padding:36px;display:flex;flex-direction:column;gap:14px;min-width:0;overflow:hidden}
+  .t-a{grid-column:span 7;background:var(--panel)}
+  .t-b{grid-column:span 5;background:#ffffff;border:1.5px solid var(--line)}
+  .t-c{grid-column:span 5;background:var(--soft);padding:0}
+  .t-d{grid-column:span 7;background:#fff6d8}
+  .t-d .muted{color:#6b5a2a}
+  .in-book{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#ffffff;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+  .ex-tag{font-size:13px;font-weight:700;color:var(--muted);margin-top:6px}
+  .tpl-note{font-size:14px;color:var(--muted);margin-top:4px}
+  .parts{margin-top:18px;flex:1;min-height:260px;background:#ffffff}
+  .parts img{width:100%;height:100%;object-fit:contain;display:block}
+  .weeks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .wk{background:#ffffff;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+  .wk b{font-size:13px;color:var(--accent)}
+  .wk span{font-weight:600;font-size:15px}
+  .tpl{display:flex;flex-direction:column;margin-top:8px;font-size:15px}
+  .tpl-r{display:grid;grid-template-columns:1fr auto;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .tpl-r:last-child{border-bottom:0;font-weight:800}
+  .c-inner{padding:36px 36px 0;display:flex;flex-direction:column;gap:14px}
+  .prints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+  .print{background:#ffffff;color:var(--ink);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+  .print b{font-size:14px}
+
+  .who{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .who-c{border:1.5px solid var(--line);border-radius:16px;padding:36px;display:flex;flex-direction:column;gap:18px}
+  .who-ic{width:52px;height:52px;border-radius:14px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
+  .who-ic .ico{width:26px;height:26px}
+  .ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+  .ticks li{display:flex;gap:12px;align-items:flex-start}
+  .ticks .ico{color:var(--ok);width:20px;height:20px;margin-top:3px}
+
+  .toc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px}
+  .toc-r{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--line)}
+  .toc-n{font-weight:800;color:var(--accent);font-size:15px}
+  .toc-t{font-weight:700;font-size:18px}
+
+  .lead-band{margin-top:112px;background:var(--soft);border-radius:20px;padding:56px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center;scroll-margin-top:90px}
+  .lead-band h2{font-size:clamp(28px,3.2vw,40px)}
+  .lead-copy{display:flex;flex-direction:column;gap:16px}
+  .lead-copy p{font-size:18px;color:#5b3a49}
+  .form{display:flex;flex-direction:column;gap:14px}
+  .pg .field{display:flex;flex-direction:column;gap:6px}
+  .pg .field label{font-weight:700;font-size:14px}
+  .pg .input{height:52px;border-radius:12px;border:1.5px solid #e6c3d3;background:#ffffff;padding:0 16px;font:500 16px 'Figtree',sans-serif;color:var(--ink)}
+  .pg .input::placeholder{color:#7a7e8c}
+  .pg .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(194,24,91,.15)}
+  .form-note{font-size:13px;color:#6b4757}
+  .form-note a{color:#6b4757}
+  .err{font-size:14px;color:var(--accent);font-weight:700}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .lead-done{display:flex;flex-direction:column;gap:8px;padding:22px;border-radius:16px;background:#e9f6ee}
+
+  .cmp-box{overflow-x:auto;border:1.5px solid var(--line);border-radius:16px}
+  .cmp{width:100%;border-collapse:collapse;min-width:640px;font-size:16px}
+  .cmp th,.cmp td{text-align:left;padding:20px 28px;border-bottom:1px solid var(--line);vertical-align:top}
+  .cmp thead th{font-size:20px;font-weight:800;letter-spacing:-0.01em;background:var(--panel)}
+  .cmp tbody th{font-weight:600;color:var(--muted);width:24%}
+  .cmp tr:last-child td,.cmp tr:last-child th{border-bottom:0}
+  .cmp .ok{display:inline-flex;gap:8px;align-items:center}
+  .cmp .ok .ico{color:var(--ok);width:18px;height:18px}
+
+  .shop{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center}
+  .shop-copy{display:flex;flex-direction:column;gap:18px}
+  .shop-copy p{font-size:18px;color:var(--muted)}
+  .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:220px 220px;gap:14px}
+  .shots > div{border-radius:16px;overflow:hidden}
+  .shots .s1{grid-row:span 2}
+  .shots img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .ctry{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .ctry-l{font-weight:700;font-size:15px;margin-right:6px}
+  .seg{display:inline-grid;grid-auto-flow:column;gap:4px;padding:4px;border-radius:12px;background:#ffffff;border:1px solid var(--line)}
+  .seg-b{min-height:40px;padding:0 16px;border-radius:9px;border:0;background:transparent;font:600 14px 'Figtree',sans-serif;color:var(--muted);cursor:pointer}
+  .seg-b.on{background:var(--ink);color:#ffffff}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .mcard{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:12px;background:#ffffff;border:1px solid var(--line)}
+  .mic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+  .mcard b{display:block;font-size:15px}
+  .mcard span{font-size:13px;color:var(--muted)}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .step{display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:3px solid var(--ink)}
+  .step-n{font-weight:800;font-size:15px;color:var(--accent)}
+  .regions{display:flex;flex-direction:column;gap:16px;margin-top:40px;padding:28px;border-radius:16px;background:var(--panel)}
+
+  .guar{display:flex;gap:28px;align-items:center;padding:40px;border-radius:20px;border:1.5px solid var(--line);margin-top:112px}
+  .guar-copy{display:flex;flex-direction:column;gap:10px}
+  .guar-copy h3{font-size:24px}
+  .seal{width:96px;height:96px;flex:none;border-radius:50%;background:var(--ink);color:#ffffff;display:grid;place-items:center}
+  .guar p{color:var(--muted);font-size:17px;max-width:62ch}
+
+  .faq-wrap{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:56px;align-items:start}
+  .faq-side{display:flex;flex-direction:column;gap:16px;position:sticky;top:100px}
+  .faq-side p{color:var(--muted)}
+  .faq{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+  .faq-i{border-bottom:1px solid var(--line)}
+  .faq-q{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0;cursor:pointer;font:700 19px/1.3 'Figtree',sans-serif;color:var(--ink);list-style:none}
+  .faq-q::-webkit-details-marker{display:none}
+  .faq-q .ico{transition:transform .2s ease}
+  .faq-i[open] .faq-q .ico{transform:rotate(45deg)}
+  .faq-a{padding:0 48px 24px 0;color:var(--muted);font-size:17px}
+
+  .local{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:20px}
+  .map{min-height:380px;border-radius:16px;overflow:hidden;position:relative;background:#e9edf1}
+  .map-roads{position:absolute;inset:0;background:linear-gradient(105deg,transparent 46%,#ffffff 46% 49%,transparent 49%),linear-gradient(12deg,transparent 58%,#ffffff 58% 61%,transparent 61%),linear-gradient(170deg,transparent 30%,#f6f7f9 30% 32%,transparent 32%)}
+  .pin{position:absolute;left:47%;top:42%;width:44px;height:44px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);box-shadow:0 10px 20px -8px rgba(22,23,26,.5)}
+  .map-cta{position:absolute;left:20px;bottom:20px}
+  .local-info{border-radius:16px;background:var(--panel);padding:36px;display:flex;flex-direction:column;gap:20px}
+  .local-h{display:flex;flex-direction:column;gap:6px}
+  .hours{width:100%;border-collapse:collapse;font-size:16px}
+  .hours th,.hours td{padding:10px 0;border-bottom:1px solid var(--line);text-align:left;font-weight:500}
+  .hours td{text-align:right}
+  .hours tr:last-child th,.hours tr:last-child td{border-bottom:0}
+
+  .final{margin-top:112px;background:var(--panel);border-radius:24px;padding:64px;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:56px;align-items:center}
+  .final .cover-img{height:auto;width:72%;justify-self:center}
+  .final-copy{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+  .final-copy h2{font-size:clamp(32px,4vw,52px)}
+  .final-copy p{font-size:19px;color:var(--muted)}
+
+  .mbar{display:none}
+
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr;gap:32px}
+    .buy{position:static}
+    .trust{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .t-a,.t-b,.t-c,.t-d{grid-column:span 12}
+    .lead-band,.shop,.faq-wrap,.local,.final{grid-template-columns:1fr}
+    .faq-side{position:static}
+    .final .cover-img{width:46%;justify-self:start}
+  }
+  @media (max-width:720px){
+    .pg{font-size:16px}
+    .nav-links{display:none}
+    .nav-in{gap:16px}
+    .sec{padding-top:80px}
+    .who,.toc,.steps{grid-template-columns:1fr}
+    .prints{grid-template-columns:1fr 1fr}
+    .weeks{grid-template-columns:1fr}
+    .tile,.who-c,.local-info{padding:26px}
+    .c-inner{padding:26px 26px 0}
+    .lead-band,.final{padding:28px;border-radius:18px}
+    .lead-band{margin-top:80px}
+    .guar{flex-direction:column;align-items:flex-start;padding:28px;margin-top:80px}
+    .final{margin-top:80px}
+    .trust{grid-template-columns:1fr;gap:18px}
+    .shots{grid-template-rows:160px 160px}
+    .faq-a{padding-right:0}
+    .map{min-height:260px}
+    .mbar{display:flex;position:sticky;bottom:0;z-index:30;align-items:center;justify-content:space-between;gap:16px;padding:12px max(20px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:#ffffff;border-top:1px solid var(--line);box-shadow:0 -10px 24px -18px rgba(22,23,26,.4)}
+    .mbar b{display:block;font-size:15px}
+    .mbar .num{font-size:13px;color:var(--muted)}
+  }
+  @media (prefers-reduced-motion:reduce){.pg *{transition:none!important}}
+</style>

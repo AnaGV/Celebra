@@ -78,7 +78,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ $json.event_time }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://somoscelebrave.com/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"{{ $json.moneda }}\", \"value\": {{ $json.total_usd }}, \"content_name\": \"{{ $json.producto }}\" }\n  }]\n}",
+        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ $json.event_time }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://somoscelebrave.com/libro/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"{{ $json.moneda }}\", \"value\": {{ $json.total_usd }}, \"content_name\": \"{{ $json.producto }}\" }\n  }]\n}",
         "options": {}
       },
       "id": "a4",

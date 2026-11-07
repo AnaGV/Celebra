@@ -1,6 +1,6 @@
 ---
-import Base from '../layouts/Base.astro';
-import '../styles/mini.css';
+import Base from '../../layouts/Base.astro';
+import '../../styles/mini.css';
 const check = 'M20 6L9 17l-5-5';
 const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
 const share = encodeURIComponent('Mira este capítulo gratis para organizar la fiesta de los niños sin gastar de más: ') ;
@@ -57,7 +57,7 @@ const share = encodeURIComponent('Mira este capítulo gratis para organizar la f
         <h2 style="font-size:22px">Mientras tanto</h2>
         <a class="btn btn-line" href="https://instagram.com/somoscelebra.ve" target="_blank" rel="noopener">Ver las piñatas en Instagram</a>
         <a class="btn btn-line" id="rg-share" href={`https://wa.me/?text=${share}`}>Compartir con una amiga por WhatsApp</a>
-        <a class="btn" href="/">Ver el libro completo</a>
+        <a class="btn" href="/libro/">Ver el libro completo</a>
       </div>
     </main>
     <p class="foot wrap">Celebra · Caripe, Monagas, Venezuela · <a href="/privacidad">Privacidad</a></p>
@@ -65,16 +65,16 @@ const share = encodeURIComponent('Mira este capítulo gratis para organizar la f
 </Base>
 
 <script>
-  import { initPais } from '../lib/pais';
-  import { wireLeadForm } from '../lib/lead';
-  import type { CountryCode } from '../config/site';
+  import { initPais } from '../../lib/pais';
+  import { wireLeadForm } from '../../lib/lead';
+  import type { CountryCode } from '../../config/site';
 
   const apply = (p: CountryCode) => document.querySelectorAll<HTMLElement>('[data-solo]').forEach((el) => (el.hidden = el.dataset.solo !== p));
   window.addEventListener('celebra:pais', (e) => apply((e as CustomEvent<CountryCode>).detail));
   initPais();
 
   const share = document.getElementById('rg-share') as HTMLAnchorElement;
-  share.href += encodeURIComponent(location.origin + '/regalo');
+  share.href += encodeURIComponent(location.origin + '/libro/regalo/');
 
   wireLeadForm(document.getElementById('form') as HTMLFormElement, (email) => {
     document.getElementById('rg-form-view')!.hidden = true;

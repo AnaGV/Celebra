@@ -349,7 +349,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ Math.floor(Date.now() / 1000) }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://{{ $env.SITE_DOMAIN }}/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"USD\", \"value\": {{ $json.total_usd }}, \"content_name\": \"Fiestas que se recuerdan\" }\n  }]\n}",
+        "jsonBody": "={\n  \"data\": [{\n    \"event_name\": \"Purchase\",\n    \"event_time\": {{ Math.floor(Date.now() / 1000) }},\n    \"event_id\": \"{{ $json.identificador }}\",\n    \"action_source\": \"website\",\n    \"event_source_url\": \"https://{{ $env.SITE_DOMAIN }}/libro/\",\n    \"user_data\": { \"em\": [\"{{ $json.email_hash }}\"] },\n    \"custom_data\": { \"currency\": \"USD\", \"value\": {{ $json.total_usd }}, \"content_name\": \"Fiestas que se recuerdan\" }\n  }]\n}",
         "options": {}
       },
       "id": "d11",
