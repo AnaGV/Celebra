@@ -214,7 +214,7 @@
 }
 
 /* ── Marca: logo e ilustraciones ── */
-.h-brand img{height:54px;width:auto;display:block}
+.h-brand img{height:60px;width:auto;display:block}
 .h-nav-in{height:76px}
 .h-intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:32px;align-items:center;margin-bottom:28px}
 .h-intro .h-top-head{margin-bottom:0}
@@ -227,7 +227,7 @@
 .h-float{animation:h-bob 5s ease-in-out infinite}
 @keyframes h-bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-1.5deg)}}
 @media (prefers-reduced-motion: reduce){.h-logo-big,.h-float{animation:none}}
-@media (max-width:980px){.h-intro{grid-template-columns:1fr}.h-intro-art{order:-1}.h-logo-big{max-width:300px}.h-brand img{height:46px}.h-nav-in{height:66px}}
+@media (max-width:980px){.h-intro{grid-template-columns:1fr}.h-intro-art{order:-1}.h-logo-big{max-width:300px}.h-brand img{height:50px}.h-nav-in{height:66px}}
 @media (max-width:560px){.h-intro-art{display:none}}
 @media (max-width:980px){.h-banner.big .h-banner-art{width:150px}}
 @media (max-width:560px){.h-banner.big .h-banner-art{width:110px}}
