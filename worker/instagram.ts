@@ -88,7 +88,7 @@ export function conectar(env: any): Response {
   });
 }
 
-async function buscarCuenta(token: string): Promise<{ id: string; username: string }[]> {
+async function buscarCuenta(token: string, env: any): Promise<{ cuentas: { id: string; username: string }[]; notas: string[] }> {
   // El token de usuario del sistema puede ver la cuenta por varios caminos según cómo Meta la asignó.
   const ids = new Set<string>();
   const notas: string[] = [];
@@ -96,6 +96,16 @@ async function buscarCuenta(token: string): Promise<{ id: string; username: stri
     try { for (const id of sacar(await api(path, token))) if (id) ids.add(String(id)); }
     catch (e: any) { notas.push(`${path.split('?')[0]}: ${e?.message}`); }
   };
+  // La vía más segura: el propio token dice a qué cuentas de Instagram tiene permiso (granular_scopes).
+  try {
+    const u = new URL(G + '/debug_token');
+    u.searchParams.set('input_token', token);
+    u.searchParams.set('access_token', `${env.IG_APP_ID}|${env.IG_APP_SECRET}`);
+    const d: any = await (await fetch(u.toString())).json();
+    if (d.error) notas.push('debug_token: ' + d.error.message);
+    for (const g of d?.data?.granular_scopes || []) if (String(g.scope).startsWith('instagram')) for (const id of g.target_ids || []) ids.add(String(id));
+    notas.push('tipo de token: ' + (d?.data?.type || '?') + ', permisos: ' + (d?.data?.scopes || []).join(' '));
+  } catch (e: any) { notas.push('debug_token: ' + e?.message); }
   await probar('/me/assigned_instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
   await probar('/me/instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
   await probar('/me/accounts?fields=instagram_business_account', (d) => (d.data || []).map((x: any) => x?.instagram_business_account?.id));
@@ -115,7 +125,7 @@ async function buscarCuenta(token: string): Promise<{ id: string; username: stri
     catch (e: any) { notas.push(`/${id}: ${e?.message}`); out.push({ id, username: '' }); }
   }
   console.log('ig cuentas', JSON.stringify({ encontradas: out, notas }));
-  return out;
+  return { cuentas: out, notas };
 }
 
 export async function callback(request: Request, env: any, ctx: any): Promise<Response> {
@@ -137,11 +147,12 @@ export async function callback(request: Request, env: any, ctx: any): Promise<Re
   if (!d.access_token) return html('No se pudo conectar', `<p>Meta respondió: ${String(d?.error?.message || r.status).replace(/[<>&]/g, '')}</p>`, 400);
 
   const esperado = String(env.IG_USERNAME || 'somoscelebra.ve').toLowerCase();
-  const cuentas = await buscarCuenta(d.access_token);
+  const { cuentas, notas } = await buscarCuenta(d.access_token, env);
   const c = cuentas.find((x) => x.username.toLowerCase() === esperado) || (cuentas.length === 1 && !cuentas[0].username ? cuentas[0] : null);
   if (!c) {
     const vistas = cuentas.map((x) => '@' + x.username).join(', ') || 'ninguna';
-    return html('Cuenta no permitida', `<p>Solo se puede conectar @${esperado}. Meta devolvió: ${vistas.replace(/[<>&]/g, '')}.</p>`, 403);
+    const det = notas.map((n) => `<li>${n.replace(/[<>&]/g, '').slice(0, 300)}</li>`).join('');
+    return html('Cuenta no permitida', `<p>Solo se puede conectar @${esperado}. Meta devolvió: ${vistas.replace(/[<>&]/g, '')}.</p><details open><summary>Detalle técnico (no contiene claves)</summary><ul style="font-size:13px;color:#5c6070">${det}</ul></details>`, 403);
   }
   const cuenta: Cuenta = { token: d.access_token, igId: c.id, username: c.username || esperado, conectado: new Date().toISOString() };
   await guardar(env, K_TOKEN, cuenta);
