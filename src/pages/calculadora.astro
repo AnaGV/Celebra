@@ -49,19 +49,28 @@ import '../styles/home.css';
     <form class="add" id="add-form" novalidate>
       <div class="fld"><label for="add-name">Agregar otro gasto</label><input id="add-name" type="text" placeholder="Ej. Fotógrafo, inflable, payaso" maxlength="40"></div>
       <div class="fld"><label for="add-price">Precio (si lo sabes)</label><input id="add-price" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></div>
-      <button type="submit" class="btn">Agregar</button>
+      <button type="submit" class="btn btn-add">+ Agregar</button>
     </form>
     <p class="note" id="calc-note"></p>
-    <div class="actions-end"><button type="button" class="btn" data-share>Enviar mi presupuesto por WhatsApp</button></div>
+    <div class="actions-end"><button type="button" class="btn btn-wa" data-share>Enviar mi presupuesto por WhatsApp</button></div>
   </div>
 </div>
 
-<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/libro/regalo/">Quiero el capítulo gratis</a></div>
+<div class="cta">
+  <img src="/img/marca/regalo.webp" alt="" width="520" height="405" loading="lazy" />
+  <div class="cta-txt">
+    <span class="cta-k">Gratis · en PDF</span>
+    <b>¿Prefieres tu presupuesto en papel?</b>
+    <p>Esta calculadora sale del capítulo 2 de nuestro libro <i>Fiestas que se recuerdan</i>. Te lo regalamos para que lo tengas a mano: trae una <b>hoja de presupuesto para imprimir</b> y anotar a lápiz, y un <b>ejemplo resuelto de una fiesta para 15 niños</b>, con cuánto se gastó en cada cosa.</p>
+    <p class="cta-s">Solo dejas tu correo y te llega en un minuto.</p>
+  </div>
+  <a href="/libro/regalo/">Quiero el capítulo gratis</a>
+</div>
 </main>
     </div>
 <div class="calc-dock" id="calc-dock" aria-hidden="true">
   <div class="d-txt"><span class="d-l" id="d-l">Te queda</span><span class="d-v" id="d-v">—</span></div>
-  <button type="button" class="btn" data-share tabindex="-1">Enviar por WhatsApp</button>
+  <button type="button" class="btn btn-wa" data-share tabindex="-1">Enviar por WhatsApp</button>
 </div>
     <Footer />
   </div>
@@ -128,9 +137,20 @@ import '../styles/home.css';
 .copied{color:var(--ok);font-weight:700;font-size:14px}
 .note{margin:0;color:var(--muted);font-size:14px}
 .btn:focus-visible,.btn-sec:focus-visible,.del:focus-visible,.cta a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:24px;border-radius:18px;background:var(--lila);color:var(--lila-ink);margin-top:8px}
-.cta b{color:var(--lila-ink)}
-.cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
+.cta{display:flex;gap:24px;align-items:center;padding:28px;border-radius:20px;background:#fbe6ee;color:#3d3554;margin-top:8px}
+.cta img{width:110px;height:auto;flex:none}
+.cta-txt{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.cta-k{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#b8285f}
+.cta-txt>b{font-size:22px;font-weight:800;letter-spacing:-.01em;color:#2b1d5c;line-height:1.15}
+.cta-txt p{margin:0;font-size:16px}
+.cta-txt p b{color:#2b1d5c}
+.cta-s{font-size:14px!important;color:var(--muted)}
+.btn-add{background:#fff;color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.btn-add:hover{color:var(--accent);background:#f7f3ff}
+.btn-wa{background:#1a7f4b}
+.btn-wa:hover{background:#156b3f}
+.cta>a{flex:none;background:#b8285f;color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
+@media (max-width:760px){.cta{flex-direction:column;align-items:flex-start;padding:24px 20px;gap:14px}.cta img{width:80px}.cta>a{width:100%;text-align:center}}
 @media (max-width:860px){.calc{grid-template-columns:1fr}.side{position:static}}
 @media (max-width:620px){
   .cols{display:none}
