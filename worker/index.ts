@@ -8,6 +8,7 @@ import { onRequestPost as codigo } from '../functions/api/codigo';
 import { onRequestPost as orders } from '../functions/api/orders';
 import { subirFoto, verFoto, borrarFoto } from './foto';
 import { registrarBaja, consultarBaja } from './baja';
+import { enviarContacto } from './contacto';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
   '/api/lead': lead,
@@ -22,6 +23,10 @@ export default {
     if (handler) {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return handler({ request, env, waitUntil: ctx.waitUntil.bind(ctx), params: {}, data: {} });
+    }
+    if (url.pathname === '/api/contacto') {
+      if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
+      return enviarContacto(request, env);
     }
     if (url.pathname === '/api/baja') {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });

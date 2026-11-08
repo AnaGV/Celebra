@@ -10,7 +10,9 @@
   },
   "observability": { "enabled": true },
   // Fotos de referencia del formulario: se borran al abrirlas o a las 72 horas.
-  "r2_buckets": [{ "binding": "FOTOS", "bucket_name": "celebra-fotos-cotizaciones" }]
+  "r2_buckets": [{ "binding": "FOTOS", "bucket_name": "celebra-fotos-cotizaciones" }],
+  // Formulario de contacto: envía al Gmail del negocio (dirección verificada en Email Routing).
+  "send_email": [{ "name": "CONTACTO", "destination_address": "somoscelebra.ve@gmail.com" }]
   // Los secretos (N8N_BASE_URL, CELEBRA_FORM_KEY, TURNSTILE_SECRET) se cargan en
   // Cloudflare > Workers > celebra > Configuración > Variables y secretos. Nunca aquí.
 }

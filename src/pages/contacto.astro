@@ -18,7 +18,7 @@ const mapa = loc.mapsEmbedUrl || `https://maps.google.com/maps?cid=${cid}&hl=es&
         <div class="h-top-head rv">
           <span class="h-kicker">Contacto</span>
           <h1>¿En qué te <em>ayudamos?</em></h1>
-          <p class="h-lead">Escríbenos por el formulario, por WhatsApp o visítanos en el taller. Te respondemos lo antes posible en nuestro horario de atención.</p>
+          <p class="h-lead">Escríbenos por el formulario y te responderemos a tu correo. Si es urgente, háblanos por WhatsApp o visítanos en el taller.</p>
         </div>
       </section>
 
@@ -30,12 +30,10 @@ const mapa = loc.mapsEmbedUrl || `https://maps.google.com/maps?cid=${cid}&hl=es&
             <label>Teléfono<input type="tel" name="telefono" autocomplete="tel" inputmode="tel" placeholder="+58 414…" /></label>
           </div>
           <label>¿En qué podemos ayudarte?<textarea name="mensaje" rows="5" required placeholder="Cuéntanos qué necesitas"></textarea></label>
-          <button class="h-btn" type="submit">
-            <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
-            Enviar por WhatsApp
-          </button>
+          <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
+          <button class="h-btn" type="submit">Enviar mensaje</button>
           <p class="h-form-err" role="alert" hidden></p>
-          <div class="h-form-ok" role="status" hidden><b>¡Listo! Tu mensaje se abrió en WhatsApp.</b><span>¿No se abrió? <a class="h-ok-wa" href="#" target="_blank" rel="noopener">Ábrelo de nuevo</a>.</span></div>
+          <div class="h-form-ok" role="status" hidden><b>¡Gracias! Recibimos tu mensaje.</b><span>Te responderemos a tu correo lo antes posible.</span></div>
         </form>
 
         <div class="h-contact-info">
@@ -84,24 +82,31 @@ const mapa = loc.mapsEmbedUrl || `https://maps.google.com/maps?cid=${cid}&hl=es&
   </div>
 </Base>
 
-<script define:vars={{ waNum: c.localWhatsapp }}>
-  const f = document.getElementById('contacto-form');
-  f.addEventListener('submit', (e) => {
+<script>
+  const f = document.getElementById('contacto-form') as HTMLFormElement;
+  const t0 = Date.now();
+  const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  f.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(f));
-    const err = f.querySelector('.h-form-err');
-    const falta = [];
-    if (!String(d.nombre || '').trim()) falta.push('tu nombre');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(d.correo || '').trim())) falta.push('un correo válido');
-    if (!String(d.mensaje || '').trim()) falta.push('tu mensaje');
+    const d = Object.fromEntries(new FormData(f)) as Record<string, string>;
+    const err = f.querySelector<HTMLElement>('.h-form-err')!;
+    const ok = f.querySelector<HTMLElement>('.h-form-ok')!;
+    const falta: string[] = [];
+    if (!(d.nombre || '').trim()) falta.push('tu nombre');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((d.correo || '').trim())) falta.push('un correo válido');
+    if (!(d.mensaje || '').trim()) falta.push('tu mensaje');
     if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
-    err.hidden = true;
-    const txt = `¡Hola Celebra! Les escribo desde la página.\n• Nombre: ${String(d.nombre).trim()}\n• Correo: ${String(d.correo).trim()}` + (String(d.telefono || '').trim() ? `\n• Teléfono: ${String(d.telefono).trim()}` : '') + `\n\n${String(d.mensaje).trim()}`;
-    const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
-    f.querySelector('.h-ok-wa').href = wa;
-    f.reset();
-    f.querySelector('.h-form-ok').hidden = false;
-    if (matchMedia('(pointer: coarse)').matches) location.href = wa;
-    else window.open(wa, '_blank', 'noopener');
+    err.hidden = true; ok.hidden = true;
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      const r = await fetch('/api/contacto', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...d, t: t0 }) });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(out.error || 'No pudimos enviarlo ahora. Inténtalo de nuevo.');
+      f.reset();
+      ok.hidden = false;
+    } catch (x) {
+      err.textContent = (x as Error).message; err.hidden = false;
+    }
+    btn.disabled = false; btn.textContent = 'Enviar mensaje';
   });
 </script>

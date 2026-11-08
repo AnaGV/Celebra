@@ -343,3 +343,4 @@
 .h-trust{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .h-trust li{padding:8px 14px;border-radius:999px;background:#ffffff;font-weight:700;font-size:14px;color:var(--plum)}
 @media (max-width:980px){.h-contact,.h-about{grid-template-columns:1fr}.h-about{padding:28px 22px;gap:20px}.h-about img{max-width:180px}.h-map{aspect-ratio:4/3}}
+.h-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0}

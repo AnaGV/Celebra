@@ -8,7 +8,6 @@ import { mainProduct } from '../config/products';
 import { tipos, packs, servicios } from '../config/celebra';
 
 const c = site.contact;
-const loc = site.location;
 const wa = (txt: string) => `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(txt)}`;
 const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
 const propios = servicios.filter((s) => s.kind === 'propio');
@@ -190,30 +189,6 @@ const hoy = new Date().toISOString().slice(0, 10);
               <a class="h-btn" href="/libro/">Ver el libro</a>
               <a class="h-btn h-btn-line" href="/libro/regalo/">Capítulo de regalo</a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="h-sec h-wrap" id="local" aria-labelledby="t-local">
-        <div class="h-head rv">
-          <span class="h-kicker">Visítanos</span>
-          <h2 id="t-local">Nuestro local en Caripe</h2>
-        </div>
-        <div class="h-visit">
-          <div class="h-vbox rv">
-            <h3>Horario</h3>
-            <dl>{loc.hours.map((h) => (<><dt>{h.days}</dt><dd>{h.time}</dd></>))}</dl>
-          </div>
-          <div class="h-vbox rv" style="--d:70ms">
-            <h3>Dónde estamos</h3>
-            <p>Caripe, estado Monagas, Venezuela. Solo retiro en el local, no hacemos envíos.</p>
-            <a class="h-link" href={c.googleMaps} target="_blank" rel="noopener">Ver la ubicación en Google Maps →</a>
-          </div>
-          <div class="h-vbox rv" style="--d:140ms">
-            <h3>Escríbenos</h3>
-            <a class="h-link" href={wa('¡Hola Celebra!')} target="_blank" rel="noopener">WhatsApp {c.localWhatsappDisplay}</a>
-            <a class="h-link" href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
-            <a class="h-link" href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
           </div>
         </div>
       </section>
