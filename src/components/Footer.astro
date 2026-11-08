@@ -1,5 +1,7 @@
 ---
 import { site } from '../config/site';
+interface Props { variant?: 'negocio' | 'libro' }
+const { variant = 'negocio' } = Astro.props;
 const c = site.contact;
 const year = new Date().getFullYear();
 ---
@@ -10,25 +12,54 @@ const year = new Date().getFullYear();
       <div>
         <a class="foot-brand" href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra · Artículos de fiesta" loading="lazy" /></a>
       </div>
-      <div>
-        <b>Contacto</b>
-        <a href={`https://wa.me/${c.whatsapp}`}>Libro y pagos: {c.whatsappDisplay}</a>
-        <a href={`https://wa.me/${c.localWhatsapp}`}>Local de Caripe: {c.localWhatsappDisplay}</a>
-        <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
-        <a href={`mailto:${site.brand.supportEmail}`}>Soporte del libro: {site.brand.supportEmail}</a>
-      </div>
-      <div>
-        <b>Redes</b>
-        <a href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
-        <a href={c.tiktok} target="_blank" rel="noopener">TikTok {c.instagramHandle}</a>
-        <a href={c.googleMaps} target="_blank" rel="noopener">Celebra en Google Maps</a>
-      </div>
-      <div>
-        <b>Legal</b>
-        <a href="/terminos">Términos de venta</a>
-        <a href="/reembolsos">Política de reembolso</a>
-        <a href="/privacidad">Privacidad</a>
-      </div>
+      {variant === 'libro' ? (
+        <>
+          <div>
+            <b>El libro</b>
+            <a href="/libro/">Fiestas que se recuerdan</a>
+            <a href="/libro/regalo/">Capítulo de regalo</a>
+            <a href="/calculadora/">Calculadora de presupuesto</a>
+          </div>
+          <div>
+            <b>Ayuda con tu compra</b>
+            <a href={`https://wa.me/${c.whatsapp}`}>WhatsApp libro y pagos: {c.whatsappDisplay}</a>
+            <a href={`mailto:${site.brand.supportEmail}`}>{site.brand.supportEmail}</a>
+          </div>
+          <div>
+            <b>Legal</b>
+            <a href="/terminos">Términos de venta</a>
+            <a href="/reembolsos">Política de reembolso</a>
+            <a href="/privacidad">Privacidad</a>
+            <a href="/baja">Darme de baja</a>
+          </div>
+        </>
+      ) : (
+        <>
+          <div>
+            <b>Celebra</b>
+            <a href="/#fiestas">Fiestas</a>
+            <a href="/packs/">Packs</a>
+            <a href="/servicios/">Servicios</a>
+            <a href="/salones/">Salones</a>
+            <a href="/libro/">El libro</a>
+            <a href="/calculadora/">Calculadora</a>
+          </div>
+          <div>
+            <b>Contacto</b>
+            <a href="/contacto/">Escríbenos</a>
+            <a href={`https://wa.me/${c.localWhatsapp}`}>WhatsApp {c.localWhatsappDisplay}</a>
+            <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
+            <a href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
+            <a href={c.tiktok} target="_blank" rel="noopener">TikTok {c.instagramHandle}</a>
+          </div>
+          <div>
+            <b>Legal</b>
+            <a href="/contacto/#quienes">Quiénes somos</a>
+            <a href="/privacidad">Privacidad</a>
+            <a href="/baja">Darme de baja</a>
+          </div>
+        </>
+      )}
     </div>
     <p class="foot-b">© {year} Celebra. Caripe, Monagas, Venezuela.</p>
   </div>

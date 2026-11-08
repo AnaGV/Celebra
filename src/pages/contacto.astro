@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { site } from '../config/site';
+const c = site.contact;
+const loc = site.location;
+const cid = new URL(c.googleMaps).searchParams.get('cid');
+const mapa = loc.mapsEmbedUrl || `https://maps.google.com/maps?cid=${cid}&hl=es&z=16&output=embed`;
+---
+
+<Base image="/img/og-celebra.jpg" title="Contacto y quiénes somos · Celebra" description="Escríbenos o visita el taller Celebra en Caripe, Monagas. Conoce quiénes hacen tus piñatas, chupeteras y decoración.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-top">
+        <div class="h-top-head rv">
+          <span class="h-kicker">Contacto</span>
+          <h1>¿En qué te <em>ayudamos?</em></h1>
+          <p class="h-lead">Escríbenos por el formulario, por WhatsApp o visítanos en el taller. Te respondemos lo antes posible en nuestro horario de atención.</p>
+        </div>
+      </section>
+
+      <section class="h-wrap h-contact">
+        <form class="h-form rv" id="contacto-form" novalidate>
+          <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+          <div class="h-form-2">
+            <label>Correo<input type="email" name="correo" autocomplete="email" inputmode="email" required /></label>
+            <label>Teléfono<input type="tel" name="telefono" autocomplete="tel" inputmode="tel" placeholder="+58 414…" /></label>
+          </div>
+          <label>¿En qué podemos ayudarte?<textarea name="mensaje" rows="5" required placeholder="Cuéntanos qué necesitas"></textarea></label>
+          <button class="h-btn" type="submit">
+            <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
+            Enviar por WhatsApp
+          </button>
+          <p class="h-form-err" role="alert" hidden></p>
+          <div class="h-form-ok" role="status" hidden><b>¡Listo! Tu mensaje se abrió en WhatsApp.</b><span>¿No se abrió? <a class="h-ok-wa" href="#" target="_blank" rel="noopener">Ábrelo de nuevo</a>.</span></div>
+        </form>
+
+        <div class="h-contact-info">
+          <div class="h-vbox rv" style="--d:60ms">
+            <h3>Taller Celebra</h3>
+            <p>Caripe, estado Monagas, Venezuela.</p>
+            <p><b>Solo retiro en el local.</b> No hacemos envíos a domicilio.</p>
+            <dl>{loc.hours.map((h) => (<><dt>{h.days}</dt><dd>{h.time}</dd></>))}</dl>
+          </div>
+          <div class="h-vbox rv" style="--d:120ms">
+            <h3>Escríbenos directo</h3>
+            <a class="h-link" href={`https://wa.me/${c.localWhatsapp}`} target="_blank" rel="noopener">WhatsApp {c.localWhatsappDisplay}</a>
+            <a class="h-link" href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
+            <a class="h-link" href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-mapa">
+        <div class="h-head rv"><span class="h-kicker">Cómo llegar</span><h2 id="t-mapa">Encuéntranos en Caripe</h2></div>
+        <div class="h-map rv">
+          <iframe src={mapa} title="Ubicación del taller Celebra en Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+        </div>
+        <p class="h-fine rv"><a class="h-link" href={c.googleMaps} target="_blank" rel="noopener">Abrir en Google Maps →</a></p>
+      </section>
+
+      <section class="h-sec h-wrap" id="quienes" aria-labelledby="t-quienes">
+        <div class="h-about rv">
+          <img src="/img/marca/regalo.webp" alt="" width="520" height="405" loading="lazy" />
+          <div>
+            <span class="h-kicker">Quiénes somos</span>
+            <h2 id="t-quienes">Un taller de fiestas hecho en familia</h2>
+            <p>Celebra es un taller de fiestas en Caripe, estado Monagas, que llevamos entre hermanas. Hacemos a mano piñatas, chupeteras y decoración para que cada cumpleaños tenga la temática y los colores que la familia sueña.</p>
+            <p>Trabajamos por encargo y con cariño en cada detalle: escuchamos lo que quieres, te mandamos el precio por escrito y te avisamos cuando está listo para retirar en el local.</p>
+            <p>También escribimos <a class="h-link" href="/libro/">Fiestas que se recuerdan</a>, nuestra guía para que puedas organizar la fiesta en casa gastando menos.</p>
+            <ul class="h-trust">
+              <li>Hecho a mano en Caripe</li>
+              <li>Precio final por escrito</li>
+              <li>Retiro en el local</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script define:vars={{ waNum: c.localWhatsapp }}>
+  const f = document.getElementById('contacto-form');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f));
+    const err = f.querySelector('.h-form-err');
+    const falta = [];
+    if (!String(d.nombre || '').trim()) falta.push('tu nombre');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(d.correo || '').trim())) falta.push('un correo válido');
+    if (!String(d.mensaje || '').trim()) falta.push('tu mensaje');
+    if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
+    err.hidden = true;
+    const txt = `¡Hola Celebra! Les escribo desde la página.\n• Nombre: ${String(d.nombre).trim()}\n• Correo: ${String(d.correo).trim()}` + (String(d.telefono || '').trim() ? `\n• Teléfono: ${String(d.telefono).trim()}` : '') + `\n\n${String(d.mensaje).trim()}`;
+    const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
+    f.querySelector('.h-ok-wa').href = wa;
+    f.reset();
+    f.querySelector('.h-form-ok').hidden = false;
+    if (matchMedia('(pointer: coarse)').matches) location.href = wa;
+    else window.open(wa, '_blank', 'noopener');
+  });
+</script>
