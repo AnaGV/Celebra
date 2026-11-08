@@ -25,6 +25,42 @@ const hoy = new Date().toISOString().slice(0, 10);
     <HomeNav />
 
     <main>
+      <section class="h-slider" aria-roledescription="carrusel" aria-label="Trabajos del taller">
+        <div class="h-slides">
+          {[
+            { bg: 'fondo-1', color: '#efe7ff', kick: 'Hechas a mano en Caripe', t: 'Piñatas a medida', d: 'Con la forma, la temática y los colores que tu peque sueña.', imgs: [['monstruo', 'Piñata de monstruo de colores'], ['corona', 'Piñata corona amarilla con flores'], ['mono', 'Piñata de selva con monito']] },
+            { bg: 'fondo-2', color: '#fbe6ee', kick: 'Para la mesa dulce', t: 'Chupeteras con mucho dulce', d: 'Personajes y temáticas hechos a mano, listos para la foto.', imgs: [['chupetera-nina', 'Chupetera de niña con dulces'], ['chupetera-dino', 'Chupetera de dinosaurio con dulces']] },
+            { bg: 'fondo-3', color: '#e3f5ff', kick: 'Su número, su nombre', t: 'Piñatas con número', d: 'El primer añito, el quinto o el que celebren: lo armamos con su temática.', imgs: [['numero-dino', 'Piñata número 1 con dinosaurios'], ['numero-granja', 'Piñata número 1 con animales de granja']] },
+          ].map((sl, i) => (
+            <div class:list={['h-slide', { on: i === 0 }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de 3`} aria-hidden={i === 0 ? undefined : 'true'} style={`--c:${sl.color}`}>
+              <picture class="h-slide-bg" aria-hidden="true">
+                <source media="(max-width: 760px)" srcset={`/img/banner/${sl.bg}-m.webp`} />
+                <img src={`/img/banner/${sl.bg}.webp`} alt="" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} onerror="this.style.display='none'" />
+              </picture>
+              <div class="h-wrap h-slide-in">
+                <div class="h-slide-txt">
+                  <span class="h-kicker">{sl.kick}</span>
+                  <p class="h-slide-t">{sl.t}</p>
+                  <p class="h-slide-d">{sl.d}</p>
+                  <div class="h-btns">
+                    <a class="h-btn" href="#reservar" tabindex={i === 0 ? undefined : '-1'}>Cotizar el mío</a>
+                    <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener" tabindex={i === 0 ? undefined : '-1'}>Ver más trabajos</a>
+                  </div>
+                </div>
+                <div class:list={['h-slide-prods', `n${sl.imgs.length}`]}>
+                  {sl.imgs.map(([f, alt]) => <img src={`/img/banner/${f}.webp`} alt={alt} loading={i === 0 ? 'eager' : 'lazy'} />)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button type="button" class="h-sl-arrow prev" aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+        <button type="button" class="h-sl-arrow next" aria-label="Siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+        <div class="h-sl-dots" role="tablist" aria-label="Elegir diapositiva">
+          {[0, 1, 2].map((i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Diapositiva ${i + 1}`}></button>)}
+        </div>
+      </section>
+
       <section class="h-wrap h-top" id="fiestas" aria-labelledby="t-top">
         <div class="h-intro">
           <div class="h-top-head rv">
@@ -288,4 +324,39 @@ const hoy = new Date().toISOString().slice(0, 10);
     if (matchMedia('(pointer: coarse)').matches) location.href = wa;
     else window.open(wa, '_blank', 'noopener');
   });
+</script>
+
+<script>
+  // Carrusel de la portada: cambia solo cada 6 s, flechas, puntos y deslizar con el dedo.
+  const root = document.querySelector<HTMLElement>('.h-slider');
+  if (root) {
+    const slides = [...root.querySelectorAll<HTMLElement>('.h-slide')];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('.h-sl-dots button')];
+    let cur = 0;
+    let timer: number | undefined;
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const go = (n: number) => {
+      cur = (n + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        const on = i === cur;
+        s.classList.toggle('on', on);
+        if (on) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true');
+        s.querySelectorAll<HTMLElement>('a').forEach((a) => (on ? a.removeAttribute('tabindex') : a.setAttribute('tabindex', '-1')));
+      });
+      dots.forEach((d, i) => d.setAttribute('aria-selected', String(i === cur)));
+    };
+    const start = () => { if (!quieto) { clearInterval(timer); timer = window.setInterval(() => go(cur + 1), 6000); } };
+    const stop = () => clearInterval(timer);
+    root.querySelector('.prev')!.addEventListener('click', () => { go(cur - 1); start(); });
+    root.querySelector('.next')!.addEventListener('click', () => { go(cur + 1); start(); });
+    dots.forEach((d, i) => d.addEventListener('click', () => { go(i); start(); }));
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    root.addEventListener('focusin', stop);
+    let x0 = 0;
+    root.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; stop(); }, { passive: true });
+    root.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1)); start(); });
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    start();
+  }
 </script>
