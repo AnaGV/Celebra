@@ -47,7 +47,7 @@ export const tipos: TipoFiesta[] = [
     tematicas: ['Ositos', 'Nubes y estrellas', 'Safari bebé', 'Flores', '¿Niña o niño?'],
     bg: '#e3f5ff',
     ink: '#0f6fa3',
-    img: '/img/marca/regalo.webp',
+    img: '/img/marca/osito.webp',
     art: `<path d="M50 70h60l-6 50H56z" fill="#c5e3f6" ${S}/><path d="M50 70q30-40 60 0" fill="#e0d1f5" ${S}/><circle cx="62" cy="128" r="9" fill="#ffffff" ${S}/><circle cx="98" cy="128" r="9" fill="#ffffff" ${S}/><path d="M110 70l14-14" ${S}/><path d="M36 40l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#fde9a6" ${S}/>`,
   },
   {
@@ -59,7 +59,7 @@ export const tipos: TipoFiesta[] = [
     tematicas: ['Palomas', 'Ángeles', 'Flores blancas', 'Dorado y blanco'],
     bg: '#fef9dc',
     ink: '#866a00',
-    img: '/img/marca/varita.webp',
+    img: '/img/marca/paloma.webp',
     art: `<path d="M44 92c10-30 40-36 62-22-8 2-12 8-12 14 14-4 24 0 30 8-16 0-26 6-34 14-14 14-40 10-46-14z" fill="#ffffff" ${S}/><circle cx="96" cy="72" r="2.5" fill="#4a1a4f"/><path d="M106 70l10-2-8 8" fill="#fde9a6" ${S}/><path d="M60 44l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#fde9a6" ${S}/>`,
   },
   {
