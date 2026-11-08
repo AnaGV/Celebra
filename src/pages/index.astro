@@ -1,4 +1,6 @@
 ---
+import '@fontsource/caveat/700.css';
+import '@fontsource/young-serif/400.css';
 import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 import HomeNav from '../components/HomeNav.astro';
@@ -178,14 +180,36 @@ const hoy = new Date().toISOString().slice(0, 10);
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-club">
-        <div class="h-clubband rv">
-          <img src="/img/marca/regalo.webp" alt="" loading="lazy" />
-          <div>
-            <span class="h-kicker" style="color:var(--rosa-ink)">Club Celebra · gratis</span>
-            <b id="t-club">¿Se te olvidan los cumpleaños?</b>
-            <p>Anota las fechas de tu pareja, tus hijos o tu mamá y te avisamos antes, con ofertas especiales en piñatas y arreglos de globos.</p>
+        <div class="h-clubhero rv">
+          <div class="h-clubhero-img">
+            <div class="h-clubtag" aria-hidden="true">
+              <span class="t1">Regala</span>
+              <span class="t2">Momentos</span>
+              <span class="t3">únicos</span>
+            </div>
+            <div class="h-club10"><b>10%</b><span>de descuento</span></div>
+            <span class="h-clubnote" aria-hidden="true">Arreglos<br />especiales<svg viewBox="0 0 60 40"><path d="M6 4c4 16 16 28 44 30m-10-9 10 9-12 5"/></svg></span>
+            <img src="/img/club/regalos-m.webp" width="900" height="626" alt="Arreglo de rosas con globo «Love you» y caja de dulces con fotos y globo «Feliz cumple mami»" loading="lazy" />
           </div>
-          <a class="h-btn" href="/club/">Unirme al Club</a>
+          <div class="h-clubhero-in">
+            <span class="h-kicker">Club Celebra · gratis</span>
+            <h2 id="t-club">¡Que no se te olvide ningún cumpleaños!</h2>
+            <p>Anota las fechas de tu pareja, tu mamá o tus hijos. Te avisamos con tiempo y te regalamos <b>10% de descuento</b> en su piñata, arreglo de globos o regalo.</p>
+            <form class="h-clubmini" action="/club/" method="get">
+              <label class="h-clubmini-q">¿De quién es la fecha?
+                <select name="rel">
+                  <option value="Pareja / novia(o)">Mi pareja</option>
+                  <option value="Mamá">Mi mamá</option>
+                  <option value="Hijo/a">Mi hijo/a</option>
+                  <option value="Otro">Otra persona</option>
+                </select>
+              </label>
+              <label>Día<select name="dia">{Array.from({ length: 31 }, (_, i) => <option value={i + 1}>{i + 1}</option>)}</select></label>
+              <label>Mes<select name="mes">{['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'].map((m, i) => <option value={i + 1}>{m}</option>)}</select></label>
+              <button class="h-btn" type="submit">Guardar fecha →</button>
+            </form>
+            <p class="h-clubmini-fine">En el siguiente paso te pedimos tu nombre y correo. 10% válido en un pedido por cada fecha registrada. Te puedes dar de baja cuando quieras.</p>
+          </div>
         </div>
       </section>
 

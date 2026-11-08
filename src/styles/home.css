@@ -393,3 +393,51 @@
 .home .h-ig-coms b{color:var(--accent)}
 @media (max-width:1080px){.home .h-ig-track{grid-auto-columns:calc((100% - 2*20px)/3)}}
 @media (max-width:760px){.home .h-ig-track{grid-auto-columns:78%;gap:14px}.home .h-ig-nav{display:none}}
+
+/* Club Celebra: tarjeta con foto de regalos */
+.home .h-clubhero{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(100deg,#d9cbf9 0%,#e9d3f6 50%,#f7cfe4 100%);display:grid;grid-template-columns:54% 46%;align-items:stretch}
+.home .h-clubhero-img{display:flex;align-items:flex-end}
+.home .h-clubhero-img img{width:100%;height:auto;display:block;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 22%),linear-gradient(to left,transparent 0,#000 14%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent 0,#000 22%),linear-gradient(to left,transparent 0,#000 14%);mask-composite:intersect}
+.home .h-clubhero-in{grid-column:2;position:relative;display:flex;flex-direction:column;gap:14px;padding:40px 40px 40px 8px;justify-content:center}
+.home .h-clubhero-in h2{font-size:clamp(28px,3.2vw,42px);color:var(--plum)}
+.home .h-clubhero-in > p{color:#3d3554;font-size:17px;max-width:46ch}
+.home .h-clubhero-in > p b{color:var(--rosa-ink)}
+.home .h-clubhero .h-kicker{color:var(--rosa-ink)}
+.home .h-clubmini{margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;border-radius:20px;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(96,67,225,.14)}
+.home .h-clubmini label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--plum)}
+.home .h-clubmini select{font:inherit;font-size:16px;font-weight:500;color:var(--ink);padding:11px 10px;border:1px solid #d9d2ee;border-radius:12px;background:#fff;min-width:0}
+.home .h-clubmini-q{grid-column:1/-1}
+.home .h-clubmini .h-btn{grid-column:1/-1;justify-content:center;background:var(--rosa);border-color:var(--rosa)}
+.home .h-clubmini .h-btn:hover{background:#c22d68}
+.home .h-clubmini-fine{font-size:13px;color:#5c5470}
+@media (max-width:900px){
+  .home .h-clubhero{display:flex;flex-direction:column;min-height:0;background:linear-gradient(180deg,#e2d4fb,#f6d3e8)}
+  .home .h-clubhero-img img{width:100%;height:auto;aspect-ratio:900/626;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 18%,#000 82%,transparent)}
+  .home .h-clubhero-in{padding:6px 20px 24px}
+}
+@media (max-width:420px){.home .h-clubmini{grid-template-columns:1fr 1fr}.home .h-clubmini-q{grid-column:1/-1}}
+
+/* Club: rótulo "Regala momentos únicos" */
+.home .h-clubhero-img{position:relative;flex-direction:column;justify-content:flex-end}
+.home .h-clubtag{position:absolute;top:34px;left:44px;z-index:1;width:330px;height:150px;pointer-events:none}
+.home .h-clubtag span{position:absolute;display:block;line-height:1;white-space:nowrap}
+.home .h-clubtag .t2{top:26px;left:4px;padding:14px 28px 18px;background:#fff;border-radius:22px;transform:rotate(-8deg);font-family:'Young Serif',Georgia,serif;font-size:58px;color:#16171a;box-shadow:0 10px 24px rgba(60,30,120,.12)}
+.home .h-clubtag .t1{top:0;left:0;z-index:2;padding:9px 18px;background:#4fb495;border-radius:12px;transform:rotate(-5deg);font:600 24px/1 'Figtree',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#10241e}
+.home .h-clubtag .t3{top:104px;left:190px;z-index:2;padding:9px 18px;background:#e7b6e6;border-radius:12px;transform:rotate(-4deg);font:600 24px/1 'Figtree',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#2b1d3a}
+.home .h-clubnote{position:absolute;left:46px;top:196px;z-index:1;font:700 30px/0.95 'Caveat',cursive;color:#c2185b;transform:rotate(-8deg);pointer-events:none}
+.home .h-clubnote svg{display:block;width:54px;height:36px;margin:4px 0 0 34px;fill:none;stroke:#c2185b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:1100px){.home .h-clubtag{transform:scale(.8);transform-origin:top left;left:28px;top:26px}.home .h-clubnote{display:none}}
+@media (max-width:900px){
+  .home .h-clubtag{position:relative;top:auto;left:auto;transform:scale(.72);transform-origin:top left;margin:20px 0 -40px 22px;height:150px}
+}
+
+/* Club: sello grande de 10% */
+.home .h-club10{position:absolute;top:40px;right:20px;width:150px;height:150px;border-radius:50%;background:var(--rosa);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 12px 28px rgba(219,57,120,.35),inset 0 0 0 5px rgba(255,255,255,.35);z-index:2}
+.home .h-club10 b{font:800 56px/0.9 'Figtree',sans-serif;letter-spacing:-.03em}
+.home .h-club10 span{font:700 14px/1.1 'Figtree',sans-serif;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+@media (max-width:1100px){.home .h-club10{width:110px;height:110px;top:150px;right:16px}.home .h-club10 b{font-size:44px}.home .h-club10 span{font-size:11px}}
+@media (max-width:900px){
+  .home .h-club10{position:absolute;top:22px;right:14px;width:96px;height:96px}
+  .home .h-club10 b{font-size:36px}.home .h-club10 span{font-size:9px;letter-spacing:.01em}
+  .home .h-clubtag{transform:scale(.62)}
+}

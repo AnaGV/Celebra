@@ -88,6 +88,16 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
   });
   mas.addEventListener('click', add);
   add();
+  // Viene desde la tarjeta del inicio: rellena la primera fecha con lo que ya eligió.
+  {
+    const q = new URLSearchParams(location.search);
+    const set = (k: string, v: string | null) => { const el = box.querySelector<HTMLSelectElement>(`[data-k="${k}"]`); if (el && v && [...el.options].some((o) => o.value === v || o.text === v)) el.value = v; };
+    if (q.has('dia') || q.has('rel')) {
+      set('relacion', q.get('rel')); set('dia', q.get('dia')); set('mes', q.get('mes'));
+      const n = box.querySelector<HTMLInputElement>('[data-k="nombre"]');
+      setTimeout(() => { scrollTo({ top: box.getBoundingClientRect().top + scrollY - 150 }); n?.focus({ preventScroll: true }); }, 50);
+    }
+  }
 
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
