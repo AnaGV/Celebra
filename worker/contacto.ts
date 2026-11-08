@@ -30,19 +30,20 @@ export async function enviarContacto(request: Request, env: any): Promise<Respon
   const correo = unaLinea(limpio(b.correo, 120)).toLowerCase();
   const telefono = unaLinea(limpio(b.telefono, 40));
   const mensaje = limpio(b.mensaje, 3000);
+  const origen = b.origen === 'empresas' ? 'empresas' : 'contacto';
   if (!nombre || !EMAIL.test(correo) || mensaje.length < 3) return json({ error: 'Revisa tu nombre, tu correo y tu mensaje.' }, 400);
 
   if (!env.CONTACTO) return json({ error: 'El correo aún no está configurado. Escríbenos por WhatsApp.' }, 503);
 
   const desde = 'contacto@somoscelebrave.com';
   const para = env.CONTACTO_DESTINO || 'somoscelebra.ve@gmail.com';
-  const cuerpo = `Nuevo mensaje desde somoscelebrave.com/contacto\n\nNombre: ${nombre}\nCorreo: ${correo}\nTeléfono: ${telefono || '-'}\n\nMensaje:\n${mensaje}\n\n— Responde a este correo para contestarle directamente.`;
+  const cuerpo = `Nuevo mensaje desde somoscelebrave.com/${origen}\n\nNombre: ${nombre}\nCorreo: ${correo}\nTeléfono: ${telefono || '-'}\n\nMensaje:\n${mensaje}\n\n— Responde a este correo para contestarle directamente.`;
   const id = `<${crypto.randomUUID()}@somoscelebrave.com>`;
   const raw = [
     `From: ${encabezado('Celebra · Contacto web')} <${desde}>`,
     `To: <${para}>`,
     `Reply-To: ${encabezado(nombre)} <${correo}>`,
-    `Subject: ${encabezado(`Nuevo mensaje de ${nombre}`)}`,
+    `Subject: ${encabezado(origen === 'empresas' ? `Cotización para empresa: ${nombre}` : `Nuevo mensaje de ${nombre}`)}`,
     `Message-ID: ${id}`,
     `Date: ${new Date().toUTCString()}`,
     'MIME-Version: 1.0',

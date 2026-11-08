@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { site } from '../config/site';
+const c = site.contact;
+const productos = [
+  { t: 'Stickers con tu logo', d: 'Para sellar bolsas, cajas y empaques. Redondos, cuadrados o con la forma de tu logo.', icon: 'M12 3a9 9 0 109 9h-6a3 3 0 01-3-3z M15 3.5A9 9 0 0120.5 9H15z' },
+  { t: 'Tags y etiquetas', d: 'Etiquetas colgantes para ropa, regalos y productos, con tu marca y precio o mensaje.', icon: 'M3 12V4h8l10 10-8 8z M7.5 7.5h.01' },
+  { t: 'Tarjetas de presentación', d: 'Tu contacto y redes en una tarjeta que la gente sí guarda.', icon: 'M3 6h18v12H3z M7 10h6 M7 14h4' },
+  { t: 'Tarjetas de agradecimiento', d: '"Gracias por tu compra" para meter en cada pedido y que te vuelvan a comprar.', icon: 'M12 20s-7-4.5-7-10a4 4 0 017-2.5A4 4 0 0119 10c0 5.5-7 10-7 10z' },
+  { t: 'Empaques y bolsas', d: 'Bolsas y cajitas personalizadas para entregar tus productos con estilo.', icon: 'M5 8h14l-1 12H6z M9 8V6a3 3 0 016 0v2' },
+  { t: 'Fiestas y eventos de empresa', d: 'Aniversarios, fin de año o Día del Niño para los hijos del equipo: piñatas, decoración y detalles.', icon: 'M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z' },
+];
+const pasos = [
+  ['Cuéntanos qué necesitas', 'Qué producto, cuántas unidades y para cuándo. Si tienes tu logo, mejor.'],
+  ['Te mandamos diseño y precio', 'Una propuesta con tu marca y el precio final por escrito.'],
+  ['Lo producimos', 'Cuando apruebas el diseño y dejas el abono, empezamos.'],
+  ['Retiras en el local', 'En Caripe, el día acordado.'],
+];
+---
+
+<Base image="/img/og-celebra.jpg" title="Papelería y publicidad para negocios · Celebra" description="Stickers con tu logo, tags, tarjetas de presentación, empaques y eventos de empresa. Celebra, Caripe, Monagas.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-top">
+        <div class="h-top-head rv">
+          <span class="h-kicker">Para empresas y emprendedores</span>
+          <h1>Que tu marca se vea <em>en cada entrega</em></h1>
+          <p class="h-lead">Stickers, tags, tarjetas y empaques con tu logo, para que tus clientes te recuerden. Y si tu empresa celebra algo, también te armamos la fiesta.</p>
+          <div class="h-btns"><a class="h-btn" href="#cotizar">Pedir cotización</a></div>
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" style="padding-top:40px" aria-labelledby="t-prod">
+        <div class="h-head rv"><span class="h-kicker">Lo que hacemos</span><h2 id="t-prod">Papelería con tu marca</h2></div>
+        <div class="h-servs h-servs-3">
+          {productos.map((p, i) => (
+            <div class="h-serv rv" style={`--d:${(i % 3) * 60}ms`}>
+              <span class="h-serv-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={p.icon}></path></svg></span>
+              <div><b>{p.t}</b><p>{p.d}</p></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-pasos">
+        <div class="h-head rv"><span class="h-kicker">Cómo trabajamos</span><h2 id="t-pasos">De tu logo a tus manos</h2><p>Pide con anticipación: los pedidos por cantidad toman entre 1 y 2 semanas según el producto.</p></div>
+        <ol class="h-steps">
+          {pasos.map(([t, d], i) => <li class="rv" style={`--d:${i * 60}ms`}><span class="h-num">{i + 1}</span><div><b>{t}</b><p>{d}</p></div></li>)}
+        </ol>
+      </section>
+
+      <section class="h-sec h-wrap" id="cotizar" aria-labelledby="t-cot">
+        <div class="h-res rv">
+          <div class="h-res-info">
+            <span class="h-kicker">Cotización para empresas</span>
+            <h2 id="t-cot">Cuéntanos de tu negocio</h2>
+            <p class="h-lead" style="font-size:18px">Te respondemos por correo con una propuesta y el precio. Si prefieres, escríbenos directo por WhatsApp.</p>
+            <a class="h-link" href={`https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('¡Hola Celebra! Quiero cotizar papelería para mi negocio.')}`} target="_blank" rel="noopener">WhatsApp {c.localWhatsappDisplay}</a>
+          </div>
+          <form class="h-form" id="emp-form" novalidate>
+            <label>Nombre del negocio<input type="text" name="negocio" autocomplete="organization" required /></label>
+            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+            <div class="h-form-2">
+              <label>Correo<input type="email" name="correo" autocomplete="email" inputmode="email" required /></label>
+              <label><span>Teléfono <span class="h-opt">(opcional)</span></span><input type="tel" name="telefono" autocomplete="tel" inputmode="tel" /></label>
+            </div>
+            <fieldset class="h-need">
+              <legend>¿Qué necesitas?</legend>
+              <div class="h-chk">{productos.map((p) => <label><input type="checkbox" name="producto" value={p.t} /><span>{p.t}</span></label>)}</div>
+            </fieldset>
+            <div class="h-form-2">
+              <label><span>Cantidad aprox. <span class="h-opt">(opcional)</span></span><input type="text" name="cantidad" placeholder="Ej. 200 stickers" /></label>
+              <label><span>Para cuándo <span class="h-opt">(opcional)</span></span><input type="text" name="fecha" placeholder="Ej. 15 de diciembre" /></label>
+            </div>
+            <label>Detalles<textarea name="mensaje" rows="4" placeholder="Colores, tamaño, si ya tienes logo…"></textarea></label>
+            <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
+            <button class="h-btn" type="submit">Pedir cotización</button>
+            <p class="h-form-err" role="alert" hidden></p>
+            <div class="h-form-ok" role="status" hidden><b>¡Gracias! Recibimos tu solicitud.</b><span>Te enviaremos la propuesta a tu correo.</span></div>
+          </form>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script>
+  const f = document.getElementById('emp-form') as HTMLFormElement;
+  const t0 = Date.now();
+  const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(f);
+    const g = (k: string) => String(fd.get(k) || '').trim();
+    const err = f.querySelector<HTMLElement>('.h-form-err')!;
+    const ok = f.querySelector<HTMLElement>('.h-form-ok')!;
+    const falta: string[] = [];
+    if (!g('negocio')) falta.push('el nombre del negocio');
+    if (!g('nombre')) falta.push('tu nombre');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(g('correo'))) falta.push('un correo válido');
+    if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
+    const prods = fd.getAll('producto').map(String);
+    const mensaje = `Negocio: ${g('negocio')}\nNecesita: ${prods.length ? prods.join(', ') : 'por definir'}\nCantidad: ${g('cantidad') || '-'}\nPara cuándo: ${g('fecha') || '-'}\n\nDetalles:\n${g('mensaje') || '-'}`;
+    err.hidden = true; ok.hidden = true; btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      const r = await fetch('/api/contacto', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ origen: 'empresas', nombre: `${g('nombre')} (${g('negocio')})`, correo: g('correo'), telefono: g('telefono'), mensaje, empresa: g('empresa'), t: t0 }) });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(out.error || 'No pudimos enviarlo ahora. Inténtalo de nuevo.');
+      f.reset(); ok.hidden = false;
+    } catch (x) { err.textContent = (x as Error).message; err.hidden = false; }
+    btn.disabled = false; btn.textContent = 'Pedir cotización';
+  });
+</script>
