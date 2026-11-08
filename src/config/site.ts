@@ -34,7 +34,8 @@ export const site = {
     googleReview: 'https://search.google.com/local/writereview?placeid=ChIJ1UP5xAmpM4wRrsY4LBxHGsk',
     instagram: 'https://instagram.com/somoscelebra.ve',
     instagramHandle: '@somoscelebra.ve',
-    tiktok: 'https://tiktok.com/@somoscelebra.ve',
+    tiktok: 'https://www.tiktok.com/@somoscelebra',
+    tiktokHandle: '@somoscelebra',
     facebook: 'https://facebook.com/somoscelebra.ve',
   },
 
