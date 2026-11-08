@@ -89,17 +89,32 @@ export function conectar(env: any): Response {
 }
 
 async function buscarCuenta(token: string): Promise<{ id: string; username: string }[]> {
-  const out: { id: string; username: string }[] = [];
-  try {
-    const d = await api('/me/assigned_instagram_accounts?fields=id,username', token);
-    for (const a of d.data || []) if (a?.id) out.push({ id: a.id, username: a.username || '' });
-  } catch { /* sigue con la otra forma */ }
-  if (!out.length) {
+  // El token de usuario del sistema puede ver la cuenta por varios caminos según cómo Meta la asignó.
+  const ids = new Set<string>();
+  const notas: string[] = [];
+  const probar = async (path: string, sacar: (d: any) => (string | undefined)[]) => {
+    try { for (const id of sacar(await api(path, token))) if (id) ids.add(String(id)); }
+    catch (e: any) { notas.push(`${path.split('?')[0]}: ${e?.message}`); }
+  };
+  await probar('/me/assigned_instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
+  await probar('/me/instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
+  await probar('/me/accounts?fields=instagram_business_account', (d) => (d.data || []).map((x: any) => x?.instagram_business_account?.id));
+  if (!ids.size) {
     try {
-      const d = await api('/me/accounts?fields=instagram_business_account{id,username}', token);
-      for (const p of d.data || []) { const a = p.instagram_business_account; if (a?.id) out.push({ id: a.id, username: a.username || '' }); }
-    } catch { /* nada */ }
+      const bs = await api('/me/businesses?fields=id', token);
+      for (const b of bs.data || []) {
+        await probar(`/${b.id}/owned_instagram_accounts?fields=id`, (d) => (d.data || []).map((x: any) => x?.id));
+        await probar(`/${b.id}/instagram_business_accounts?fields=id`, (d) => (d.data || []).map((x: any) => x?.id));
+        await probar(`/${b.id}/instagram_accounts?fields=id`, (d) => (d.data || []).map((x: any) => x?.id));
+      }
+    } catch (e: any) { notas.push('/me/businesses: ' + e?.message); }
   }
+  const out: { id: string; username: string }[] = [];
+  for (const id of ids) {
+    try { const d = await api(`/${id}?fields=id,username`, token); out.push({ id: d.id || id, username: d.username || '' }); }
+    catch (e: any) { notas.push(`/${id}: ${e?.message}`); out.push({ id, username: '' }); }
+  }
+  console.log('ig cuentas', JSON.stringify({ encontradas: out, notas }));
   return out;
 }
 
