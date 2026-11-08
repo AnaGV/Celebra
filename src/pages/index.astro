@@ -32,9 +32,6 @@ const hoy = new Date().toISOString().slice(0, 10);
             <h1 id="t-top">¿Qué fiesta estás <em>organizando?</em></h1>
             <p class="h-lead">Piñatas, chupeteras y decoración hechas a mano en nuestro taller. Elige tu celebración y te mostramos todo lo que podemos hacer.</p>
           </div>
-          <div class="h-intro-art rv" style="--d:120ms" aria-hidden="true">
-            <img class="h-logo-big" src="/img/marca/logo.webp" width="1000" height="437" alt="" fetchpriority="high" />
-          </div>
         </div>
         <div class="h-banners">
           {tipos.map((t, i) => (
@@ -48,32 +45,6 @@ const hoy = new Date().toISOString().slice(0, 10);
             </a>
           ))}
         </div>
-      </section>
-
-      <section class="h-sec h-wrap" id="packs" aria-labelledby="t-packs">
-        <div class="h-head rv">
-          <span class="h-kicker">Packs listos</span>
-          <h2 id="t-packs">¿Cuántos invitados tendrás?</h2>
-          <p>Elige una cantidad y te recomendamos el pack que mejor te conviene. Todos se adaptan a tu temática y se retiran en el local.</p>
-        </div>
-        <div class="h-guests rv" role="radiogroup" aria-label="Número de invitados">
-          {packs.map((p, i) => (
-            <button type="button" class="h-guest" role="radio" aria-checked={p.destacado ? 'true' : 'false'} data-pack={p.id}>{p.invitados}</button>
-          ))}
-        </div>
-        <div class="h-packs">
-          {packs.map((p, i) => (
-            <article class:list={['h-pack rv', { on: p.destacado }]} data-pack-card={p.id} style={`--d:${i * 70}ms`}>
-              <span class="h-pack-tag">Recomendado para ti</span>
-              <h3>{p.name}</h3>
-              <p class="h-pack-inv">{p.invitados}</p>
-              <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
-              <p class="h-pack-price">{precio(p.priceUsd)}</p>
-              <a class="h-btn h-btn-line" href="#reservar" data-pick={p.id}>Cotizar este pack</a>
-            </article>
-          ))}
-        </div>
-        <p class="h-fine rv">Todos los packs son <b>solo con retiro en el local de Caripe</b>. No hacemos envíos a domicilio.</p>
       </section>
 
       <section class="h-sec h-wrap" id="servicios" aria-labelledby="t-serv">
@@ -126,7 +97,7 @@ const hoy = new Date().toISOString().slice(0, 10);
               </div>
             </fieldset>
             <label class="h-cond" data-pack-field hidden>¿Cuál pack?
-              <select name="pack">{packs.map((p) => <option value={p.name} selected={p.destacado}>{p.name} · {p.invitados.replace(' invitados', '').toLowerCase()}</option>)}</select>
+              <select name="pack">{packs.map((p) => <option value={p.name} data-id={p.id} selected={p.destacado}>{p.name} · {p.invitados.replace(' invitados', '').toLowerCase()}</option>)}</select>
             </label>
             <label class="h-cond" data-otro-field hidden>¿Qué otra cosa necesitas?<input type="text" name="otro" placeholder="Ej. centro de mesa, fondo para fotos…" /></label>
             <label>Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
@@ -234,6 +205,13 @@ const hoy = new Date().toISOString().slice(0, 10);
     if (marcar) { packToggle.checked = true; sync(); }
   };
   document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack, false)));
+  // Viene desde /packs/ con ?pack=…: deja marcado ese pack en el formulario.
+  const qp = new URLSearchParams(location.search).get('pack');
+  if (qp && document.querySelector(`[data-pack-card="${qp}"]`) === null) {
+    const opt = [...$('select[name="pack"]').options].find((o) => o.dataset.id === qp);
+    if (opt) { $('select[name="pack"]').value = opt.value; packToggle.checked = true; sync(); }
+    history.replaceState(null, '', location.pathname);
+  }
   document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick, true)));
 
   // Foto de referencia: se achica y se sube apenas la eligen (no al enviar),

@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { packs } from '../config/celebra';
+const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
+---
+
+<Base image="/img/og-celebra.jpg" title="Packs para fiestas según tus invitados · Celebra" description="Packs de piñata, chupetera, bolsitas de recuerdo y decoración según el número de invitados. Taller Celebra en Caripe, Monagas.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-top" id="packs" aria-labelledby="t-packs">
+        <div class="h-head rv">
+          <span class="h-kicker">Packs listos</span>
+          <h1 id="t-packs">¿Cuántos invitados <em>tendrás?</em></h1>
+          <p>Elige una cantidad y te recomendamos el pack que mejor te conviene. Todos se adaptan a tu temática y se retiran en el local.</p>
+        </div>
+        <div class="h-guests rv" role="radiogroup" aria-label="Número de invitados">
+          {packs.map((p, i) => (
+            <button type="button" class="h-guest" role="radio" aria-checked={p.destacado ? 'true' : 'false'} data-pack={p.id}>{p.invitados}</button>
+          ))}
+        </div>
+        <div class="h-packs">
+          {packs.map((p, i) => (
+            <article class:list={['h-pack rv', { on: p.destacado }]} data-pack-card={p.id} style={`--d:${i * 70}ms`}>
+              <span class="h-pack-tag">Recomendado para ti</span>
+              <h3>{p.name}</h3>
+              <p class="h-pack-inv">{p.invitados}</p>
+              <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
+              <p class="h-pack-price">{precio(p.priceUsd)}</p>
+              <a class="h-btn h-btn-line" href={`/?pack=${p.id}#reservar`}>Cotizar este pack</a>
+            </article>
+          ))}
+        </div>
+        <p class="h-fine rv">Todos los packs son <b>solo con retiro en el local de Caripe</b>. No hacemos envíos a domicilio.</p>
+      </section>
+      <section class="h-sec h-wrap" aria-labelledby="t-solo">
+        <div class="h-tile rv" style="--bg:#f1eaff;--ink:#6043e1">
+          <span class="h-kicker">¿No necesitas un pack completo?</span>
+          <b id="t-solo">Cotiza solo lo que quieras</b>
+          <span>Solo la piñata, la chupetera, el cotillón o las bolsitas: marca lo que necesitas en el formulario y te enviamos el precio.</span>
+          <a class="h-banner-cta" href="/#reservar" style="text-decoration:none">Ir a cotizar →</a>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script>
+  const pick = (id: string) => {
+    document.querySelectorAll<HTMLElement>('.h-guest').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pack === id)));
+    document.querySelectorAll<HTMLElement>('.h-pack').forEach((c) => c.classList.toggle('on', c.dataset.packCard === id));
+  };
+  document.querySelectorAll<HTMLElement>('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack!)));
+</script>

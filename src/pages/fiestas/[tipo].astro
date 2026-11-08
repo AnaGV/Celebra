@@ -53,7 +53,7 @@ const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde 
               <p class="h-pack-inv">{p.invitados}</p>
               <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
               <p class="h-pack-price">{precio(p.priceUsd)}</p>
-              <a class="h-btn h-btn-line" href="/#reservar">Reservar</a>
+              <a class="h-btn h-btn-line" href={`/?pack=${p.id}#reservar`}>Cotizar este pack</a>
             </article>
           ))}
         </div>

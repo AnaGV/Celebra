@@ -216,7 +216,7 @@
 /* ── Marca: logo e ilustraciones ── */
 .h-brand img{height:60px;width:auto;display:block}
 .h-nav-in{height:76px}
-.h-intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:32px;align-items:center;margin-bottom:28px}
+.h-intro{display:block;margin-bottom:28px}
 .h-intro .h-top-head{margin-bottom:0}
 .h-intro-art{display:grid;place-items:center}
 .h-logo-big{width:100%;max-width:440px;height:auto;animation:h-bob 6s ease-in-out infinite}
