@@ -4,87 +4,177 @@ import Footer from '../components/Footer.astro';
 import HomeNav from '../components/HomeNav.astro';
 import '../styles/home.css';
 import { site } from '../config/site';
-import { salones } from '../config/celebra';
+import { CATEGORIAS, proveedores } from '../config/directorio';
 const c = site.contact;
+const conteo = Object.fromEntries(CATEGORIAS.map((k) => [k.id, proveedores.filter((p) => p.categorias.includes(k.id)).length]));
+const datos = JSON.stringify({ categorias: CATEGORIAS, proveedores });
+const agregar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola Celebra, tengo un negocio para fiestas en Caripe y quiero aparecer en el directorio.')}`;
+const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola Celebra, soy dueño(a) de un negocio del directorio y quiero que lo retiren.')}`;
 ---
 
-<Base image="/img/og-celebra.jpg" title="Salones de eventos en Caripe · Celebra" description="Los salones y espacios para fiestas de Caripe, Monagas, en un solo lugar. ¿Tienes un salón? Publícalo en Celebra.">
+<Base image="/img/og-celebra.jpg" title="Dónde y con quién hacer tu fiesta en Caripe · Celebra" description="Lugares para fiestas, tortas, fotografía, maquillaje y más en Caripe, Monagas. Busca por categoría y escríbeles directo por WhatsApp.">
   <div class="home">
     <HomeNav />
     <main>
       <section class="h-wrap h-page-hero">
         <div class="h-top-head rv" style="margin:0">
-          <span class="h-kicker">Salones en Caripe</span>
-          <h1>¿Dónde hacer la fiesta?</h1>
-          <p class="h-lead">Estamos reuniendo los salones y espacios para eventos de Caripe en un solo lugar, con su capacidad, lo que incluyen y cómo contactarlos.</p>
-          <div class="h-btns"><a class="h-btn" href="#publica">Tengo un salón</a></div>
+          <span class="h-kicker">Directorio de Caripe</span>
+          <h1>¿Dónde y con quién hacer tu fiesta?</h1>
+          <p class="h-lead">Lugares, tortas, fotografía, maquillaje y más servicios para fiestas en Caripe. Busca, mira sus reseñas en Google y escríbeles directo.</p>
         </div>
         <div class="h-page-art rv" style="--bg:#e3f5ff;--d:100ms">
           <svg viewBox="0 0 160 160" aria-hidden="true"><path d="M30 70l50-34 50 34" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="2.5" stroke-linejoin="round"></path><rect x="40" y="70" width="80" height="58" fill="#ffffff" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="70" y="94" width="20" height="34" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="48" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><rect x="96" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><path d="M36 64q22 12 44 0t44 0" fill="none" stroke="#c2185b" stroke-width="2.5"></path></svg>
         </div>
       </section>
 
-      <section class="h-sec h-wrap" aria-labelledby="t-list">
-        <div class="h-head rv"><span class="h-kicker">Directorio</span><h2 id="t-list">Salones disponibles</h2></div>
-        {salones.length === 0 ? (
-          <div class="h-empty rv">
-            <b>Muy pronto, los primeros salones</b>
-            <p>Estamos hablando con los dueños de los salones de Caripe. Mientras tanto, escríbenos y te recomendamos uno según tu fecha y tus invitados.</p>
-            <a class="h-btn h-btn-line" href={`https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('¡Hola Celebra! Busco un salón en Caripe para una fiesta. Fecha: … Invitados: …')}`} target="_blank" rel="noopener">Pedir una recomendación</a>
+      <section class="h-sec h-wrap h-dir" aria-labelledby="t-dir" style="padding-top:40px">
+        <h2 id="t-dir" class="h-sr">Buscar en el directorio</h2>
+        <div class="h-dir-bar">
+          <label class="h-dir-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+            <input type="search" id="dir-q" placeholder="Busca por nombre o servicio (ej. piscina, tortas)" aria-label="Buscar" autocomplete="off" />
+          </label>
+        </div>
+        <div class="h-dir-chips" role="group" aria-label="Categorías">
+          <button type="button" class="h-dir-chip" data-cat="" aria-pressed="true">Todo <span>{proveedores.length}</span></button>
+          {CATEGORIAS.map((k) => (
+            <button type="button" class="h-dir-chip" data-cat={k.id} aria-pressed="false"><span aria-hidden="true">{k.icono}</span> {k.nombre} <span>{conteo[k.id]}</span></button>
+          ))}
+        </div>
+        <p class="h-dir-info" id="dir-info" aria-live="polite"></p>
+        <article class="h-dir-celebra" id="dir-celebra" hidden>
+          <img src="/img/club/regalos-m.webp" width="900" height="626" alt="" loading="lazy" />
+          <div>
+            <span class="h-dir-own">🎈 Celebra · organizamos este directorio</span>
+            <h3>Piñatas, globos, arreglos y decoración</h3>
+            <p>Lo que no encuentras en el directorio lo hacemos nosotras en el taller: piñatas con número y letra, arreglos de globos, chupeteras, toppers, cotillón y regalos personalizados.</p>
+            <div class="h-dir-acc">
+              <a class="h-btn" id="dir-cotizar" href="/#reservar">Cotizar con Celebra</a>
+              <a class="h-dir-maps" href="/packs/">Ver packs para fiestas</a>
+            </div>
           </div>
-        ) : (
-          <div class="h-packs">
-            {salones.map((s) => (
-              <article class="h-pack rv">
-                {s.foto && <img src={s.foto} alt={`Salón ${s.name}`} loading="lazy" style="border-radius:12px;aspect-ratio:4/3;object-fit:cover;width:100%" />}
-                <h3>{s.name}</h3>
-                <p class="h-pack-inv">{s.zona} · {s.capacidad}</p>
-                <ul>{s.incluye.map((x) => <li>{x}</li>)}</ul>
-                <a class="h-btn h-btn-line" href={`https://wa.me/${s.whatsapp}`} target="_blank" rel="noopener">Contactar</a>
-              </article>
-            ))}
-          </div>
-        )}
+        </article>
+        <ul class="h-dir-grid" id="dir-list"></ul>
+        <div class="h-dir-empty" id="dir-empty" hidden>
+          <p><b>Todavía no tenemos negocios en esta categoría.</b> ¿Conoces uno o tienes uno? Escríbenos y lo agregamos.</p>
+          <a class="h-btn" href={agregar} target="_blank" rel="noopener">Recomendar un negocio</a>
+        </div>
+        <nav class="h-dir-pages" id="dir-pages" aria-label="Páginas"></nav>
+        <p class="h-dir-note">El orden de los negocios cambia cada día para que todos tengan su turno. Celebra no cobra comisión ni gestiona reservas: el trato es directo con cada negocio. ¿Eres dueño y no quieres aparecer? <a href={quitar} target="_blank" rel="noopener">Escríbenos</a> y lo retiramos.</p>
       </section>
 
-      <section class="h-sec h-wrap" id="publica" aria-labelledby="t-pub">
-        <div class="h-res rv" style="background:#e3f5ff">
-          <div class="h-res-info">
-            <span class="h-kicker" style="color:#0f6fa3">Para dueños de salones</span>
-            <h2 id="t-pub">Publica tu salón en Celebra</h2>
-            <p class="h-lead" style="font-size:18px">Las familias que organizan una fiesta en Caripe nos buscan a nosotras: aparece justo cuando están eligiendo dónde celebrar.</p>
-            <ul class="h-res-steps" style="list-style:disc">
-              <li>Ficha con fotos, capacidad, lo que incluye y tu WhatsApp.</li>
-              <li>Te recomendamos a los clientes que nos piden salón.</li>
-              <li>Te contamos las condiciones por WhatsApp.</li>
-            </ul>
+      <section class="h-sec h-wrap" aria-labelledby="t-add">
+        <div class="h-dir-add rv">
+          <div>
+            <span class="h-kicker">¿Tienes un negocio para fiestas?</span>
+            <h2 id="t-add">Aparece gratis en el directorio</h2>
+            <p>Lugares, tortas, pasapalos, sonido, mesas y sillas, fotografía, maquillaje, animadores… Si atiendes fiestas en Caripe, te agregamos sin costo.</p>
           </div>
-          <form class="h-form" id="pub-form" data-tipo="salón" novalidate>
-            <label>Nombre del salón<input type="text" name="negocio" required /></label>
-            <div class="h-form-2">
-              <label>Capacidad<input type="text" name="capacidad" placeholder="Ej. 80 personas" /></label>
-              <label>Sector<input type="text" name="zona" placeholder="Ej. Centro" /></label>
-            </div>
-            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
-            <button class="h-btn" type="submit">Quiero publicar mi salón</button>
-            <p class="h-form-err" role="alert" hidden>Falta el nombre del salón y tu nombre.</p>
-          </form>
+          <a class="h-btn" href={agregar} target="_blank" rel="noopener">Quiero aparecer</a>
         </div>
       </section>
     </main>
     <Footer />
   </div>
+  <script type="application/json" id="dir-data" set:html={datos}></script>
 </Base>
 
-<script define:vars={{ waNum: c.localWhatsapp }}>
-  const f = document.getElementById('pub-form');
-  f.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const d = Object.fromEntries(new FormData(f));
-    const err = f.querySelector('.h-form-err');
-    if (!String(d.negocio).trim() || !String(d.nombre).trim()) { err.hidden = false; return; }
-    err.hidden = true;
-    const txt = `¡Hola Celebra! Quiero publicar mi salón en la página.\n• Salón: ${d.negocio}\n• Capacidad: ${d.capacidad || '-'}\n• Sector: ${d.zona || '-'}\n• Mi nombre: ${d.nombre}`;
-    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
-  });
+<script>
+  type Cat = { id: string; nombre: string; icono: string };
+  type Prov = { nombre: string; categorias: string[]; descripcion: string; zona?: string; tel?: string; instagram?: string; placeId?: string };
+  const { categorias, proveedores } = JSON.parse(document.getElementById('dir-data')!.textContent || '{}') as { categorias: Cat[]; proveedores: Prov[] };
+  const POR_PAGINA = 9;
+  const nombreCat = Object.fromEntries(categorias.map((k) => [k.id, k]));
+  const lista = document.getElementById('dir-list') as HTMLUListElement;
+  const info = document.getElementById('dir-info')!;
+  const vacio = document.getElementById('dir-empty')!;
+  const pags = document.getElementById('dir-pages')!;
+  const q = document.getElementById('dir-q') as HTMLInputElement;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.h-dir-chip')];
+
+  // Orden del día: mismo para todos durante el día (hora de Venezuela), distinto cada día.
+  const dia = new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10);
+  let semilla = [...dia].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+  const azar = () => ((semilla = (semilla * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const orden = proveedores.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p);
+
+  const sinAcentos = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const esCelular = (t: string) => /^58(412|414|416|422|424|426)/.test(t);
+  const telBonito = (t: string) => '+' + t.replace(/^58(\d{3})(\d{3})(\d{4})$/, '58 $1 $2 $3');
+
+  const params = new URLSearchParams(location.search);
+  let cat = params.get('cat') || '';
+  let pagina = Math.max(1, Number(params.get('p')) || 1);
+  q.value = params.get('q') || '';
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, txt?: string) {
+    const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e;
+  }
+
+  function tarjeta(p: Prov) {
+    const li = el('li', 'h-dir-card');
+    const top = el('div', 'h-dir-tags');
+    for (const id of p.categorias) { const k = nombreCat[id]; if (k) top.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
+    li.append(top, el('h3', '', p.nombre), el('p', 'h-dir-desc', p.descripcion));
+    if (p.zona) li.append(el('p', 'h-dir-zona', '📍 ' + p.zona));
+    const acc = el('div', 'h-dir-acc');
+    const servicio = (nombreCat[cat] || nombreCat[p.categorias[0]])?.nombre.toLowerCase() || 'su servicio';
+    if (p.tel && esCelular(p.tel)) {
+      const a = el('a', 'h-btn h-dir-wa', 'Ir al WhatsApp') as HTMLAnchorElement;
+      a.href = `https://wa.me/${p.tel}?text=${encodeURIComponent(`Hola, ${p.nombre}. Los encontré en el directorio de Celebra (somoscelebrave.com) y quisiera información sobre ${servicio} para una fiesta.`)}`;
+      a.target = '_blank'; a.rel = 'noopener';
+      acc.append(a);
+    } else if (p.tel) {
+      const a = el('a', 'h-btn h-dir-tel', 'Llamar ' + telBonito(p.tel)) as HTMLAnchorElement;
+      a.href = 'tel:+' + p.tel; acc.append(a);
+    }
+    if (p.instagram) {
+      const a = el('a', 'h-btn h-btn-line', 'Instagram') as HTMLAnchorElement;
+      a.href = `https://instagram.com/${p.instagram.replace('@', '')}`; a.target = '_blank'; a.rel = 'noopener'; acc.append(a);
+    }
+    if (p.placeId) {
+      const a = el('a', 'h-dir-maps', 'Ver reseñas en Google Maps') as HTMLAnchorElement;
+      a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.nombre + ' Caripe')}&query_place_id=${p.placeId}`;
+      a.target = '_blank'; a.rel = 'noopener'; acc.append(a);
+    }
+    li.append(acc);
+    return li;
+  }
+
+  const celebra = document.getElementById('dir-celebra')!;
+  const PROPIO = ['pinata', 'globo', 'arreglo', 'decora', 'cotillon', 'chupeta', 'topper', 'regalo', 'invitacion', 'centro de mesa', 'sorpresa', 'bolsita', 'flor', 'rosa', 'desayuno', 'caja'];
+  function pintar(scroll = false) {
+    const texto = sinAcentos(q.value.trim());
+    const buscaLoNuestro = !!texto && PROPIO.some((k) => texto.includes(k) || (texto.length >= 4 && k.startsWith(texto)));
+    celebra.hidden = !(buscaLoNuestro || (!cat && !texto && pagina === 1));
+    const res = orden.filter((p) => (!cat || p.categorias.includes(cat)) &&
+      (!texto || sinAcentos([p.nombre, p.descripcion, p.zona || '', ...p.categorias.map((id) => nombreCat[id]?.nombre || '')].join(' ')).includes(texto)));
+    const total = Math.max(1, Math.ceil(res.length / POR_PAGINA));
+    pagina = Math.min(pagina, total);
+    lista.replaceChildren(...res.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map(tarjeta));
+    vacio.hidden = res.length > 0 || buscaLoNuestro;
+    info.textContent = res.length ? `${res.length} resultado${res.length === 1 ? '' : 's'}${cat ? ' en ' + nombreCat[cat].nombre : ''}` : '';
+    chips.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cat === cat)));
+    pags.replaceChildren();
+    if (total > 1) {
+      const btn = (txt: string, n: number, actual = false, off = false) => {
+        const b = el('button', 'h-dir-pg' + (actual ? ' is-on' : ''), txt) as HTMLButtonElement;
+        b.type = 'button'; b.disabled = off; if (actual) b.setAttribute('aria-current', 'page');
+        b.addEventListener('click', () => { pagina = n; pintar(true); });
+        return b;
+      };
+      pags.append(btn('‹ Anterior', pagina - 1, false, pagina === 1));
+      for (let i = 1; i <= total; i++) pags.append(btn(String(i), i, i === pagina));
+      pags.append(btn('Siguiente ›', pagina + 1, false, pagina === total));
+    }
+    const u = new URLSearchParams();
+    if (cat) u.set('cat', cat); if (q.value.trim()) u.set('q', q.value.trim()); if (pagina > 1) u.set('p', String(pagina));
+    history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+    if (scroll) document.getElementById('dir-q')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  chips.forEach((b) => b.addEventListener('click', () => { cat = b.dataset.cat || ''; pagina = 1; pintar(); }));
+  let t: number | undefined;
+  q.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(() => { pagina = 1; pintar(); }, 150); });
+  pintar();
 </script>
