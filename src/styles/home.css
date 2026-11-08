@@ -441,3 +441,26 @@
   .home .h-club10 b{font-size:36px}.home .h-club10 span{font-size:9px;letter-spacing:.01em}
   .home .h-clubtag{transform:scale(.62)}
 }
+
+/* Página del Club: arte con regalos y tarjetas de ideas */
+.home .h-clubart{position:relative;width:100%;max-width:520px;justify-self:center;border-radius:28px;overflow:hidden;background:linear-gradient(160deg,#d9cbf9,#efd2f2 60%,#f7cfe4);padding-top:150px}
+.home .h-clubart img{display:block;width:100%;height:auto;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 16%);mask-image:linear-gradient(to bottom,transparent,#000 16%)}
+.home .h-clubart .h-clubtag{top:22px;left:20px;transform:scale(.72);transform-origin:top left}
+.home .h-clubart .h-club10{top:24px;right:18px;width:112px;height:112px}
+.home .h-clubart .h-club10 b{font-size:42px}.home .h-clubart .h-club10 span{font-size:10.5px;letter-spacing:.02em}
+.home .h-page-hero:has(.h-clubart){grid-template-columns:minmax(0,6fr) minmax(0,5fr)}
+.home .h-ideas{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.home .h-idea{display:grid;grid-template-columns:44% 1fr;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#ece3fd,#fbe3ef)}
+.home .h-idea-img{display:flex;align-items:flex-end;justify-content:center;padding-top:12px}
+.home .h-idea-img img{width:100%;height:auto;display:block}
+.home .h-idea-txt{display:flex;flex-direction:column;gap:10px;padding:26px 24px 26px 8px;justify-content:center}
+.home .h-idea-txt .h-kicker{color:var(--rosa-ink)}
+.home .h-idea-txt h3{font-size:22px;color:var(--plum)}
+.home .h-idea-txt p{font-size:15.5px;color:#3d3554}
+.home .h-idea-txt .h-btn{align-self:flex-start;min-height:46px;padding:0 18px;font-size:15px;background:#fff}
+@media (max-width:980px){.home .h-ideas{grid-template-columns:1fr}}
+@media (max-width:900px){.home .h-page-hero:has(.h-clubart){grid-template-columns:1fr}.home .h-clubart{max-width:440px}}
+@media (max-width:520px){.home .h-idea{grid-template-columns:1fr}.home .h-idea-img img{width:62%;margin:0 auto}.home .h-idea-txt{padding:18px 20px 22px}.home .h-idea-txt .h-btn{align-self:stretch;width:auto}}
+.home .h-idea-img img{-webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%),linear-gradient(to right,transparent,#000 18%,#000 82%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent,#000 12%),linear-gradient(to right,transparent,#000 18%,#000 82%,transparent);mask-composite:intersect}
+.home .h-clubart .h-clubtag{position:absolute;margin:0;height:150px}
+@media (max-width:520px){.home .h-clubart{padding-top:118px}.home .h-clubart .h-clubtag{transform:scale(.58);left:14px;top:18px}.home .h-clubart .h-club10{width:96px;height:96px;top:16px;right:12px}.home .h-clubart .h-club10 b{font-size:34px}.home .h-clubart .h-club10 span{font-size:9px;letter-spacing:0}}

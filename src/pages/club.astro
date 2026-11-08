@@ -3,6 +3,9 @@ import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 import HomeNav from '../components/HomeNav.astro';
 import '../styles/home.css';
+import '@fontsource/caveat/700.css';
+import '@fontsource/young-serif/400.css';
+import { site } from '../config/site';
 import { RELACIONES, TIPOS } from '../config/club';
 const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 ---
@@ -18,11 +21,19 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <p class="h-lead">Anota los cumpleaños y aniversarios de quienes quieres. Te avisamos antes, con una oferta especial para celebrarlos: piñatas, arreglos de globos, chupeteras y detalles.</p>
           <ul class="h-trust" style="margin-top:4px">
             <li>Aviso antes de cada fecha</li>
-            <li>Ofertas solo para socios</li>
+            <li>10% de descuento en cada fecha</li>
             <li>Te das de baja cuando quieras</li>
           </ul>
         </div>
-        <div class="h-page-art rv" style="--bg:#fbe6ee;--d:100ms"><img class="h-float" src="/img/marca/regalo.webp" alt="" /></div>
+        <div class="h-clubart rv" style="--d:100ms">
+          <div class="h-clubtag" aria-hidden="true">
+            <span class="t1">Regala</span>
+            <span class="t2">Momentos</span>
+            <span class="t3">únicos</span>
+          </div>
+          <div class="h-club10"><b>10%</b><span>de descuento</span></div>
+          <img src="/img/club/regalos-m.webp" width="900" height="626" alt="Arreglo de rosas con globo «Love you» y caja de dulces con fotos y globo «Feliz cumple mami»" />
+        </div>
       </section>
 
       <section class="h-sec h-wrap" style="padding-top:56px" aria-labelledby="t-reg">
@@ -45,6 +56,30 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span>Te escribiremos antes de cada fecha. Si quieres cambiar tus fechas, vuelve a registrarte con el mismo correo.</span></div>
         </form>
         <p class="h-fine rv" style="max-width:640px">Guardamos solo lo necesario para avisarte: tu nombre y contacto, y de cada fecha el primer nombre, la relación y el día. Nunca apellidos ni fotos, y no compartimos tus datos. <a class="h-link" href="/privacidad">Privacidad</a></p>
+      </section>
+
+      <section class="h-sec h-wrap" aria-labelledby="t-ideas">
+        <div class="h-head rv">
+          <span class="h-kicker">Ideas para regalar</span>
+          <h2 id="t-ideas">¿Y qué le regalo?</h2>
+          <p>Cuando se acerque la fecha te escribimos con ideas como estas, hechas a mano en el taller y con tu 10% de socio.</p>
+        </div>
+        <div class="h-ideas">
+          {[
+            { img: '/img/club/rosas.webp', k: 'Para tu pareja', t: 'Rosas con globo personalizado', d: 'Rosas rojas, flores blancas y un globo burbuja con el mensaje que quieras: «Love you», su nombre o una fecha especial.', msg: 'Hola Celebra, me interesa el arreglo de rosas con globo personalizado.' },
+            { img: '/img/club/mami.webp', k: 'Para mamá', t: 'Caja de dulces con fotos', d: 'Sus dulces favoritos, fotos de la familia y un globo burbuja con «Feliz cumple, mami» o el mensaje que elijas.', msg: 'Hola Celebra, me interesa la caja de dulces con fotos y globo personalizado.' },
+          ].map((x, i) => (
+            <article class="h-idea rv" style={`--d:${i * 80}ms`}>
+              <div class="h-idea-img"><img src={x.img} alt={x.t} loading="lazy" /></div>
+              <div class="h-idea-txt">
+                <span class="h-kicker">{x.k}</span>
+                <h3>{x.t}</h3>
+                <p>{x.d}</p>
+                <a class="h-btn h-btn-line" href={`https://wa.me/${site.contact.localWhatsapp}?text=${encodeURIComponent(x.msg)}`} target="_blank" rel="noopener">Pedir por WhatsApp</a>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
     <Footer />
