@@ -145,6 +145,8 @@ const hoy = new Date().toISOString().slice(0, 10);
               <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la vemos.</p>
             </div>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+            <label><span>Correo <span class="h-opt">(opcional)</span></span><input type="email" name="correo" autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.com" /></label>
+            <label class="h-promo"><input type="checkbox" name="promos" value="si" /><span>Quiero recibir descuentos y novedades de Celebra. Puedes darte de baja cuando quieras.</span></label>
             <button class="h-btn" type="submit">
               <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
               Enviar por WhatsApp
@@ -318,7 +320,7 @@ const hoy = new Date().toISOString().slice(0, 10);
     const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
     const hayFoto = foto.files && foto.files.length > 0;
     const linea = fotoUrl ? `\n📷 Foto de referencia (guárdala al abrirla, se borra a los 15 min): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
-    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + linea;
+    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + (String(d.correo || '').trim() ? `\n• Correo: ${String(d.correo).trim()}${d.promos ? ' (acepta recibir descuentos)' : ''}` : '') + linea;
     const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
     // Deja el formulario limpio para una nueva cotización (también al volver con "atrás").
     const ok = $('.h-form-ok');

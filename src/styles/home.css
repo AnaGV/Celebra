@@ -323,3 +323,6 @@
 }
 .h-form-ok{display:flex;flex-direction:column;gap:4px}
 .h-form-ok a{color:#0f4d73;font-weight:700}
+.h-opt{font-weight:500;color:var(--muted)}
+.h-form label.h-promo{flex-direction:row;align-items:flex-start;gap:10px;font-weight:500;font-size:13.5px;color:var(--muted)}
+.h-form .h-promo input{width:20px;height:20px;min-height:0;flex:none;margin-top:1px;accent-color:var(--accent);-webkit-appearance:checkbox;appearance:auto}
