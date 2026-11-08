@@ -9,77 +9,127 @@ const year = new Date().getFullYear();
 <footer class="foot">
   <div class="foot-wrap">
     <div class="foot-g">
-      <div>
+      <div class="foot-first">
         <a class="foot-brand" href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra · Artículos de fiesta" loading="lazy" /></a>
+        {variant === 'libro' ? (
+          <p class="foot-txt">Una guía práctica para organizar fiestas infantiles sin estrés, hecha en Caripe.</p>
+        ) : (
+          <div class="foot-cta">
+            <b>Pedidos para empresas</b>
+            <p class="foot-txt">Stickers, tags y tarjetas con tu marca. Déjanos tus datos y te cotizamos.</p>
+            <a class="foot-btn" href="/empresas/">Cotizar para mi empresa</a>
+          </div>
+        )}
       </div>
       {variant === 'libro' ? (
         <>
-          <div>
-            <b>El libro</b>
-            <a href="/libro/">Fiestas que se recuerdan</a>
-            <a href="/libro/regalo/">Capítulo de regalo</a>
-            <a href="/calculadora/">Calculadora de presupuesto</a>
-          </div>
-          <div>
-            <b>Ayuda con tu compra</b>
-            <a href={`https://wa.me/${c.whatsapp}`}>WhatsApp libro y pagos: {c.whatsappDisplay}</a>
-            <a href={`mailto:${site.brand.supportEmail}`}>{site.brand.supportEmail}</a>
-          </div>
-          <div>
-            <b>Legal</b>
-            <a href="/terminos">Términos de venta</a>
-            <a href="/reembolsos">Política de reembolso</a>
-            <a href="/privacidad">Privacidad</a>
-            <a href="/baja">Darme de baja</a>
-          </div>
+          <details class="foot-col" open>
+            <summary>El libro</summary>
+            <div>
+              <a href="/libro/">Fiestas que se recuerdan</a>
+              <a href="/libro/regalo/">Capítulo de regalo</a>
+              <a href="/calculadora/">Calculadora de presupuesto</a>
+            </div>
+          </details>
+          <details class="foot-col" open>
+            <summary>Ayuda con tu compra</summary>
+            <div>
+              <a href={`https://wa.me/${c.whatsapp}`}>WhatsApp libro y pagos: {c.whatsappDisplay}</a>
+              <a href={`mailto:${site.brand.supportEmail}`}>{site.brand.supportEmail}</a>
+            </div>
+          </details>
+          <details class="foot-col" open>
+            <summary>Legal</summary>
+            <div>
+              <a href="/terminos">Términos de venta</a>
+              <a href="/reembolsos">Política de reembolso</a>
+              <a href="/privacidad">Privacidad</a>
+              <a href="/baja">Darme de baja</a>
+            </div>
+          </details>
         </>
       ) : (
         <>
-          <div>
-            <b>Celebra</b>
-            <a href="/#fiestas">Fiestas</a>
-            <a href="/packs/">Packs</a>
-            <a href="/servicios/">Servicios</a>
-            <a href="/salones/">Salones</a>
-            <a href="/libro/">El libro</a>
-            <a href="/calculadora/">Calculadora</a>
-            <a href="/club/">Club Celebra</a>
-            <a href="/empresas/">Para empresas</a>
-          </div>
-          <div>
-            <b>Contacto</b>
-            <a href="/contacto/">Escríbenos</a>
-            <a href={`https://wa.me/${c.localWhatsapp}`}>WhatsApp {c.localWhatsappDisplay}</a>
-            <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
-            <a href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
-            <a href={c.tiktok} target="_blank" rel="noopener">TikTok {c.tiktokHandle}</a>
-          </div>
-          <div>
-            <b>Legal</b>
-            <a href="/contacto/#quienes">Quiénes somos</a>
-            <a href="/privacidad">Privacidad</a>
-            <a href="/baja">Darme de baja</a>
-          </div>
+          <details class="foot-col" open>
+            <summary>Celebra</summary>
+            <div>
+              <a href="/#fiestas">Fiestas</a>
+              <a href="/packs/">Packs</a>
+              <a href="/servicios/">Servicios</a>
+              <a href="/salones/">Salones</a>
+              <a href="/libro/">El libro</a>
+              <a href="/calculadora/">Calculadora</a>
+              <a href="/club/">Club Celebra</a>
+              <a href="/empresas/">Para empresas</a>
+            </div>
+          </details>
+          <details class="foot-col" open>
+            <summary>Contacto</summary>
+            <div>
+              <a href="/contacto/">Escríbenos</a>
+              <a href={`https://wa.me/${c.localWhatsapp}`}>WhatsApp {c.localWhatsappDisplay}</a>
+              <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a>
+              <a href={c.instagram} target="_blank" rel="noopener">Instagram {c.instagramHandle}</a>
+              <a href={c.tiktok} target="_blank" rel="noopener">TikTok {c.tiktokHandle}</a>
+            </div>
+          </details>
+          <details class="foot-col" open>
+            <summary>Información</summary>
+            <div>
+              <a href="/contacto/#quienes">Quiénes somos</a>
+              <a href="/privacidad">Privacidad</a>
+              <a href="/baja">Darme de baja</a>
+            </div>
+          </details>
         </>
       )}
     </div>
-    <p class="foot-b">© {year} Celebra. Caripe, Monagas, Venezuela.</p>
   </div>
+  <div class="foot-bar"><div class="foot-wrap">© {year} Celebra. Caripe, Monagas, Venezuela.</div></div>
 </footer>
 
+<script>
+  // En teléfono las columnas se pliegan como acordeón; en pantalla grande van siempre abiertas.
+  const mq = window.matchMedia('(max-width:720px)');
+  const cols = () => document.querySelectorAll<HTMLDetailsElement>('.foot-col');
+  const ajustar = () => cols().forEach((d) => { d.open = !mq.matches; });
+  ajustar();
+  mq.addEventListener('change', ajustar);
+  cols().forEach((d) => d.querySelector('summary')?.addEventListener('click', (e) => { if (!mq.matches) e.preventDefault(); }));
+</script>
+
 <style>
-  .foot{margin-top:112px;border-top:1px solid #e3e5ea;padding:56px 0 40px;font-size:15px;font-family:'Figtree',system-ui,sans-serif;color:#16171a;background:#ffffff}
+  .foot{margin-top:112px;font-size:15px;font-family:'Figtree',system-ui,sans-serif;color:#fff;background:#6043e1}
   .foot-wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
-  .foot-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
-  .foot-g div{display:flex;flex-direction:column;gap:10px;min-width:0}
-  .foot-g b{font-size:14px}
-  .foot-g span{color:#5c6070}
-  .foot a{color:#5c6070;text-decoration:none;overflow-wrap:anywhere}
-  .foot a:hover{color:#16171a}
-  .foot .foot-brand{display:block;width:160px}
+  .foot > .foot-wrap{padding-top:56px;padding-bottom:48px}
+  .foot-g{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
+  .foot-first{display:flex;flex-direction:column;gap:22px;min-width:0}
+  .foot .foot-brand{display:block;width:200px;background:#fff;border-radius:18px;padding:12px 16px;box-shadow:0 6px 18px rgba(20,10,60,.18)}
   .foot .foot-brand img{width:100%;height:auto;display:block}
-  .foot-mark{width:30px;height:30px;border-radius:9px;background:#c2185b;display:grid;place-items:center}
-  .foot-b{margin:48px 0 0;color:#5c6070;font-size:13px}
+  .foot-cta{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+  .foot-cta b{font-size:16px}
+  .foot-txt{margin:0;color:rgba(255,255,255,.88);line-height:1.5;max-width:34ch}
+  .foot .foot-btn{margin-top:6px;display:inline-block;background:#db3978;color:#fff;font-weight:700;padding:12px 18px;border-radius:12px;text-decoration:none}
+  .foot .foot-btn:hover{background:#c22d68;color:#fff}
+  .foot-col summary{list-style:none;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;cursor:default}
+  .foot-col summary::-webkit-details-marker{display:none}
+  .foot-col > div{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .foot a{color:rgba(255,255,255,.88);text-decoration:none;overflow-wrap:anywhere}
+  .foot a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+  .foot a:focus-visible,.foot summary:focus-visible{outline:2px solid #fcef91;outline-offset:3px;border-radius:4px}
+  .foot-bar{background:#4a2fc4;color:rgba(255,255,255,.85);font-size:13px;padding:16px 0}
   @media (max-width:980px){.foot-g{grid-template-columns:1fr 1fr}}
-  @media (max-width:560px){.foot-g{grid-template-columns:1fr}.foot{margin-top:80px}}
+  @media (max-width:720px){
+    .foot{margin-top:80px}
+    .foot > .foot-wrap{padding-top:40px;padding-bottom:24px}
+    .foot-g{grid-template-columns:1fr;gap:0}
+    .foot-first{padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.22)}
+    .foot-col{border-bottom:1px solid rgba(255,255,255,.22)}
+    .foot-col summary{cursor:pointer;margin:0;padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:16px}
+    .foot-col summary::after{content:'';width:10px;height:10px;border-right:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(45deg) translate(-3px,-3px);transition:transform .2s}
+    .foot-col[open] summary::after{transform:rotate(-135deg) translate(-3px,-3px)}
+    .foot-col > div{padding:0 0 22px;gap:16px}
+    .foot-col a{font-size:16px}
+  }
+  @media (prefers-reduced-motion:reduce){.foot-col summary::after{transition:none}}
 </style>
