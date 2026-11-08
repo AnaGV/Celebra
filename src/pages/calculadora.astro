@@ -1,32 +1,89 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><link rel="icon" href="/favicon.ico" sizes="32x32" /><link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Calculadora de presupuesto para fiestas · Celebra</title>
-<meta name="description" content="Reparte el presupuesto de tu fiesta infantil por rubro, anota lo que ya cotizaste y mira cuánto te queda. Gratis, de Celebra.">
-<meta property="og:title" content="Calculadora de presupuesto para fiestas · Celebra">
-<meta property="og:description" content="Reparte el presupuesto, anota lo que ya cotizaste y mira cuánto te queda.">
-<meta property="og:image" content="/img/og.jpg">
-<meta name="theme-color" content="#ffffff">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
-<style>
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+---
+
+<Base image="/img/og-celebra.jpg" title="Calculadora de presupuesto para fiestas · Celebra" description="Reparte el presupuesto de tu fiesta infantil por rubro, anota lo que ya cotizaste y mira cuánto te queda. Gratis, de Celebra.">
+  <div class="home">
+    <HomeNav />
+    <div class="calc-page">
+<main class="wrap">
+<h1>¿Cuánto cuesta tu fiesta?</h1>
+<p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía del taller Celebra. Cuando ya sepas el precio de algo, anótalo y te mostramos cuánto te queda para lo demás.</p>
+
+<div class="calc">
+  <div class="side">
+    <form class="calc-in" id="calc-form" novalidate>
+      <div class="fld">
+        <label for="calc-total">¿Cuánto vas a gastar en total?</label>
+        <div class="money"><select id="calc-cur" aria-label="Moneda"><option value="USD">USD</option><option value="Bs">Bs</option><option value="CLP">CLP</option></select><input id="calc-total" type="number" inputmode="decimal" min="0" step="any"></div>
+      </div>
+      <div class="fld">
+        <label for="calc-kids">¿Cuántos niños invitas?</label>
+        <input id="calc-kids" type="number" inputmode="numeric" min="1" step="1">
+      </div>
+    </form>
+    <div class="kpis" aria-live="polite">
+      <div class="kpi big" id="k-left-box"><span class="k-l" id="k-left-l">Te queda por gastar</span><b class="k-v" id="k-left">—</b><span class="k-s" id="k-left-s"></span><div class="bar" aria-hidden="true"><i id="k-bar"></i></div></div>
+      <div class="kpi"><span class="k-l">Ya cotizado</span><b class="k-v" id="k-known">—</b></div>
+      <div class="kpi"><span class="k-l">Por niño</span><b class="k-v" id="k-kid">—</b></div>
+      <div class="kpi"><span class="k-l">Cada bolsita</span><b class="k-v" id="k-bag">—</b></div>
+      <div class="kpi"><span class="k-l">Imprevistos</span><b class="k-v" id="k-buf">—</b></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-sec" data-share>Enviar por WhatsApp</button>
+      <button type="button" class="btn-sec" id="calc-copy">Copiar</button>
+      <button type="button" class="btn-sec" id="calc-reset">Empezar de nuevo</button>
+      <span class="copied" id="calc-copied" role="status"></span>
+    </div>
+  </div>
+
+  <div class="list">
+    <div class="list-head">
+      <h2>Tu presupuesto por rubro</h2>
+      <p>El sugerido se recalcula solo: lo que ya cotizaste se descuenta y el resto se reparte entre lo que falta.</p>
+    </div>
+    <div id="groups"></div>
+    <form class="add" id="add-form" novalidate>
+      <div class="fld"><label for="add-name">Agregar otro gasto</label><input id="add-name" type="text" placeholder="Ej. Fotógrafo, inflable, payaso" maxlength="40"></div>
+      <div class="fld"><label for="add-price">Precio (si lo sabes)</label><input id="add-price" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></div>
+      <button type="submit" class="btn">Agregar</button>
+    </form>
+    <p class="note" id="calc-note"></p>
+    <div class="actions-end"><button type="button" class="btn" data-share>Enviar mi presupuesto por WhatsApp</button></div>
+  </div>
+</div>
+
+<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/libro/regalo/">Quiero el capítulo gratis</a></div>
+</main>
+    </div>
+<div class="calc-dock" id="calc-dock" aria-hidden="true">
+  <div class="d-txt"><span class="d-l" id="d-l">Te queda</span><span class="d-v" id="d-v">—</span></div>
+  <button type="button" class="btn" data-share tabindex="-1">Enviar por WhatsApp</button>
+</div>
+    <Footer />
+  </div>
+</Base>
+
+<style is:global>
+
 /* Colores tomados del logo de Celebra: magenta, celeste, azul, lila y amarillo. */
-:root{--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--panel:#f4f5f7;--accent:#c2185b;--lila:#f3eefd;--lila-line:#ded3f7;--lila-ink:#4b2a86;--cielo:#e8f4fc;--cielo-ink:#14466f;--ok:#1a7f4b;--bad:#b42318;--bad-soft:#fdecea;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif}
+:root{--ink:#16171a;--muted:#5c6070;--line:#e3e5ea;--panel:#f4f5f7;--accent:#6043e1;--lila:#f3eefd;--lila-line:#ded3f7;--lila-ink:#4b2a86;--cielo:#e8f4fc;--cielo-ink:#14466f;--ok:#1a7f4b;--bad:#b42318;--bad-soft:#fdecea;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.calc-page{color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
-.topbar{border-bottom:1px solid var(--line);padding:4px 0}
-.top{display:flex;align-items:center;gap:10px;height:56px;max-width:1040px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));font-weight:800;font-size:20px;letter-spacing:-0.03em;color:var(--ink);text-decoration:none}
-.mark{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
-.wrap{max-width:1040px;margin:0 auto;padding:40px max(20px,env(safe-area-inset-right,0px)) 56px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
-h1{margin:0;font-weight:800;letter-spacing:-0.025em;font-size:clamp(32px,5vw,48px);line-height:1.08;text-wrap:balance}
-h2{margin:0;font-weight:800;letter-spacing:-0.02em;font-size:20px}
+.calc-page .wrap{max-width:1040px;margin:0 auto;padding:40px max(20px,env(safe-area-inset-right,0px)) 56px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:22px}
+.calc-page h1{margin:0;font-weight:800;letter-spacing:-0.025em;font-size:clamp(32px,5vw,48px);line-height:1.08;text-wrap:balance}
+.calc-page h2{margin:0;font-weight:800;letter-spacing:-0.02em;font-size:20px}
 .lead{margin:0;color:var(--muted);font-size:18px;max-width:62ch}
 .calc{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:20px;align-items:start}
 .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:16px}
 .calc-in{background:var(--lila);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .fld{display:flex;flex-direction:column;gap:6px}.fld label{font-weight:700;font-size:14px}
-input,select{height:52px;border-radius:12px;border:1.5px solid var(--lila-line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(194,24,91,.15)}
+.calc-page input,.calc-page select{height:52px;border-radius:12px;border:1.5px solid var(--lila-line);background:#fff;color:var(--ink);padding:0 13px;font:500 16px var(--body);width:100%;min-width:0}
+.calc-page input:focus,.calc-page select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(96,67,225,.15)}
 .money{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .kpi{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
@@ -38,7 +95,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 .kpi.big.bad .k-v{color:var(--bad)}
 .k-s{font-size:13px;color:var(--muted)}
 .bar{height:10px;border-radius:999px;background:#fff;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#e0457b,#7b4fd6);transition:width .25s ease}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#db3978,#6043e1);transition:width .25s ease}
 .kpi.big.bad .bar i{background:var(--bad)}
 .list{display:flex;flex-direction:column;gap:18px;min-width:0}
 .list-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px}
@@ -74,7 +131,6 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:24px;border-radius:18px;background:var(--lila);color:var(--lila-ink);margin-top:8px}
 .cta b{color:var(--lila-ink)}
 .cta a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:16px 22px;border-radius:12px}
-.foot{text-align:center;color:var(--muted);font-size:13px;padding:0 20px 40px}.foot a{color:var(--muted)}
 @media (max-width:860px){.calc{grid-template-columns:1fr}.side{position:static}}
 @media (max-width:620px){
   .cols{display:none}
@@ -88,58 +144,27 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
   .add{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
-</style></head><body>
-<div class="topbar"><a class="top" href="/"><span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></span>Celebra</a></div>
-<main class="wrap">
-<h1>¿Cuánto cuesta tu fiesta?</h1>
-<p class="lead">Escribe cuánto puedes gastar y cuántos niños invitas. Te repartimos el total con la guía del taller Celebra. Cuando ya sepas el precio de algo, anótalo y te mostramos cuánto te queda para lo demás.</p>
 
-<div class="calc">
-  <div class="side">
-    <form class="calc-in" id="calc-form" novalidate>
-      <div class="fld">
-        <label for="calc-total">¿Cuánto vas a gastar en total?</label>
-        <div class="money"><select id="calc-cur" aria-label="Moneda"><option value="USD">USD</option><option value="Bs">Bs</option><option value="CLP">CLP</option></select><input id="calc-total" type="number" inputmode="decimal" min="0" step="any"></div>
-      </div>
-      <div class="fld">
-        <label for="calc-kids">¿Cuántos niños invitas?</label>
-        <input id="calc-kids" type="number" inputmode="numeric" min="1" step="1">
-      </div>
-    </form>
-    <div class="kpis" aria-live="polite">
-      <div class="kpi big" id="k-left-box"><span class="k-l" id="k-left-l">Te queda por gastar</span><b class="k-v" id="k-left">—</b><span class="k-s" id="k-left-s"></span><div class="bar" aria-hidden="true"><i id="k-bar"></i></div></div>
-      <div class="kpi"><span class="k-l">Ya cotizado</span><b class="k-v" id="k-known">—</b></div>
-      <div class="kpi"><span class="k-l">Por niño</span><b class="k-v" id="k-kid">—</b></div>
-      <div class="kpi"><span class="k-l">Cada bolsita</span><b class="k-v" id="k-bag">—</b></div>
-      <div class="kpi"><span class="k-l">Imprevistos</span><b class="k-v" id="k-buf">—</b></div>
-    </div>
-    <div class="actions">
-      <button type="button" class="btn-sec" id="calc-copy">Copiar para WhatsApp</button>
-      <button type="button" class="btn-sec" id="calc-reset">Empezar de nuevo</button>
-      <span class="copied" id="calc-copied" role="status"></span>
-    </div>
-  </div>
+/* Barra fija en el celular: cuánto queda + compartir */
+.calc-dock{display:none}
+.actions-end{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+@media (max-width:860px){
+  .calc-dock{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:0 -10px 24px -18px rgba(43,29,92,.5);transform:translateY(110%);transition:transform .25s ease}
+  .calc-dock.on{transform:none}
+  .calc-dock .d-l{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .calc-dock .d-v{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--cielo-ink);line-height:1.1}
+  .calc-dock.bad .d-v{color:var(--bad)}
+  .calc-dock .d-txt{flex:1;min-width:0}
+  .calc-dock .btn{min-height:48px;padding:0 16px;font-size:15px}
+  .calc-page{padding-bottom:84px}
+  .h-wa{display:none}
+}
+@media (prefers-reduced-motion:reduce){.calc-dock{transition:none}}
 
-  <div class="list">
-    <div class="list-head">
-      <h2>Tu presupuesto por rubro</h2>
-      <p>El sugerido se recalcula solo: lo que ya cotizaste se descuenta y el resto se reparte entre lo que falta.</p>
-    </div>
-    <div id="groups"></div>
-    <form class="add" id="add-form" novalidate>
-      <div class="fld"><label for="add-name">Agregar otro gasto</label><input id="add-name" type="text" placeholder="Ej. Fotógrafo, inflable, payaso" maxlength="40"></div>
-      <div class="fld"><label for="add-price">Precio (si lo sabes)</label><input id="add-price" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></div>
-      <button type="submit" class="btn">Agregar</button>
-    </form>
-    <p class="note" id="calc-note"></p>
-  </div>
-</div>
+</style>
 
-<div class="cta"><span><b>¿Quieres la plantilla para imprimir y el ejemplo resuelto?</b><br>Te regalamos el capítulo de presupuesto en PDF.</span><a href="/libro/regalo/">Quiero el capítulo gratis</a></div>
-</main>
-<p class="foot">Celebra · Caripe, Monagas, Venezuela · <a href="/libro/">Ver el libro Fiestas que se recuerdan</a></p>
+<script is:inline>
 
-<script>
 (function () {
   // Reparto del libro (capítulo 2): los mismos 11 rubros y porcentajes que las páginas 6 a 8.
   const DEFAULTS = [
@@ -233,6 +258,9 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
     $('k-kid').textContent = fmt(T / kids, cur);
     $('k-bag').textContent = bagRow ? fmt(bagRow.sug / bags, cur) : '—';
     $('k-buf').textContent = bufRow ? fmt(bufRow.sug, cur) : '—';
+    $('d-l').textContent = over ? 'Te pasaste por' : 'Te queda';
+    $('d-v').textContent = fmt(Math.abs(left), cur);
+    $('calc-dock').classList.toggle('bad', over);
     $('calc-note').textContent = 'Los porcentajes son la guía del libro y sirven de punto de partida: cambia lo que quieras. Si el monto por niño te parece alto, baja invitados o haz más cosas en casa; no recortes la comida.';
     save();
   }
@@ -290,13 +318,21 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
     renderRows();
   });
 
-  $('calc-copy').addEventListener('click', () => {
+  const resumen = () => {
     const cur = state.cur;
     const { T, known, left } = compute();
     const lines = state.rows.filter((r) => r.sug > 0).map((r) => '• ' + r.name + ': ' + fmt(r.sug, cur) + (r.real != null ? ' ✓' : ''));
     const text = 'Mi presupuesto para la fiesta (' + state.kids + ' niños)\n' + lines.join('\n') +
       '\nTotal: ' + fmt(T, cur) + '\nYa cotizado: ' + fmt(known, cur) + '\n' + (left < 0 ? 'Me pasé por: ' : 'Me queda: ') + fmt(Math.abs(left), cur) +
       '\n(✓ = precio real)\nCalculado con la guía de Celebra: ' + location.origin + '/calculadora/';
+    return text;
+  };
+  document.querySelectorAll('[data-share]').forEach((b) => b.addEventListener('click', () => {
+    const url = 'https://wa.me/?text=' + encodeURIComponent(resumen());
+    if (matchMedia('(pointer: coarse)').matches) location.href = url; else window.open(url, '_blank', 'noopener');
+  }));
+  $('calc-copy').addEventListener('click', () => {
+    const text = resumen();
     const done = () => { $('calc-copied').textContent = 'Copiado'; setTimeout(() => { $('calc-copied').textContent = ''; }, 1800); };
     const fallback = () => { $('calc-copied').textContent = 'No se pudo copiar'; };
     try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
@@ -315,5 +351,13 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
   }
   document.addEventListener('input', () => { try { localStorage.setItem(KEY + '-touched', '1'); } catch (e) {} }, { once: true });
 })();
+
+// La barra de abajo aparece cuando el resumen de arriba ya no se ve.
+(function () {
+  const dock = document.getElementById('calc-dock');
+  const box = document.getElementById('k-left-box');
+  if (!dock || !box || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(([en]) => dock.classList.toggle('on', !en.isIntersecting && en.boundingClientRect.top < 0)).observe(box);
+})();
+
 </script>
-</body></html>

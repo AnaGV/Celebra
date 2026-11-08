@@ -11,6 +11,21 @@
         ],
         "createdAt": "2026-11-07T22:24:43.045Z",
         "reason": "Claude: .h-ref-img is a hidden preview whose src is set by JS from the user's chosen file; never rendered empty"
+      },
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-11-08T04:13:58.245Z",
+        "reason": "Claude: Fraunces is the established typeface of the Celebra book and its gift chapter PDF; changing it would break consistency with the published ebook"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "lead-magnet/capitulo-2-presupuesto.html"
+        ],
+        "createdAt": "2026-11-08T04:13:58.261Z",
+        "reason": "Claude: print chapter of the book uses the book's editorial italic accents by design, not a landing hero"
       }
     ]
   }
