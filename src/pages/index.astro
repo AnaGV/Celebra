@@ -30,10 +30,9 @@ const hoy = new Date().toISOString().slice(0, 10);
           {[
             { bg: 'fondo-1', color: '#dcc8f7', kick: 'Hechas a mano en Caripe', t: 'Piñatas a medida', d: 'Con la forma, la temática, el nombre y los colores que tu peque sueña.', imgs: [['', 'Piñatas hechas a mano: forrada rosada, de selva con monito, corona amarilla con flores y letra N con nombre']] },
             { bg: 'fondo-2', color: '#f7cfdf', kick: 'Para la mesa dulce', t: 'Chupeteras con mucho dulce', d: 'Personajes y temáticas hechos a mano, listos para la foto.', imgs: [['', 'Chupeteras con dulces: niña, fresita y dinosaurio']] },
-            { bg: 'fondo-3', color: '#bfe3f7', kick: 'Su número, su nombre', t: 'Piñatas con número', d: 'El primer añito, el quinto o el que celebren: lo armamos con su temática.', imgs: [['', 'Piñatas con número 1 de dinosaurios y de granja']] },
-            { bg: 'fondo-4', color: '#f7cfdf', kick: 'Hecho en el taller', t: 'Detalles para cada fiesta', d: 'Chupeteras, piñatas y decoración a juego.', full: true, imgs: [['', 'Tres chupeteras con dulces sobre una repisa con flores de papel']] },
+            { bg: 'fondo-3', color: '#bfe3f7', kick: 'Su número, su inicial', t: 'Piñatas con número y letra', d: 'Su edad o la inicial de su nombre, armada con la temática que elijan.', imgs: [['', 'Piñatas con número 1 de dinosaurios y de granja, y letra N con nombre']] },
           ].map((sl, i) => (
-            <div class:list={['h-slide', { on: i === 0, full: (sl as any).full }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de 4`} aria-hidden={i === 0 ? undefined : 'true'} style={`--c:${sl.color}`}>
+            <div class:list={['h-slide', { on: i === 0, full: (sl as any).full }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de 3`} aria-hidden={i === 0 ? undefined : 'true'} style={`--c:${sl.color}`}>
               <picture class="h-slide-bg">
                 <source media="(max-width: 760px)" srcset={`/img/banner/slide-${i + 1}-m.webp`} />
                 <img src={`/img/banner/slide-${i + 1}.webp`} alt={sl.imgs.map((x) => x[1]).join(', ')} loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
@@ -55,7 +54,7 @@ const hoy = new Date().toISOString().slice(0, 10);
         <button type="button" class="h-sl-arrow prev" aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
         <button type="button" class="h-sl-arrow next" aria-label="Siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
         <div class="h-sl-dots" role="tablist" aria-label="Elegir diapositiva">
-          {[0, 1, 2, 3].map((i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Diapositiva ${i + 1}`}></button>)}
+          {[0, 1, 2].map((i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Diapositiva ${i + 1}`}></button>)}
         </div>
       </section>
 
