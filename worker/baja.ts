@@ -32,6 +32,8 @@ export async function registrarBaja(request: Request, env: any): Promise<Respons
   const body = (await request.json().catch(() => ({}))) as { email?: unknown; borrar?: unknown };
   const email = typeof body.email === 'string' ? normalizar(body.email) : '';
   if (!EMAIL.test(email)) return json({ error: 'Escribe un correo válido' }, 400);
+  // Darse de baja también lo saca del Club (no más recordatorios ni ofertas).
+  await env.FOTOS.delete(`club/${await huella(email)}.json`);
   await env.FOTOS.put(`bajas/${await huella(email)}`, '', {
     customMetadata: { fecha: new Date().toISOString(), borrar: body.borrar ? 'si' : 'no' },
   });

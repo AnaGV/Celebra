@@ -9,6 +9,7 @@ import { onRequestPost as orders } from '../functions/api/orders';
 import { subirFoto, verFoto, borrarFoto } from './foto';
 import { registrarBaja, consultarBaja } from './baja';
 import { enviarContacto } from './contacto';
+import { registrarClub, resumenDiario } from './club';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
   '/api/lead': lead,
@@ -23,6 +24,10 @@ export default {
     if (handler) {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return handler({ request, env, waitUntil: ctx.waitUntil.bind(ctx), params: {}, data: {} });
+    }
+    if (url.pathname === '/api/club') {
+      if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
+      return registrarClub(request, env);
     }
     if (url.pathname === '/api/contacto') {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
@@ -49,5 +54,8 @@ export default {
     }
     if (url.pathname.startsWith('/api/')) return new Response('No encontrado', { status: 404 });
     return env.ASSETS.fetch(request);
+  },
+  async scheduled(_event: any, env: any, ctx: any) {
+    ctx.waitUntil(resumenDiario(env));
   },
 };

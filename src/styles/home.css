@@ -344,3 +344,20 @@
 .h-trust li{padding:8px 14px;border-radius:999px;background:#ffffff;font-weight:700;font-size:14px;color:var(--plum)}
 @media (max-width:980px){.h-contact,.h-about{grid-template-columns:1fr}.h-about{padding:28px 22px;gap:20px}.h-about img{max-width:180px}.h-map{aspect-ratio:4/3}}
 .h-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0}
+
+/* ── Club ── */
+.h-club{max-width:720px;margin:0 auto}
+.h-fecha{border:1.5px solid var(--line);border-radius:16px;padding:16px;margin:0 0 12px;display:flex;flex-direction:column;gap:12px;background:#fbf9ff}
+.h-fecha-3{display:grid;grid-template-columns:1.4fr .7fr 1.1fr;gap:12px}
+.h-fecha-x{align-self:flex-end;border:0;background:none;color:var(--muted);text-decoration:underline;font:600 14px 'Figtree',sans-serif;cursor:pointer;padding:4px}
+.h-club .h-btn-line{border:0;cursor:pointer}
+.h-club .h-promo a{color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:560px){.h-fecha-3{grid-template-columns:1fr 1fr}.h-fecha-3 label:first-child{grid-column:span 2}}
+.h-clubband{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:32px 40px;border-radius:24px;background:#fbe6ee}
+.h-clubband img{width:120px;height:auto;flex:none}
+.h-clubband div{display:flex;flex-direction:column;gap:8px;flex:1}
+.h-clubband b{font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--plum)}
+.h-clubband p{color:#3d3554;font-size:17px}
+@media (max-width:760px){.h-clubband{flex-direction:column;align-items:flex-start;padding:26px 22px}.h-clubband img{width:90px}}
+.h-page-hero .h-trust li{background:#f1eaff}

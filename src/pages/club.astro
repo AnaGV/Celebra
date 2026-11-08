@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { RELACIONES, TIPOS } from '../config/club';
+const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+---
+
+<Base image="/img/og-celebra.jpg" title="Club Celebra · Nunca más olvides una fecha" description="Registra los cumpleaños y aniversarios de quienes quieres y te avisamos antes, con ofertas especiales para celebrarlos. Gratis, de Celebra en Caripe.">
+  <div class="home">
+    <HomeNav />
+    <main>
+      <section class="h-wrap h-page-hero">
+        <div class="h-top-head rv" style="margin:0">
+          <span class="h-kicker">Club Celebra · gratis</span>
+          <h1>Nunca más se te olvida <em>una fecha</em></h1>
+          <p class="h-lead">Anota los cumpleaños y aniversarios de quienes quieres. Te avisamos antes, con una oferta especial para celebrarlos: piñatas, arreglos de globos, chupeteras y detalles.</p>
+          <ul class="h-trust" style="margin-top:4px">
+            <li>Aviso antes de cada fecha</li>
+            <li>Ofertas solo para socios</li>
+            <li>Te das de baja cuando quieras</li>
+          </ul>
+        </div>
+        <div class="h-page-art rv" style="--bg:#fbe6ee;--d:100ms"><img class="h-float" src="/img/marca/regalo.webp" alt="" /></div>
+      </section>
+
+      <section class="h-sec h-wrap" style="padding-top:56px" aria-labelledby="t-reg">
+        <form class="h-form h-club rv" id="club-form" novalidate>
+          <h2 id="t-reg" style="font-size:26px">Tus fechas importantes</h2>
+          <p class="h-ref-note" style="margin-top:-6px">Solo el primer nombre y el día. Puedes anotar hasta 5.</p>
+          <div id="fechas"></div>
+          <button type="button" class="h-btn h-btn-line" id="mas">+ Agregar otra fecha</button>
+
+          <h2 style="font-size:22px;margin-top:10px">¿A quién le avisamos?</h2>
+          <label>Tu nombre<input type="text" name="nombre" autocomplete="given-name" required /></label>
+          <div class="h-form-2">
+            <label>Correo<input type="email" name="email" autocomplete="email" inputmode="email" required /></label>
+            <label><span>WhatsApp <span class="h-opt">(opcional)</span></span><input type="tel" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="+58 414…" /></label>
+          </div>
+          <label class="h-promo"><input type="checkbox" name="acepto" /><span>Acepto que Celebra me escriba antes de estas fechas con ofertas y novedades. Puedo darme de baja cuando quiera en <a href="/baja">somoscelebrave.com/baja</a>.</span></label>
+          <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
+          <button class="h-btn" type="submit">Unirme al Club</button>
+          <p class="h-form-err" role="alert" hidden></p>
+          <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span>Te escribiremos antes de cada fecha. Si quieres cambiar tus fechas, vuelve a registrarte con el mismo correo.</span></div>
+        </form>
+        <p class="h-fine rv" style="max-width:640px">Guardamos solo lo necesario para avisarte: tu nombre y contacto, y de cada fecha el primer nombre, la relación y el día. Nunca apellidos ni fotos, y no compartimos tus datos. <a class="h-link" href="/privacidad">Privacidad</a></p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<template id="tpl-fecha">
+  <fieldset class="h-fecha">
+    <legend class="sr-only">Fecha</legend>
+    <div class="h-form-2">
+      <label>Nombre<input type="text" data-k="nombre" maxlength="30" placeholder="Ej. Ana" /></label>
+      <label>Es mi…<select data-k="relacion">{RELACIONES.map((r) => <option>{r}</option>)}</select></label>
+    </div>
+    <div class="h-fecha-3">
+      <label>Qué celebra<select data-k="tipo">{TIPOS.map((t) => <option>{t}</option>)}</select></label>
+      <label>Día<select data-k="dia">{Array.from({ length: 31 }, (_, i) => <option value={i + 1}>{i + 1}</option>)}</select></label>
+      <label>Mes<select data-k="mes">{meses.map((m, i) => <option value={i + 1}>{m}</option>)}</select></label>
+    </div>
+    <button type="button" class="h-fecha-x" aria-label="Quitar esta fecha">Quitar</button>
+  </fieldset>
+</template>
+
+<script>
+  const f = document.getElementById('club-form') as HTMLFormElement;
+  const box = document.getElementById('fechas')!;
+  const tpl = document.getElementById('tpl-fecha') as HTMLTemplateElement;
+  const mas = document.getElementById('mas') as HTMLButtonElement;
+  const t0 = Date.now();
+  const add = () => {
+    if (box.children.length >= 5) return;
+    box.appendChild(tpl.content.cloneNode(true));
+    mas.hidden = box.children.length >= 5;
+    box.querySelectorAll<HTMLElement>('.h-fecha-x').forEach((x) => (x.hidden = box.children.length === 1));
+  };
+  box.addEventListener('click', (e) => {
+    const x = (e.target as HTMLElement).closest('.h-fecha-x');
+    if (!x) return;
+    x.closest('.h-fecha')!.remove();
+    mas.hidden = false;
+    box.querySelectorAll<HTMLElement>('.h-fecha-x').forEach((b) => (b.hidden = box.children.length === 1));
+  });
+  mas.addEventListener('click', add);
+  add();
+
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = f.querySelector<HTMLElement>('.h-form-err')!;
+    const ok = f.querySelector<HTMLElement>('.h-form-ok')!;
+    const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const fd = new FormData(f);
+    const fechas = [...box.querySelectorAll('.h-fecha')].map((fs) => Object.fromEntries([...fs.querySelectorAll<HTMLInputElement>('[data-k]')].map((i) => [i.dataset.k, i.value.trim()]))).filter((x) => x.nombre);
+    const falta: string[] = [];
+    if (!fechas.length) falta.push('al menos una fecha con nombre');
+    if (!String(fd.get('nombre') || '').trim()) falta.push('tu nombre');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(fd.get('email') || '').trim())) falta.push('un correo válido');
+    if (!fd.get('acepto')) falta.push('marcar que aceptas que te escribamos');
+    if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
+    err.hidden = true; btn.disabled = true; btn.textContent = 'Guardando…';
+    try {
+      const r = await fetch('/api/club', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nombre: fd.get('nombre'), email: fd.get('email'), whatsapp: fd.get('whatsapp'), empresa: fd.get('empresa'), acepto: true, fechas, t: t0 }) });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(out.error || 'No pudimos guardarlo. Inténtalo de nuevo.');
+      f.reset(); box.innerHTML = ''; add();
+      ok.hidden = false; ok.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } catch (x) { err.textContent = (x as Error).message; err.hidden = false; }
+    btn.disabled = false; btn.textContent = 'Unirme al Club';
+  });
+</script>
