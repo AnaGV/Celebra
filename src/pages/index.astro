@@ -33,9 +33,9 @@ const hoy = new Date().toISOString().slice(0, 10);
             { bg: 'fondo-3', color: '#e3f5ff', kick: 'Su número, su nombre', t: 'Piñatas con número', d: 'El primer añito, el quinto o el que celebren: lo armamos con su temática.', imgs: [['numero-dino', 'Piñata número 1 con dinosaurios'], ['numero-granja', 'Piñata número 1 con animales de granja']] },
           ].map((sl, i) => (
             <div class:list={['h-slide', { on: i === 0 }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de 3`} aria-hidden={i === 0 ? undefined : 'true'} style={`--c:${sl.color}`}>
-              <picture class="h-slide-bg" aria-hidden="true">
-                <source media="(max-width: 760px)" srcset={`/img/banner/${sl.bg}-m.webp`} />
-                <img src={`/img/banner/${sl.bg}.webp`} alt="" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} onerror="this.style.display='none'" />
+              <picture class="h-slide-bg">
+                <source media="(max-width: 760px)" srcset={`/img/banner/slide-${i + 1}-m.webp`} />
+                <img src={`/img/banner/slide-${i + 1}.webp`} alt={sl.imgs.map((x) => x[1]).join(', ')} loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
               </picture>
               <div class="h-wrap h-slide-in">
                 <div class="h-slide-txt">
@@ -46,9 +46,6 @@ const hoy = new Date().toISOString().slice(0, 10);
                     <a class="h-btn" href="#reservar" tabindex={i === 0 ? undefined : '-1'}>Cotizar el mío</a>
                     <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener" tabindex={i === 0 ? undefined : '-1'}>Ver más trabajos</a>
                   </div>
-                </div>
-                <div class:list={['h-slide-prods', `n${sl.imgs.length}`]}>
-                  {sl.imgs.map(([f, alt]) => <img src={`/img/banner/${f}.webp`} alt={alt} loading={i === 0 ? 'eager' : 'lazy'} />)}
                 </div>
               </div>
             </div>
