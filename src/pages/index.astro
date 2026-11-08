@@ -150,7 +150,11 @@ const hoy = new Date().toISOString().slice(0, 10);
               Enviar por WhatsApp
             </button>
             <p class="h-form-err" role="alert" hidden></p>
-            <div class="h-form-ok" role="status" hidden><b>No pudimos subir tu foto.</b> En WhatsApp, toca el clip 📎 y adjúntala antes de enviar el mensaje.</div>
+            <div class="h-form-ok" role="status" hidden>
+              <b>¡Listo! Tu cotización se abrió en WhatsApp.</b>
+              <span class="h-ok-foto" hidden>No pudimos subir tu foto: en WhatsApp toca el clip 📎 y adjúntala.</span>
+              <span>¿No se abrió? <a class="h-ok-wa" href="#" target="_blank" rel="noopener">Ábrelo de nuevo</a>. Puedes llenar el formulario otra vez para una cotización distinta.</span>
+            </div>
           </form>
         </div>
       </section>
@@ -316,7 +320,15 @@ const hoy = new Date().toISOString().slice(0, 10);
     const linea = fotoUrl ? `\n📷 Foto de referencia (guárdala al abrirla, se borra a los 15 min): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
     const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + linea;
     const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
-    $('.h-form-ok').hidden = !(hayFoto && !fotoUrl);
+    // Deja el formulario limpio para una nueva cotización (también al volver con "atrás").
+    const ok = $('.h-form-ok');
+    ok.querySelector('.h-ok-foto').hidden = !(hayFoto && !fotoUrl);
+    ok.querySelector('.h-ok-wa').href = wa;
+    f.reset();
+    fotoUrl = '';
+    $('.h-ref-img').hidden = true; $('.h-ref-img').removeAttribute('src'); $('.h-ref-empty').hidden = false; estado.hidden = true;
+    sync();
+    ok.hidden = false;
     // En el celular, abrir en la misma pestaña es lo que hace saltar a la app de WhatsApp.
     if (matchMedia('(pointer: coarse)').matches) location.href = wa;
     else window.open(wa, '_blank', 'noopener');
