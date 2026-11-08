@@ -96,6 +96,22 @@ const hoy = new Date().toISOString().slice(0, 10);
         <div class="h-btns rv" style="margin-top:24px"><a class="h-btn h-btn-line" href="/servicios/">Ver todos los servicios</a></div>
       </section>
 
+      <section class="h-sec h-wrap h-ig" id="instagram" aria-labelledby="t-ig" hidden>
+        <div class="h-ig-top">
+          <div class="h-head">
+            <span class="h-kicker">En Instagram</span>
+            <h2 id="t-ig">Lo último del taller</h2>
+            <p>Lo que vamos haciendo y lo que nos dicen nuestras clientas.</p>
+          </div>
+          <div class="h-ig-nav">
+            <button type="button" class="h-ig-arrow" data-dir="-1" aria-label="Anteriores"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+            <button type="button" class="h-ig-arrow" data-dir="1" aria-label="Siguientes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+          </div>
+        </div>
+        <ul class="h-ig-track" aria-label="Publicaciones recientes de Instagram"></ul>
+        <div class="h-btns" style="margin-top:20px"><a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener">Seguir a {c.instagramHandle}</a></div>
+      </section>
+
       <section class="h-sec h-wrap" id="reservar" aria-labelledby="t-res">
         <div class="h-res rv">
           <div class="h-res-info">
@@ -358,4 +374,52 @@ const hoy = new Date().toISOString().slice(0, 10);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
     start();
   }
+</script>
+
+<script>
+  // Carrusel de Instagram: lee /api/ig/feed (publicaciones + comentarios que la dueña aprobó).
+  (async () => {
+    const sec = document.getElementById('instagram');
+    const track = sec?.querySelector<HTMLUListElement>('.h-ig-track');
+    if (!sec || !track) return;
+    let posts: any[] = [];
+    try { const r = await fetch('/api/ig/feed'); if (r.ok) posts = (await r.json()).posts || []; } catch { return; }
+    if (!posts.length) return;
+    const el = (tag: string, cls?: string, txt?: string) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const fmt = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' });
+    for (const p of posts) {
+      const li = el('li', 'h-ig-card');
+      const a = el('a', 'h-ig-media') as HTMLAnchorElement;
+      a.href = p.enlace; a.target = '_blank'; a.rel = 'noopener';
+      a.setAttribute('aria-label', 'Ver en Instagram: ' + (p.texto || 'publicación').slice(0, 80));
+      const img = el('img') as HTMLImageElement;
+      img.src = p.img; img.alt = ''; img.loading = 'lazy'; img.width = 600; img.height = 600;
+      a.append(img);
+      if (p.tipo === 'VIDEO') a.append(el('span', 'h-ig-tag', 'Video'));
+      if (p.tipo === 'CAROUSEL_ALBUM') a.append(el('span', 'h-ig-tag', 'Álbum'));
+      li.append(a);
+      const body = el('div', 'h-ig-body');
+      const meta = el('div', 'h-ig-meta');
+      if (p.likes != null) meta.append(el('span', '', '♥ ' + p.likes));
+      meta.append(el('span', '', '💬 ' + p.nComentarios));
+      if (p.fecha) meta.append(el('span', 'h-ig-date', fmt.format(new Date(p.fecha))));
+      body.append(meta);
+      if (p.texto) body.append(el('p', 'h-ig-txt', p.texto));
+      if (p.comentarios?.length) {
+        const ul = el('ul', 'h-ig-coms');
+        for (const cm of p.comentarios) {
+          const c = el('li');
+          c.append(el('b', '', '@' + cm.usuario + ' '), document.createTextNode(cm.texto));
+          ul.append(c);
+        }
+        body.append(ul);
+      }
+      li.append(body);
+      track.append(li);
+    }
+    sec.hidden = false;
+    sec.querySelectorAll<HTMLButtonElement>('.h-ig-arrow').forEach((b) => b.addEventListener('click', () => {
+      track.scrollBy({ left: Number(b.dataset.dir) * track.clientWidth * 0.9, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }));
+  })();
 </script>

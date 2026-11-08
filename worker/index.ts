@@ -10,6 +10,7 @@ import { subirFoto, verFoto, borrarFoto } from './foto';
 import { registrarBaja, consultarBaja } from './baja';
 import { enviarContacto } from './contacto';
 import { registrarClub, resumenDiario } from './club';
+import { conectar, callback, sincronizar, feed, imagen, aprobar } from './instagram';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
   '/api/lead': lead,
@@ -47,6 +48,16 @@ export default {
       if (partes[1] === 'borrar' && request.method === 'POST') return borrarFoto(env, partes[0]);
       return verFoto(request, env, partes[0]);
     }
+    if (url.pathname.startsWith('/api/ig/')) {
+      if (request.method !== 'GET') return new Response('Método no permitido', { status: 405, headers: { allow: 'GET' } });
+      const r = url.pathname.slice(8);
+      if (r === 'feed') return feed(env);
+      if (r.startsWith('img/')) return imagen(env, r.slice(4));
+      if (r === 'aprobar') return aprobar(request, env);
+      if (r === 'conectar') return conectar(env);
+      if (r === 'callback') return callback(request, env, ctx);
+      return new Response('No encontrado', { status: 404 });
+    }
     if (url.pathname === '/api/pais') {
       const c = (request as any).cf?.country ?? request.headers.get('cf-ipcountry') ?? '';
       const pais = c === 'VE' ? 'VE' : c === 'CL' ? 'CL' : 'OTRO';
@@ -57,5 +68,6 @@ export default {
   },
   async scheduled(_event: any, env: any, ctx: any) {
     ctx.waitUntil(resumenDiario(env));
+    ctx.waitUntil(sincronizar(env).catch((e: any) => console.log('ig sync', e?.message)));
   },
 };

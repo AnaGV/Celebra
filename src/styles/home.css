@@ -370,3 +370,26 @@
   .h-chips::-webkit-scrollbar{display:none}
   .h-chips a{flex:none;padding:8px 14px;border-radius:999px;background:#f7f3ff;color:var(--ink);font-weight:700;font-size:14px;text-decoration:none}
 }
+
+/* Instagram */
+.home .h-ig-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+.home .h-ig-top .h-head{margin-bottom:28px}
+.home .h-ig-nav{display:flex;gap:10px;margin-bottom:32px}
+.home .h-ig-arrow{width:46px;height:46px;border-radius:50%;border:1px solid #e3e5ea;background:#fff;display:grid;place-items:center;cursor:pointer}
+.home .h-ig-arrow:hover{border-color:var(--accent)}
+.home .h-ig-arrow svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.home .h-ig-track{list-style:none;margin:0;padding:4px 2px 12px;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 3*20px)/4);gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.home .h-ig-track::-webkit-scrollbar{display:none}
+.home .h-ig-card{scroll-snap-align:start;background:#fff;border:1px solid #ece8f7;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.home .h-ig-media{position:relative;display:block;aspect-ratio:1;background:#f3effc}
+.home .h-ig-media img{width:100%;height:100%;object-fit:cover;display:block}
+.home .h-ig-tag{position:absolute;top:10px;right:10px;background:rgba(22,23,26,.7);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px}
+.home .h-ig-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.home .h-ig-meta{display:flex;gap:14px;font-size:14px;font-weight:700;color:var(--ink)}
+.home .h-ig-date{margin-left:auto;font-weight:500;color:var(--muted)}
+.home .h-ig-txt{margin:0;font-size:15px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.home .h-ig-coms{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.home .h-ig-coms li{background:#f6f2ff;border-radius:14px 14px 14px 4px;padding:9px 12px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.home .h-ig-coms b{color:var(--accent)}
+@media (max-width:1080px){.home .h-ig-track{grid-auto-columns:calc((100% - 2*20px)/3)}}
+@media (max-width:760px){.home .h-ig-track{grid-auto-columns:78%;gap:14px}.home .h-ig-nav{display:none}}
