@@ -83,27 +83,51 @@ function aBase64(buf: ArrayBuffer): string {
   return btoa(s);
 }
 
+const GRACIA_MS = 15 * 60 * 1000; // después de abrirla por primera vez, 15 minutos para guardarla
+
+export async function borrarFoto(env: any, id: string): Promise<Response> {
+  if (env.FOTOS && ID_RE.test(id)) await env.FOTOS.delete(`ref/${id}`);
+  return pagina('Foto borrada · Celebra', '<h1>Listo, foto borrada</h1><p>La foto ya no está guardada en la página. Si la guardaste, la encuentras en la galería de tu teléfono.</p>');
+}
+
 export async function verFoto(request: Request, env: any, id: string): Promise<Response> {
   const ua = request.headers.get('user-agent') || '';
   if (request.method === 'HEAD' || BOTS.test(ua)) {
     return pagina('Foto de referencia · Celebra', '<h1>Foto de referencia</h1><p>Ábrela para verla.</p>');
   }
-  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos de referencia se borran apenas se abren, o a las 72 horas. Pídele a la clienta que la envíe de nuevo por WhatsApp.</p>', 404);
+  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos de referencia se borran 15 minutos después de abrirlas, o a las 72 horas si nadie las abre. Pídele a la clienta que la envíe de nuevo por WhatsApp.</p>', 404);
   if (!env.FOTOS || !ID_RE.test(id)) return noEsta();
 
   const key = `ref/${id}`;
   const obj = await env.FOTOS.get(key);
   if (!obj) return noEsta();
   const subida = Number(obj.customMetadata?.subida || 0);
-  if (subida && Date.now() - subida > MAX_EDAD_MS) {
+  const vista = Number(obj.customMetadata?.vista || 0);
+  const ahora = Date.now();
+  if ((subida && ahora - subida > MAX_EDAD_MS) || (vista && ahora - vista > GRACIA_MS)) {
     await env.FOTOS.delete(key);
     return noEsta();
   }
   const datos = await obj.arrayBuffer();
-  await env.FOTOS.delete(key);
+  // Primera vez que se abre: se marca la hora; desde ahí corren los 15 minutos.
+  if (!vista) {
+    await env.FOTOS.put(key, datos, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { subida: String(subida || ahora), vista: String(ahora) } });
+  }
+  const quedan = Math.max(1, Math.ceil(((vista || ahora) + GRACIA_MS - ahora) / 60000));
   const src = `data:image/jpeg;base64,${aBase64(datos)}`;
   return pagina(
     'Foto de referencia · Celebra',
-    `<h1>Foto de referencia</h1><div class="aviso"><b>Guárdala ahora:</b> esta foto ya se borró de la página y no se puede volver a abrir. Mantén presionada la imagen y toca <b>Guardar</b>, o usa el botón.</div><img src="${src}" alt="Foto de referencia enviada por la clienta"><a class="b" href="${src}" download="referencia-${id}.jpg">Descargar foto</a>`,
+    `<h1>Foto de referencia</h1>
+<div class="aviso">Tienes <b>${quedan} minuto${quedan === 1 ? '' : 's'}</b> para guardarla. Después se borra sola.</div>
+<img id="foto" src="${src}" alt="Foto de referencia enviada por la clienta">
+<p style="font-size:14px"><b>En iPhone:</b> mantén el dedo sobre la foto y toca <b>Guardar en Fotos</b>.</p>
+<a class="b" id="guardar" href="${src}" download="referencia-${id}.jpg">Guardar foto</a>
+<form method="post" action="/ref/${id}/borrar" style="margin-top:14px"><button type="submit" style="background:none;border:0;color:#5c6070;text-decoration:underline;font-size:15px;cursor:pointer">Ya la guardé, borrarla ahora</button></form>
+<script>
+(function(){var b=document.getElementById('guardar'),f=null;
+if(!navigator.canShare||!window.File)return;
+fetch(b.href).then(function(r){return r.blob()}).then(function(bl){var x=new File([bl],'referencia-${id}.jpg',{type:'image/jpeg'});if(navigator.canShare({files:[x]}))f=x;});
+b.addEventListener('click',function(e){if(!f)return;e.preventDefault();navigator.share({files:[f]}).catch(function(){});});})();
+</script>`,
   );
 }
