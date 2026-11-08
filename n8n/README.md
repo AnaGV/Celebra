@@ -119,3 +119,20 @@ Al activar el workflow, n8n te da una URL de formulario. Protégela con la crede
 ## Próximo workflow
 
 - Binance automático: consulta periódica del historial de Binance Pay (clave de solo lectura, IP del VPS) para confirmar pagos sin el formulario.
+
+## Bajas: regla obligatoria (nunca escribir a quien se dio de baja)
+
+La lista de bajas vive en la página (Cloudflare R2, solo la huella SHA-256 del correo) y **no caduca**.
+La persona se da de baja en `https://somoscelebrave.com/baja` (los correos ya enlazan a `/baja?e=<correo>`).
+
+**Antes de CADA correo de marketing** (seguimiento de leads, novedades, descuentos, opinión) agrega un nodo
+HTTP Request y descarta el envío si responde `baja: true`:
+
+- `GET https://{{ $env.SITE_DOMAIN }}/api/baja/estado?e={{ encodeURIComponent($json.email) }}`
+- Cabecera `x-celebra-key: {{ $env.CELEBRA_FORM_KEY }}`
+- Respuesta: `{ "baja": true|false, "borrar": true|false }`
+
+Si `borrar` es `true`, borra además sus filas en Google Sheets (nombre, email, pedidos) y deja solo `baja = sí`.
+El formulario del capítulo gratis ya envía `baja: true` a n8n si el correo está de baja: entrega solo el capítulo
+que pidió, sin código de descuento ni correos de seguimiento, y no la vuelve a agregar a la lista.
+Los correos de entrega de una compra (el libro, el recibo) sí se envían siempre: no son marketing.

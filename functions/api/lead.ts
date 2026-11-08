@@ -4,10 +4,11 @@
  * guarda el lead en Google Sheets, envía el email y avisa a Meta.
  */
 import { callN8n, json, turnstileOk, type N8nEnv } from './_n8n';
+import { estaDeBaja } from '../../worker/baja';
 
 type LeadBody = { nombre?: string; email?: string; pais?: string; origen?: string; utm?: string; event_id?: string; empresa?: string; turnstile?: string };
 
-export const onRequestPost: PagesFunction<N8nEnv> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<N8nEnv & { FOTOS?: unknown }> = async ({ request, env }) => {
   let body: LeadBody;
   try {
     body = await request.json();
@@ -38,6 +39,8 @@ export const onRequestPost: PagesFunction<N8nEnv> = async ({ request, env }) => 
       origen: body.origen === 'regalo' ? 'regalo' : 'landing',
       utm: String(body.utm ?? '').slice(0, 120),
       event_id: String(body.event_id ?? '').slice(0, 80),
+      // Si se dio de baja, n8n le manda solo lo que pidió (el capítulo) y nunca más correos de marketing.
+      baja: await estaDeBaja(env, email),
     });
     if (status >= 400) return json({ ok: false, error: 'Revisa tu email.' }, 400);
     return json({ ok: true, reenviado: Boolean(data.reenviado) });

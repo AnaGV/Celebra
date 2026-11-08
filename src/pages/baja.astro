@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import HomeNav from '../components/HomeNav.astro';
+import '../styles/home.css';
+import { site } from '../config/site';
+---
+
+<Base title="Darme de baja · Celebra" description="Deja de recibir correos de Celebra.">
+  <meta slot="head" name="robots" content="noindex" />
+  <div class="home">
+    <HomeNav />
+    <main class="h-wrap" style="max-width:640px;padding-top:56px">
+      <div class="h-top-head">
+        <span class="h-kicker">Correos de Celebra</span>
+        <h1 style="font-size:clamp(32px,5vw,44px)">Darme de baja</h1>
+        <p class="h-lead" style="font-size:18px">Escribe tu correo y no te volveremos a enviar descuentos ni novedades. Es definitivo: no te volveremos a agregar a la lista.</p>
+      </div>
+      <form class="h-form" id="baja-form" novalidate style="margin-top:24px">
+        <label>Tu correo<input type="email" name="email" autocomplete="email" inputmode="email" required /></label>
+        <label class="h-promo"><input type="checkbox" name="borrar" value="si" /><span>Además, borren todos mis datos (nombre, correo y pedidos guardados).</span></label>
+        <button class="h-btn" type="submit">Darme de baja</button>
+        <p class="h-form-err" role="alert" hidden></p>
+        <div class="h-form-ok" role="status" hidden>
+          <b>Listo, te diste de baja.</b>
+          <span>No recibirás más correos de Celebra. Si pediste borrar tus datos, los eliminamos en los próximos días. Cualquier duda: {site.brand.email}.</span>
+        </div>
+      </form>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<script>
+  const f = document.getElementById('baja-form') as HTMLFormElement;
+  const q = new URLSearchParams(location.search).get('e');
+  if (q) (f.elements.namedItem('email') as HTMLInputElement).value = q;
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = f.querySelector<HTMLElement>('.h-form-err')!;
+    const ok = f.querySelector<HTMLElement>('.h-form-ok')!;
+    const btn = f.querySelector<HTMLButtonElement>('button')!;
+    const email = (f.elements.namedItem('email') as HTMLInputElement).value.trim();
+    const borrar = (f.elements.namedItem('borrar') as HTMLInputElement).checked;
+    err.hidden = true;
+    btn.disabled = true;
+    try {
+      const r = await fetch('/api/baja', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, borrar }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'No pudimos registrarlo. Inténtalo de nuevo.');
+      ok.hidden = false;
+      f.querySelectorAll('label, button').forEach((x) => ((x as HTMLElement).hidden = true));
+      history.replaceState(null, '', location.pathname);
+    } catch (x) {
+      err.textContent = (x as Error).message;
+      err.hidden = false;
+      btn.disabled = false;
+    }
+  });
+</script>
