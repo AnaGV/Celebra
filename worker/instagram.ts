@@ -104,9 +104,11 @@ async function buscarCuenta(token: string, env: any): Promise<{ cuentas: { id: s
     const d: any = await (await fetch(u.toString())).json();
     if (d.error) notas.push('debug_token: ' + d.error.message);
     for (const g of d?.data?.granular_scopes || []) if (String(g.scope).startsWith('instagram')) for (const id of g.target_ids || []) ids.add(String(id));
+    notas.push('alcances: ' + JSON.stringify((d?.data?.granular_scopes || []).map((g: any) => [g.scope, (g.target_ids || []).length])));
     notas.push('tipo de token: ' + (d?.data?.type || '?') + ', permisos: ' + (d?.data?.scopes || []).join(' '));
   } catch (e: any) { notas.push('debug_token: ' + e?.message); }
-  await probar('/me/assigned_instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
+  await probar('/me/assigned_instagram_accounts?fields=id', (d) => { notas.push('assigned_instagram_accounts: ' + (d.data || []).length); return (d.data || []).map((x: any) => x?.id); });
+  if (env.IG_USER_ID) ids.add(String(env.IG_USER_ID).trim());
   await probar('/me/instagram_accounts?fields=id', (d) => (d.data || []).map((x: any) => x?.id));
   await probar('/me/accounts?fields=instagram_business_account', (d) => (d.data || []).map((x: any) => x?.instagram_business_account?.id));
   if (!ids.size) {
