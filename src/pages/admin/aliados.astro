@@ -1,0 +1,107 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/home.css';
+import { CATEGORIAS } from '../../config/directorio';
+---
+
+<Base image="/img/og-celebra.jpg" title="Aliados · Admin Celebra" description="Administración de aliados.">
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="home">
+    <header class="h-pan-top"><a href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra" /></a><span>Admin · Aliados</span></header>
+    <main class="h-wrap h-pan">
+      <form class="h-form" id="k-form">
+        <label>Clave de administración<input type="password" name="k" autocomplete="current-password" /></label>
+        <button class="h-btn" type="submit">Entrar</button>
+        <p class="h-form-err" role="alert" hidden></p>
+      </form>
+
+      <div id="adm" hidden>
+        <h1>Aliados</h1>
+        <ul class="h-adm-lista" id="a-lista"></ul>
+
+        <h2 id="a-tit">Nuevo aliado</h2>
+        <form class="h-form" id="a-form" novalidate>
+          <input type="hidden" name="id" />
+          <div class="h-form-2">
+            <label>Nombre del negocio<input name="nombre" required /></label>
+            <label>WhatsApp (con código, ej. 584141234567)<input name="whatsapp" inputmode="tel" required /></label>
+          </div>
+          <fieldset class="h-adm-cats"><legend>Categorías</legend>
+            {CATEGORIAS.filter((k) => k.id !== 'lugares' || true).map((k) => <label><input type="checkbox" name="cat" value={k.id} /> {k.icono} {k.nombre}</label>)}
+          </fieldset>
+          <label>Descripción corta<textarea name="descripcion" rows="2" maxlength="400"></textarea></label>
+          <div class="h-form-2">
+            <label>Zona<input name="zona" value="Caripe" /></label>
+            <label>Plan<select name="plan"><option value="gratis">Gratis</option><option value="pro">Pro</option></select></label>
+          </div>
+          <label class="h-pan-switch"><input type="checkbox" name="activo" checked /> Visible en el directorio</label>
+          <label class="h-pan-switch"><input type="checkbox" name="nuevoEnlace" /> Generar un enlace privado nuevo (el anterior deja de funcionar)</label>
+          <button class="h-btn" type="submit">Guardar aliado</button>
+          <p class="h-form-err" role="alert" hidden></p>
+        </form>
+        <div class="h-form-ok" id="a-ok" hidden>
+          <b>✓ Aliado guardado</b>
+          <span id="a-ok-txt"></span>
+          <a class="h-btn h-dir-wa" id="a-ok-wa" target="_blank" rel="noopener" hidden>Enviarle su enlace por WhatsApp</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  let K = ''; try { K = sessionStorage.getItem('celebra-admin') || ''; } catch {}
+  let lista: any[] = [];
+  const H = () => ({ 'x-celebra-key': K, 'content-type': 'application/json' });
+  const el = (t: string, c?: string, x?: string) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+
+  async function cargar() {
+    const r = await fetch('/api/admin/aliados', { headers: H() });
+    if (!r.ok) throw new Error('Clave incorrecta');
+    lista = (await r.json()).aliados;
+    const ul = $('#a-lista'); ul.replaceChildren();
+    if (!lista.length) ul.append(el('li', '', 'Aún no hay aliados.'));
+    for (const a of lista) {
+      const li = el('li'); li.append(el('b', '', a.nombre), el('span', '', `${a.plan === 'pro' ? 'Pro' : 'Gratis'} · ${a.activo ? 'visible' : 'oculto'} · ${a.confirmadoActivo ? 'activo ' + a.confirmadoActivo.slice(0, 10) : 'sin confirmar'}`));
+      const ed = el('button', 'h-btn h-btn-line', 'Editar') as HTMLButtonElement; ed.type = 'button';
+      ed.addEventListener('click', () => editar(a)); li.append(ed); ul.append(li);
+    }
+  }
+  function editar(a: any) {
+    const f = $<HTMLFormElement>('#a-form'); f.reset();
+    (f.elements.namedItem('id') as HTMLInputElement).value = a.id;
+    (f.elements.namedItem('nombre') as HTMLInputElement).value = a.nombre;
+    (f.elements.namedItem('whatsapp') as HTMLInputElement).value = a.whatsapp;
+    (f.elements.namedItem('plan') as HTMLSelectElement).value = a.plan;
+    (f.elements.namedItem('activo') as HTMLInputElement).checked = a.activo;
+    f.querySelectorAll<HTMLInputElement>('input[name=cat]').forEach((c) => (c.checked = a.categorias.includes(c.value)));
+    $('#a-tit').textContent = 'Editar: ' + a.nombre; f.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  $<HTMLFormElement>('#k-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); K = String(new FormData(e.target as HTMLFormElement).get('k') || '');
+    try { await cargar(); try { sessionStorage.setItem('celebra-admin', K); } catch {} $('#k-form').hidden = true; $('#adm').hidden = false; }
+    catch (x) { const er = $('#k-form .h-form-err'); er.textContent = (x as Error).message; er.hidden = false; }
+  });
+
+  $<HTMLFormElement>('#a-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); const f = e.target as HTMLFormElement, fd = new FormData(f), er = f.querySelector<HTMLElement>('.h-form-err')!;
+    const body: any = { id: fd.get('id') || undefined, nombre: fd.get('nombre'), whatsapp: fd.get('whatsapp'), categorias: fd.getAll('cat'),
+      plan: fd.get('plan'), activo: !!fd.get('activo'), nuevoEnlace: !!fd.get('nuevoEnlace') };
+    if (String(fd.get('descripcion') || '')) body.descripcion = fd.get('descripcion');
+    if (String(fd.get('zona') || '')) body.zona = fd.get('zona');
+    const r = await fetch('/api/admin/aliados', { method: 'POST', headers: H(), body: JSON.stringify(body) });
+    const d = await r.json(); if (!r.ok) { er.textContent = d.error; er.hidden = false; return; }
+    er.hidden = true; $('#a-ok').hidden = false;
+    const wa = $<HTMLAnchorElement>('#a-ok-wa');
+    if (d.enlace) {
+      $('#a-ok-txt').textContent = 'Enlace privado: ' + d.enlace;
+      const msg = `¡Hola! Ya eres aliado de Celebra 🎉 Este es tu panel privado para cargar tus servicios, precios, fotos y días disponibles, y ver tus reservas:\n${d.enlace}\n\nGuárdalo y no lo compartas: es tu llave.`;
+      wa.href = `https://wa.me/${String(fd.get('whatsapp')).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`; wa.hidden = false;
+    } else { $('#a-ok-txt').textContent = 'Cambios guardados (el enlace privado sigue siendo el mismo).'; wa.hidden = true; }
+    f.reset(); $('#a-tit').textContent = 'Nuevo aliado'; await cargar();
+  });
+
+  if (K) cargar().then(() => { $('#k-form').hidden = true; $('#adm').hidden = false; }).catch(() => {});
+</script>
