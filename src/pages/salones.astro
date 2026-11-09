@@ -7,7 +7,7 @@ import { site } from '../config/site';
 import { CATEGORIAS, proveedores } from '../config/directorio';
 const c = site.contact;
 const conteo = Object.fromEntries(CATEGORIAS.map((k) => [k.id, proveedores.filter((p) => p.categorias.includes(k.id)).length]));
-const datos = JSON.stringify({ categorias: CATEGORIAS, proveedores });
+const datos = JSON.stringify({ categorias: CATEGORIAS, proveedores, celebra: c.localWhatsapp });
 const agregar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola Celebra, tengo un negocio para fiestas en Caripe y quiero aparecer en el directorio.')}`;
 const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola Celebra, soy dueño(a) de un negocio del directorio y quiero que lo retiren.')}`;
 ---
@@ -81,8 +81,8 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
 
 <script>
   type Cat = { id: string; nombre: string; icono: string };
-  type Prov = { nombre: string; categorias: string[]; descripcion: string; zona?: string; tel?: string; instagram?: string; placeId?: string };
-  const { categorias, proveedores } = JSON.parse(document.getElementById('dir-data')!.textContent || '{}') as { categorias: Cat[]; proveedores: Prov[] };
+  type Prov = { nombre: string; categorias: string[]; descripcion: string; zona?: string; tel?: string; instagram?: string; placeId?: string; aliado?: string; foto?: string };
+  const { categorias, proveedores, celebra: CELEBRA } = JSON.parse(document.getElementById('dir-data')!.textContent || '{}') as { categorias: Cat[]; proveedores: Prov[]; celebra: string };
   const POR_PAGINA = 9;
   const nombreCat = Object.fromEntries(categorias.map((k) => [k.id, k]));
   const lista = document.getElementById('dir-list') as HTMLUListElement;
@@ -96,7 +96,7 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   const dia = new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10);
   let semilla = [...dia].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
   const azar = () => ((semilla = (semilla * 1664525 + 1013904223) >>> 0) / 2 ** 32);
-  const orden = proveedores.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p);
+  let orden = proveedores.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p);
 
   const sinAcentos = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const esCelular = (t: string) => /^58(412|414|416|422|424|426)/.test(t);
@@ -115,11 +115,16 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
     const li = el('li', 'h-dir-card');
     const top = el('div', 'h-dir-tags');
     for (const id of p.categorias) { const k = nombreCat[id]; if (k) top.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
+    if (p.foto) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = p.foto; im.alt = ''; im.loading = 'lazy'; li.append(im); }
+    if (p.aliado) top.append(el('span', 'h-dir-tag h-dir-al', '✓ Aliado · reserva en línea'));
     li.append(top, el('h3', '', p.nombre), el('p', 'h-dir-desc', p.descripcion));
     if (p.zona) li.append(el('p', 'h-dir-zona', '📍 ' + p.zona));
     const acc = el('div', 'h-dir-acc');
     const servicio = (nombreCat[cat] || nombreCat[p.categorias[0]])?.nombre.toLowerCase() || 'su servicio';
-    if (p.tel && esCelular(p.tel)) {
+    if (p.aliado) {
+      const a = el('a', 'h-btn h-dir-wa', 'Ver disponibilidad y reservar') as HTMLAnchorElement;
+      a.href = '/reservar/?a=' + encodeURIComponent(p.aliado); acc.append(a);
+    } else if (p.tel && esCelular(p.tel)) {
       const a = el('a', 'h-btn h-dir-wa', 'Ir al WhatsApp') as HTMLAnchorElement;
       a.href = `https://wa.me/${p.tel}?text=${encodeURIComponent(`Hola, ${p.nombre}. Los encontré en el directorio de Celebra (somoscelebrave.com) y quisiera información sobre ${servicio} para una fiesta.`)}`;
       a.target = '_blank'; a.rel = 'noopener';
@@ -137,6 +142,9 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
       a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.nombre + ' Caripe')}&query_place_id=${p.placeId}`;
       a.target = '_blank'; a.rel = 'noopener'; acc.append(a);
     }
+    const rep = el('a', 'h-dir-rep', 'Reportar dato incorrecto') as HTMLAnchorElement;
+    rep.href = `https://wa.me/${CELEBRA}?text=${encodeURIComponent('Hola Celebra, quiero reportar un dato incorrecto en el directorio: ' + p.nombre + '. ')}`;
+    rep.target = '_blank'; rep.rel = 'noopener'; acc.append(rep);
     li.append(acc);
     return li;
   }
@@ -177,4 +185,14 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   let t: number | undefined;
   q.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(() => { pagina = 1; pintar(); }, 150); });
   pintar();
+  // Aliados con reserva en línea: van primero (en orden del día entre ellos) y reemplazan su ficha simple.
+  fetch('/api/aliados').then((r) => r.json()).then((d) => {
+    const al: Prov[] = (d.aliados || []).map((a: any) => ({ nombre: a.nombre, categorias: a.categorias, descripcion: a.descripcion, zona: a.zona, placeId: a.placeId, aliado: a.id, foto: a.fotos[0] }));
+    if (!al.length) return;
+    const nombres = new Set(al.map((a) => sinAcentos(a.nombre)));
+    const resto = orden.filter((p) => !nombres.has(sinAcentos(p.nombre)));
+    orden = [...al.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p), ...resto];
+    for (const b of chips) { const k = b.dataset.cat || ''; const n = orden.filter((p) => !k || p.categorias.includes(k)).length; const sp = b.querySelector('span:last-child'); if (sp) sp.textContent = String(n); }
+    pintar();
+  }).catch(() => {});
 </script>

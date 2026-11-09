@@ -10,6 +10,7 @@ import { subirFoto, verFoto, borrarFoto } from './foto';
 import { registrarBaja, consultarBaja } from './baja';
 import { enviarContacto } from './contacto';
 import { registrarClub, resumenDiario } from './club';
+import { listaAliados, fichaAliado, fotoAliado, crearReserva, panel, admin } from './aliados';
 import { conectar, callback, sincronizar, feed, imagen, aprobar } from './instagram';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
@@ -58,6 +59,16 @@ export default {
       if (r === 'callback') return callback(request, env, ctx);
       return new Response('No encontrado', { status: 404 });
     }
+    if (url.pathname === '/api/aliados') return listaAliados(env);
+    if (url.pathname.startsWith('/api/aliados/')) {
+      const [id, a, b] = url.pathname.slice(13).split('/');
+      if (!a && request.method === 'GET') return fichaAliado(request, env, id);
+      if (a === 'foto' && request.method === 'GET') return fotoAliado(env, id, b);
+      if (a === 'reserva' && request.method === 'POST') return crearReserva(request, env, id);
+      return new Response('No encontrado', { status: 404 });
+    }
+    if (url.pathname === '/api/panel' || url.pathname.startsWith('/api/panel/')) return panel(request, env, url.pathname.slice(11));
+    if (url.pathname === '/api/admin/aliados') return admin(request, env);
     if (url.pathname === '/api/pais') {
       const c = (request as any).cf?.country ?? request.headers.get('cf-ipcountry') ?? '';
       const pais = c === 'VE' ? 'VE' : c === 'CL' ? 'CL' : 'OTRO';

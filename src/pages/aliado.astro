@@ -1,0 +1,211 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/home.css';
+---
+
+<Base image="/img/og-celebra.jpg" title="Mi panel de aliado · Celebra" description="Panel privado de los aliados de Celebra.">
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="home">
+    <header class="h-pan-top"><a href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra" /></a><span>Panel de aliado</span></header>
+    <main class="h-wrap h-pan">
+      <p id="p-load">Cargando tu panel…</p>
+      <div id="p-err" hidden><h1>Este enlace no funciona</h1><p>Pídele a Celebra un enlace nuevo por WhatsApp.</p></div>
+
+      <div id="p-app" hidden>
+        <h1 id="p-nombre"></h1>
+        <p class="h-pan-sub">Lo que cambies aquí se ve en tu ficha en <a class="h-link" id="p-ver" target="_blank" rel="noopener">somoscelebrave.com</a>. Guarda este enlace: es tu llave privada.</p>
+        <nav class="h-pan-tabs" role="tablist">
+          <button role="tab" data-t="reservas" aria-selected="true">Reservas <span id="p-nres"></span></button>
+          <button role="tab" data-t="calendario" aria-selected="false">Calendario</button>
+          <button role="tab" data-t="servicios" aria-selected="false">Servicios y precios</button>
+          <button role="tab" data-t="ficha" aria-selected="false">Mi ficha y pagos</button>
+        </nav>
+
+        <section data-p="reservas">
+          <p class="h-pan-help">Cuando te llegue una solicitud por WhatsApp, revisa el pago en tu banco o Binance y márcala aquí. Al confirmar, el día queda ocupado en tu calendario.</p>
+          <ul class="h-pan-res" id="p-res"></ul>
+        </section>
+
+        <section data-p="calendario" hidden>
+          <label class="h-pan-switch"><input type="checkbox" id="p-usacal" /> Mostrar mi disponibilidad en la página y apartar fechas</label>
+          <p class="h-pan-help">Toca un día para <b>bloquearlo</b> (no trabajas) o desbloquearlo. Los días con reservas confirmadas se ven en verde.</p>
+          <div class="h-cal h-pan-cal">
+            <div class="h-cal-top"><button type="button" class="h-cal-nav" data-d="-1" aria-label="Mes anterior">‹</button><b id="p-mes"></b><button type="button" class="h-cal-nav" data-d="1" aria-label="Mes siguiente">›</button></div>
+            <div class="h-cal-sem"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+            <div class="h-cal-grid" id="p-grid"></div>
+            <p class="h-cal-ley"><i class="ok"></i> Libre <i class="res"></i> Con reservas <i class="no"></i> Bloqueado</p>
+          </div>
+        </section>
+
+        <section data-p="servicios" hidden>
+          <p class="h-pan-help"><b>Cantidad</b> = cuántos puedes atender el mismo día (por ejemplo, 2 equipos de sonido). El precio es en dólares.</p>
+          <div id="p-serv"></div>
+          <button type="button" class="h-btn h-btn-line" id="p-addserv">+ Agregar servicio</button>
+        </section>
+
+        <section data-p="ficha" hidden>
+          <form class="h-form" id="p-ficha" novalidate>
+            <label>Descripción corta<textarea name="descripcion" rows="3" maxlength="400"></textarea></label>
+            <div class="h-form-2">
+              <label>WhatsApp donde recibes las reservas<input name="whatsapp" inputmode="tel" /></label>
+              <label>Zona<input name="zona" /></label>
+            </div>
+            <label>Instagram <small>(opcional)</small><input name="instagram" placeholder="@tunegocio" /></label>
+            <h3>Pago Móvil <small>(se muestra al cliente cuando elige pagar)</small></h3>
+            <div class="h-form-2"><label>Banco<input name="pm_banco" placeholder="Banesco 0134" /></label><label>Teléfono<input name="pm_tel" inputmode="tel" /></label></div>
+            <label>Cédula o RIF<input name="pm_ced" /></label>
+            <h3>Binance <small>(opcional)</small></h3>
+            <label>Binance Pay ID o correo<input name="bi_id" /></label>
+            <label>Nota de pago <small>(ej. "50% para apartar, resto el día del evento")</small><input name="pago_nota" maxlength="160" /></label>
+            <h3>Fotos (máximo 2)</h3>
+            <div class="h-pan-fotos" id="p-fotos"></div>
+          </form>
+        </section>
+
+        <div class="h-pan-bar"><button class="h-btn" id="p-save" type="button">Guardar cambios</button><span id="p-msg" role="status"></span></div>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  let tok = location.hash.slice(1);
+  try { if (tok) sessionStorage.setItem('celebra-aliado', tok); else tok = sessionStorage.getItem('celebra-aliado') || ''; } catch {}
+  const H = () => ({ 'x-aliado': tok, 'content-type': 'application/json' });
+  let A: any, R: any[] = [], hoy = '', mes = '', sucio = false;
+  const el = (t: string, c?: string, x?: string) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const marcar = () => { sucio = true; $('#p-msg').textContent = 'Tienes cambios sin guardar'; };
+
+  async function cargar() {
+    const r = await fetch('/api/panel', { headers: H() });
+    if (!r.ok) throw new Error('401');
+    const d = await r.json(); A = d.aliado; R = d.reservas; hoy = d.hoy; if (!mes) mes = hoy.slice(0, 7);
+  }
+
+  function fechaTxt(f: string) { return new Date(f + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); }
+  function pintarReservas() {
+    const ul = $('#p-res'); ul.replaceChildren();
+    const pend = R.filter((r) => r.estado === 'apartada').length;
+    $('#p-nres').textContent = pend ? String(pend) : '';
+    const orden = { apartada: 0, confirmada: 1, rechazada: 2, vencida: 3 } as any;
+    const lista = [...R].filter((r) => r.fecha >= hoy || r.estado === 'apartada').sort((a, b) => orden[a.estado] - orden[b.estado] || a.fecha.localeCompare(b.fecha));
+    if (!lista.length) { ul.append(el('li', 'h-pan-vacio', 'Todavía no tienes solicitudes. Cuando alguien reserve desde la página, aparecerá aquí.')); return; }
+    for (const r of lista) {
+      const li = el('li', 'h-pan-r ' + r.estado);
+      const tag = { apartada: 'Por verificar', confirmada: 'Confirmada', rechazada: 'Rechazada', vencida: 'Vencida (no respondiste en 24 h)' }[r.estado as string]!;
+      li.append(el('span', 'h-pan-tag', tag), el('b', '', `${fechaTxt(r.fecha)} · ${r.cliente.nombre}`),
+        el('p', '', r.items.map((i: any) => i.nombre + (i.cant > 1 ? ' ×' + i.cant : '')).join(', ') + ` · $${r.total}${r.invitados ? ' · ' + r.invitados + ' inv.' : ''}`),
+        el('p', 'h-pan-pago', r.metodo === 'pagomovil' ? `Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Pago por coordinar'));
+      if (r.nota) li.append(el('p', 'h-pan-nota', '“' + r.nota + '”'));
+      const acc = el('div', 'h-pan-acc');
+      if (r.captura) { const a = el('a', 'h-link', 'Ver captura') as HTMLAnchorElement; a.href = r.captura; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
+      const w = el('a', 'h-link', 'Escribirle') as HTMLAnchorElement; w.href = `https://wa.me/${r.cliente.whatsapp.replace(/\D/g, '')}`; w.target = '_blank'; w.rel = 'noopener'; acc.append(w);
+      const boton = (t: string, accion: string, cls: string) => { const b = el('button', 'h-btn ' + cls, t) as HTMLButtonElement; b.type = 'button'; b.addEventListener('click', () => accionar(r.id, accion, b)); acc.append(b); };
+      if (r.estado === 'apartada') { boton('✅ Pago verificado', 'confirmar', 'h-dir-wa'); boton('No llegó el pago', 'rechazar', 'h-btn-line'); }
+      else if (r.estado !== 'confirmada') boton('Volver a apartar', 'reabrir', 'h-btn-line');
+      li.append(acc); ul.append(li);
+    }
+  }
+  async function accionar(id: string, accion: string, b: HTMLButtonElement) {
+    if (accion === 'rechazar' && !confirm('¿Seguro? La fecha se libera para otros clientes.')) return;
+    b.disabled = true;
+    const r = await fetch('/api/panel/reserva/' + id, { method: 'POST', headers: H(), body: JSON.stringify({ accion }) });
+    const d = await r.json().catch(() => ({}));
+    await cargar(); pintarReservas(); pintarCal();
+    if (d.avisar) { if (matchMedia('(pointer: coarse)').matches) location.href = d.avisar; else window.open(d.avisar, '_blank', 'noopener'); }
+  }
+
+  function pintarCal() {
+    const [y, m] = mes.split('-').map(Number);
+    $('#p-mes').textContent = `${MESES[m - 1]} ${y}`;
+    const g = $('#p-grid'); g.replaceChildren();
+    const primero = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7, dias = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    for (let i = 0; i < primero; i++) g.append(el('span'));
+    for (let d = 1; d <= dias; d++) {
+      const f = `${mes}-${String(d).padStart(2, '0')}`;
+      const nconf = R.filter((r) => r.fecha === f && r.estado === 'confirmada').length, napar = R.filter((r) => r.fecha === f && r.estado === 'apartada').length;
+      const bloq = A.bloqueados.includes(f);
+      const b = el('button', `h-cal-d ${bloq ? 'no' : nconf || napar ? 'res' : 'ok'}`) as HTMLButtonElement;
+      b.type = 'button'; b.append(el('span', '', String(d))); if (nconf + napar) b.append(el('small', '', String(nconf + napar)));
+      b.disabled = f < hoy; b.title = bloq ? 'Bloqueado' : `${nconf} confirmada(s), ${napar} por verificar`;
+      b.addEventListener('click', () => { A.bloqueados = bloq ? A.bloqueados.filter((x: string) => x !== f) : [...A.bloqueados, f]; marcar(); pintarCal(); });
+      g.append(b);
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>('.h-cal-nav').forEach((b) => b.addEventListener('click', () => {
+    const [y, m] = mes.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + Number(b.dataset.d), 1)); mes = d.toISOString().slice(0, 7); pintarCal();
+  }));
+
+  function pintarServicios() {
+    const box = $('#p-serv'); box.replaceChildren();
+    A.servicios.forEach((s: any, i: number) => {
+      const row = el('div', 'h-pan-s');
+      const inp = (lbl: string, k: string, type = 'text', extra: Record<string, string> = {}) => {
+        const l = el('label', '', lbl); const x = el('input') as HTMLInputElement; x.type = type; x.value = s[k] ?? ''; Object.assign(x, extra);
+        x.addEventListener('input', () => { s[k] = type === 'number' ? Number(x.value) : x.value; marcar(); }); l.append(x); return l;
+      };
+      const act = el('label', 'h-pan-act'); const cb = el('input') as HTMLInputElement; cb.type = 'checkbox'; cb.checked = s.activo !== false;
+      cb.addEventListener('change', () => { s.activo = cb.checked; marcar(); }); act.append(cb, document.createTextNode(' Visible'));
+      const del = el('button', 'h-pan-del', 'Quitar') as HTMLButtonElement; del.type = 'button';
+      del.addEventListener('click', () => { A.servicios.splice(i, 1); marcar(); pintarServicios(); });
+      row.append(inp('Servicio', 'nombre'), inp('Precio (USD)', 'precio', 'number', { min: '0', step: '0.5' }), inp('Por (ej. evento, hora, persona)', 'unidad'), inp('Cantidad por día', 'cantidad', 'number', { min: '1' }), act, del);
+      box.append(row);
+    });
+  }
+  $('#p-addserv').addEventListener('click', () => { A.servicios.push({ nombre: '', precio: 0, unidad: 'evento', cantidad: 1, activo: true }); marcar(); pintarServicios(); });
+
+  function pintarFicha() {
+    const f = $<HTMLFormElement>('#p-ficha'); const v = (n: string, x: string) => ((f.elements.namedItem(n) as HTMLInputElement).value = x || '');
+    v('descripcion', A.descripcion); v('whatsapp', A.whatsapp); v('zona', A.zona); v('instagram', A.instagram ? '@' + A.instagram : '');
+    v('pm_banco', A.pago.pagoMovil?.banco); v('pm_tel', A.pago.pagoMovil?.telefono); v('pm_ced', A.pago.pagoMovil?.cedula);
+    v('bi_id', A.pago.binance?.id); v('pago_nota', A.pago.nota);
+    f.addEventListener('input', marcar);
+    const fotos = $('#p-fotos'); fotos.replaceChildren();
+    for (const n of [1, 2]) {
+      const box = el('label', 'h-pan-foto'); const img = el('img') as HTMLImageElement;
+      if (A.fotos.some((u: string) => u.endsWith('/' + n))) img.src = `/api/aliados/${A.id}/foto/${n}?v=${Date.now()}`;
+      const inp = el('input') as HTMLInputElement; inp.type = 'file'; inp.accept = 'image/*';
+      const t = el('span', '', img.src ? 'Cambiar foto ' + n : 'Subir foto ' + n);
+      inp.addEventListener('change', async () => {
+        const file = inp.files?.[0]; if (!file) return; t.textContent = 'Subiendo…';
+        const bm = await createImageBitmap(file); const k = Math.min(1, 1400 / Math.max(bm.width, bm.height));
+        const c = document.createElement('canvas'); c.width = Math.round(bm.width * k); c.height = Math.round(bm.height * k); c.getContext('2d')!.drawImage(bm, 0, 0, c.width, c.height);
+        const blob: Blob = await new Promise((ok) => c.toBlob((b) => ok(b!), 'image/jpeg', 0.84));
+        const r = await fetch(`/api/panel/foto/${n}`, { method: 'POST', headers: { 'x-aliado': tok, 'content-type': 'image/jpeg' }, body: blob });
+        t.textContent = r.ok ? '✓ Foto ' + n + ' guardada' : 'No se pudo subir'; if (r.ok) img.src = URL.createObjectURL(blob);
+      });
+      box.append(img, t, inp); fotos.append(box);
+    }
+  }
+
+  $('#p-save').addEventListener('click', async () => {
+    const f = $<HTMLFormElement>('#p-ficha'); const g = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value;
+    const body = {
+      descripcion: g('descripcion'), whatsapp: g('whatsapp'), zona: g('zona'), instagram: g('instagram'),
+      calendario: $<HTMLInputElement>('#p-usacal').checked, servicios: A.servicios, bloqueados: A.bloqueados,
+      pago: { pagoMovil: { banco: g('pm_banco'), telefono: g('pm_tel'), cedula: g('pm_ced') }, binance: { id: g('bi_id') }, nota: g('pago_nota') }, sigoActivo: true,
+    };
+    $('#p-msg').textContent = 'Guardando…';
+    const r = await fetch('/api/panel', { method: 'PUT', headers: H(), body: JSON.stringify(body) });
+    $('#p-msg').textContent = r.ok ? '✓ Guardado. Ya se ve en la página.' : 'No se pudo guardar. Revisa tu conexión.';
+    if (r.ok) { sucio = false; await cargar(); pintarServicios(); }
+  });
+  addEventListener('beforeunload', (e) => { if (sucio) e.preventDefault(); });
+
+  document.querySelectorAll<HTMLButtonElement>('.h-pan-tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.h-pan-tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll<HTMLElement>('[data-p]').forEach((s) => (s.hidden = s.dataset.p !== b.dataset.t));
+  }));
+  $<HTMLInputElement>('#p-usacal').addEventListener('change', marcar);
+
+  (async () => {
+    try { await cargar(); } catch { $('#p-load').hidden = true; $('#p-err').hidden = false; return; }
+    $('#p-nombre').textContent = 'Hola, ' + A.nombre;
+    $<HTMLAnchorElement>('#p-ver').href = '/reservar/?a=' + A.id;
+    $<HTMLInputElement>('#p-usacal').checked = !!A.calendario;
+    pintarReservas(); pintarCal(); pintarServicios(); pintarFicha();
+    $('#p-load').hidden = true; $('#p-app').hidden = false;
+  })();
+</script>
