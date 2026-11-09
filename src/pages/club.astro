@@ -21,7 +21,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <p class="h-lead">Anota los cumpleaños y aniversarios de quienes quieres. Te avisamos antes, con una oferta especial para celebrarlos: piñatas, arreglos de globos, chupeteras y detalles.</p>
           <ul class="h-trust" style="margin-top:4px">
             <li>Aviso antes de cada fecha</li>
-            <li>10% de descuento en cada fecha</li>
+            <li>10% en tu próxima compra</li>
             <li>Te das de baja cuando quieras</li>
           </ul>
         </div>
@@ -53,7 +53,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
           <button class="h-btn" type="submit">Unirme al Club</button>
           <p class="h-form-err" role="alert" hidden></p>
-          <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span>Te escribiremos antes de cada fecha. Si quieres cambiar tus fechas, vuelve a registrarte con el mismo correo.</span></div>
+          <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span class="h-ok-cod"></span><span>Te escribiremos antes de cada fecha. Si quieres cambiar tus fechas, vuelve a registrarte con el mismo correo.</span></div>
         </form>
         <p class="h-fine rv" style="max-width:640px">Guardamos solo lo necesario para avisarte: tu nombre y contacto, y de cada fecha el primer nombre, la relación y el día. Nunca apellidos ni fotos, y no compartimos tus datos. <a class="h-link" href="/privacidad">Privacidad</a></p>
       </section>
@@ -62,7 +62,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
         <div class="h-head rv">
           <span class="h-kicker">Ideas para regalar</span>
           <h2 id="t-ideas">¿Y qué le regalo?</h2>
-          <p>Cuando se acerque la fecha te escribimos con ideas como estas, hechas a mano en el taller y con tu 10% de socio.</p>
+          <p>Cuando se acerque la fecha te escribimos con ideas como estas, hechas a mano en el taller y con tu código de 10% (válido para una compra).</p>
         </div>
         <div class="h-ideas">
           {[
@@ -152,6 +152,8 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
       const r = await fetch('/api/club', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nombre: fd.get('nombre'), email: fd.get('email'), whatsapp: fd.get('whatsapp'), empresa: fd.get('empresa'), acepto: true, fechas, t: t0 }) });
       const out = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(out.error || 'No pudimos guardarlo. Inténtalo de nuevo.');
+      const cod = ok.querySelector<HTMLElement>('.h-ok-cod')!;
+      cod.textContent = out.codigo ? (out.repite ? `Actualizamos tus fechas. Tu código sigue siendo ${out.codigo} (es uno por persona).` : `Tu código de 10% es ${out.codigo}. Guárdalo y muéstralo al hacer tu pedido (válido para una compra).`) : '';
       f.reset(); box.innerHTML = ''; add();
       ok.hidden = false; ok.scrollIntoView({ block: 'center', behavior: 'smooth' });
     } catch (x) { err.textContent = (x as Error).message; err.hidden = false; }

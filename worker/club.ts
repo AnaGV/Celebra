@@ -17,7 +17,13 @@ import { RELACIONES, TIPOS } from '../src/config/club';
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 type Fecha = { nombre: string; relacion: string; tipo: string; dia: number; mes: number };
-type Registro = { nombre: string; email: string; whatsapp: string; fechas: Fecha[]; alta: string };
+type Registro = { nombre: string; email: string; whatsapp: string; fechas: Fecha[]; alta: string; codigo?: string; nombres?: string[] };
+
+function nuevoCodigo() {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const r = crypto.getRandomValues(new Uint8Array(5));
+  return 'CLUB-' + [...r].map((x) => abc[x % abc.length]).join('');
+}
 
 function b64(s: string) { let o = ''; for (const b of new TextEncoder().encode(s)) o += String.fromCharCode(b); return btoa(o).replace(/.{1,76}/g, '$&\r\n'); }
 const enc = (t: string) => { let o = ''; for (const b of new TextEncoder().encode(t)) o += String.fromCharCode(b); return `=?UTF-8?B?${btoa(o)}?=`; };
@@ -62,15 +68,22 @@ export async function registrarClub(request: Request, env: any): Promise<Respons
   if (!fechas.length) return json({ error: 'Agrega al menos una fecha.' }, 400);
 
   const key = `club/${await huella(email)}.json`;
-  // Si se registra de nuevo, se reemplaza (máx. 5 fechas por correo).
-  const reg: Registro = { nombre, email, whatsapp, fechas, alta: new Date().toISOString() };
+  // Un solo código de 10% por correo: si vuelve a registrarse, conserva su código (no recibe otro).
+  const previo = (await (await env.FOTOS.get(key))?.json().catch(() => null)) as Registro | null;
+  const repite = !!previo?.codigo;
+  const codigo = previo?.codigo || nuevoCodigo();
+  const nombres = [...new Set([...(previo?.nombres || (previo ? [previo.nombre] : [])), nombre])].slice(-10);
+  const reg: Registro = { nombre, email, whatsapp, fechas, alta: previo?.alta || new Date().toISOString(), codigo, nombres };
   await env.FOTOS.put(key, JSON.stringify(reg), { httpMetadata: { contentType: 'application/json' } });
 
+  const otroNombre = repite && previo && previo.nombre.toLowerCase() !== nombre.toLowerCase();
   try {
-    await correoNegocio(env, `Nuevo en el Club: ${nombre} (${fechas.length} fecha${fechas.length > 1 ? 's' : ''})`,
-      `Se registró en el Club Celebra:\n\nNombre: ${nombre}\nCorreo: ${email}\nWhatsApp: ${whatsapp || '-'}\n\nFechas:\n${fechas.map((f) => '• ' + linea(f)).join('\n')}\n\nTe avisaremos por correo 30 y 7 días antes de cada fecha.`, email);
+    await correoNegocio(env, `${repite ? 'Actualizó sus fechas' : 'Nuevo en el Club'}: ${nombre} · código ${codigo}`,
+      `${repite ? 'Volvió a registrarse (mismo correo, MISMO código: no se le da otro 10%).' : 'Se registró en el Club Celebra.'}\n\nNombre: ${nombre}\nCorreo: ${email}\nWhatsApp: ${whatsapp || '-'}\nCódigo de 10%: ${codigo} (válido para UNA compra)\n` +
+      (otroNombre ? `\n⚠️ Ojo: antes se registró con el nombre "${previo!.nombre}". Revisa que sea la misma persona.\n` : '') +
+      `\nFechas:\n${fechas.map((f) => '• ' + linea(f)).join('\n')}\n\nTe avisaremos por correo 30 y 7 días antes de cada fecha.`, email);
   } catch (e) { console.error('club aviso', (e as Error).message); }
-  return json({ ok: true });
+  return json({ ok: true, codigo, repite });
 }
 
 export async function borrarDelClub(env: any, email: string) {
