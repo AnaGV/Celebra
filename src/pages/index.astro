@@ -1,4 +1,5 @@
 ---
+import XmasBanner from '../components/XmasBanner.astro';
 import '@fontsource/caveat/700.css';
 import '@fontsource/young-serif/400.css';
 import Base from '../layouts/Base.astro';
@@ -28,15 +29,18 @@ const hoy = new Date().toISOString().slice(0, 10);
     <main>
       <section class="h-slider" aria-roledescription="carrusel" aria-label="Trabajos del taller">
         <div class="h-slides">
+          <div class="h-slide h-xmas-slide on" role="group" aria-roledescription="diapositiva" aria-label="1 de 4" data-xmas>
+            <XmasBanner />
+          </div>
           {[
             { bg: 'fondo-1', color: '#dcc8f7', kick: 'Hechas a mano en Caripe', t: 'Piñatas a medida', d: 'Con la forma, la temática, el nombre y los colores que tu peque sueña.', imgs: [['', 'Piñatas hechas a mano: forrada rosada, de selva con monito, corona amarilla con flores y letra N con nombre']] },
             { bg: 'fondo-2', color: '#f7cfdf', kick: 'Para la mesa dulce', t: 'Chupeteras con mucho dulce', d: 'Personajes y temáticas hechos a mano, listos para la foto.', imgs: [['', 'Chupeteras con dulces: niña, fresita y dinosaurio']] },
             { bg: 'fondo-3', color: '#bfe3f7', kick: 'Su número, su inicial', t: 'Piñatas con número y letra', d: 'Su edad o la inicial de su nombre, armada con la temática que elijan.', imgs: [['', 'Piñatas con número 1 de dinosaurios y de granja, y letra N con nombre']] },
           ].map((sl, i) => (
-            <div class:list={['h-slide', { on: i === 0, full: (sl as any).full }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de 3`} aria-hidden={i === 0 ? undefined : 'true'} style={`--c:${sl.color}`}>
+            <div class:list={['h-slide', { full: (sl as any).full }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 2} de 4`} aria-hidden="true" style={`--c:${sl.color}`}>
               <picture class="h-slide-bg">
                 <source media="(max-width: 760px)" srcset={`/img/banner/slide-${i + 1}-m.webp`} />
-                <img src={`/img/banner/slide-${i + 1}.webp`} alt={sl.imgs.map((x) => x[1]).join(', ')} loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+                <img src={`/img/banner/slide-${i + 1}.webp`} alt={sl.imgs.map((x) => x[1]).join(', ')} loading="lazy" />
               </picture>
               <div class="h-wrap h-slide-in">
                 <div class="h-slide-txt">
@@ -44,8 +48,8 @@ const hoy = new Date().toISOString().slice(0, 10);
                   <p class="h-slide-t">{sl.t}</p>
                   <p class="h-slide-d">{sl.d}</p>
                   <div class="h-btns">
-                    <a class="h-btn" href="#reservar" tabindex={i === 0 ? undefined : '-1'}>Cotizar el mío</a>
-                    <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener" tabindex={i === 0 ? undefined : '-1'}>Ver más trabajos</a>
+                    <a class="h-btn" href="#reservar" tabindex="-1">Cotizar el mío</a>
+                    <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener" tabindex="-1">Ver más trabajos</a>
                   </div>
                 </div>
               </div>
@@ -55,7 +59,7 @@ const hoy = new Date().toISOString().slice(0, 10);
         <button type="button" class="h-sl-arrow prev" aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
         <button type="button" class="h-sl-arrow next" aria-label="Siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
         <div class="h-sl-dots" role="tablist" aria-label="Elegir diapositiva">
-          {[0, 1, 2].map((i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Diapositiva ${i + 1}`}></button>)}
+          {[0, 1, 2, 3].map((i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Diapositiva ${i + 1}`}></button>)}
         </div>
       </section>
 
@@ -383,9 +387,19 @@ const hoy = new Date().toISOString().slice(0, 10);
         s.querySelectorAll<HTMLElement>('a').forEach((a) => (on ? a.removeAttribute('tabindex') : a.setAttribute('tabindex', '-1')));
       });
       dots.forEach((d, i) => d.setAttribute('aria-selected', String(i === cur)));
+      if (slides[cur].hasAttribute('data-xmas')) xmas()?.start(); else xmas()?.stop();
     };
-    const start = () => { if (!quieto) { clearInterval(timer); timer = window.setInterval(() => go(cur + 1), 6000); } };
-    const stop = () => clearInterval(timer);
+    const xmasEl = root.querySelector<HTMLElement>('#xmas');
+    const xmas = () => (xmasEl as any)?.xmas;
+    let paused = false;
+    const start = () => {
+      paused = false; clearTimeout(timer);
+      if (quieto) return;
+      if (slides[cur].hasAttribute('data-xmas')) return; // avanza cuando termina su animación
+      timer = window.setTimeout(() => { go(cur + 1); start(); }, 6000);
+    };
+    const stop = () => { paused = true; clearTimeout(timer); };
+    xmasEl?.addEventListener('xmas:done', () => { if (!paused && slides[cur].hasAttribute('data-xmas')) { go(cur + 1); start(); } });
     root.querySelector('.prev')!.addEventListener('click', () => { go(cur - 1); start(); });
     root.querySelector('.next')!.addEventListener('click', () => { go(cur + 1); start(); });
     dots.forEach((d, i) => d.addEventListener('click', () => { go(i); start(); }));
@@ -396,6 +410,7 @@ const hoy = new Date().toISOString().slice(0, 10);
     root.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; stop(); }, { passive: true });
     root.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1)); start(); });
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    go(0);
     start();
   }
 </script>
