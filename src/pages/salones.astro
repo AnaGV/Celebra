@@ -115,9 +115,10 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
     const li = el('li', 'h-dir-card');
     const top = el('div', 'h-dir-tags');
     for (const id of p.categorias) { const k = nombreCat[id]; if (k) top.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
-    if (p.foto) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = p.foto; im.alt = ''; im.loading = 'lazy'; li.append(im); }
     if (p.aliado) top.append(el('span', 'h-dir-tag h-dir-al', '✓ Aliado · reserva en línea'));
-    li.append(top, el('h3', '', p.nombre), el('p', 'h-dir-desc', p.descripcion));
+    let titulo: HTMLElement = el('h3', '', p.nombre);
+    if (p.foto) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = p.foto; im.alt = ''; im.loading = 'lazy'; const h = el('div', 'h-dir-head'); h.append(im, titulo); titulo = h; }
+    li.append(top, titulo, el('p', 'h-dir-desc', p.descripcion));
     if (p.zona) li.append(el('p', 'h-dir-zona', '📍 ' + p.zona));
     const acc = el('div', 'h-dir-acc');
     const servicio = (nombreCat[cat] || nombreCat[p.categorias[0]])?.nombre.toLowerCase() || 'su servicio';
