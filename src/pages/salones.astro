@@ -146,7 +146,7 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   function pintar(scroll = false) {
     const texto = sinAcentos(q.value.trim());
     const buscaLoNuestro = !!texto && PROPIO.some((k) => texto.includes(k) || (texto.length >= 4 && k.startsWith(texto)));
-    celebra.hidden = !(buscaLoNuestro || (!cat && !texto && pagina === 1));
+    celebra.hidden = !(buscaLoNuestro || (!cat && !texto));
     const res = orden.filter((p) => (!cat || p.categorias.includes(cat)) &&
       (!texto || sinAcentos([p.nombre, p.descripcion, p.zona || '', ...p.categorias.map((id) => nombreCat[id]?.nombre || '')].join(' ')).includes(texto)));
     const total = Math.max(1, Math.ceil(res.length / POR_PAGINA));
