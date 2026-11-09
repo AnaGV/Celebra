@@ -244,7 +244,9 @@ import '@fontsource/great-vibes/400.css';
       .wrap-m{display:flex;flex-direction:column}
   }
 
-  @media (max-width:760px){.xmas .tag{left:50%;top:4%;transform:translateX(-50%);align-items:center}.xmas .tag h2{font-size:64px;text-align:center;line-height:.95}.xmas .tag{top:5%;width:90%}}
+  @media (max-width:760px){.xmas .tag{left:50%;top:4%;transform:translateX(-50%);align-items:center}.xmas .tag h2{font-size:64px;text-align:center;line-height:.95}
+    .xmas svg.scene{-webkit-mask-image:linear-gradient(to bottom,transparent calc(var(--top,0px) - 2px),#000 calc(var(--top,0px) + 70px));mask-image:linear-gradient(to bottom,transparent calc(var(--top,0px) - 2px),#000 calc(var(--top,0px) + 70px))}
+    .xmas{background:#3f28ad}.xmas[data-scene='1']{background:#3a5bbd}.xmas[data-scene='2']{background:#c26a5c}.xmas .tag{top:5%;width:90%}}
 
 </style>
 <script>
@@ -268,7 +270,7 @@ import '@fontsource/great-vibes/400.css';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const meet = matchMedia('(max-width: 760px)').matches;
     scenes.forEach((sv) => { sv.setAttribute('preserveAspectRatio', meet ? 'xMidYMax meet' : 'xMidYMid slice'); sv.setAttribute('viewBox', meet ? '320 0 1500 900' : '0 0 2100 900'); });
-    if (meet) { S = Math.min(W / 1500, H / 900); OX = (W - 1500 * S) / 2 - 320 * S; OY = H - 900 * S; }
+    if (meet) { S = Math.min(W / 1500, H / 900); OX = (W - 1500 * S) / 2 - 320 * S; OY = H - 900 * S; root.style.setProperty('--top', OY + 'px'); }
     else { S = Math.max(W / 2100, H / 900); OX = (W - 2100 * S) / 2; OY = (H - 900 * S) / 2; }
   }
   const wx = (x) => x * S + OX, wy = (y) => y * S + OY;
