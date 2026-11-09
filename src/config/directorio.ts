@@ -46,7 +46,6 @@ export const proveedores: Proveedor[] = [
   { nombre: 'Restaurante El Portón de Caripe', categorias: ['lugares'], descripcion: 'Restaurante familiar con estacionamiento, cerca del pueblo.', zona: 'Caripe', placeId: 'ChIJX0QqFPQAM4wR8xY-TtFXgmw' },
   { nombre: 'La Bodeguita 2707', categorias: ['lugares'], descripcion: 'Restaurante amplio, cómodo para grupos grandes.', zona: 'Av. Enrique Chaumer', tel: '584148300711', placeId: 'ChIJR4GvRVsBM4wR5wKT-GXu3nk' },
   { nombre: 'Enki Restaurant', categorias: ['lugares'], descripcion: 'Restaurante pequeño y acogedor para celebraciones íntimas.', zona: 'Av. Enrique Chaumer', tel: '584148625434', placeId: 'ChIJL9Z4LuEBM4wRs8RfhbrFjTk' },
-  { nombre: 'Hadas Café', categorias: ['lugares', 'tortas'], descripcion: 'Restaurante de cocina regional y española, conocido por sus tortas.', zona: 'Caripe', tel: '582925451349', placeId: 'ChIJkVEFaKQAM4wRKWkB6v3DHCg' },
   // Tortas y dulces
   { nombre: 'Panadería y Pastelería San José', categorias: ['tortas'], descripcion: 'Panadería tradicional de Caripe con tortas y dulces.', zona: 'Caripe', tel: '582925451536', placeId: 'ChIJpWIPAqQAM4wR0daZJ6SkLEw' },
   { nombre: 'Panadería y Pastelería El Sol de Torrez', categorias: ['tortas'], descripcion: 'Pastelería con tortas y hojaldres, junto a la plaza.', zona: 'Av. Enrique Chaumer', tel: '584140205410', placeId: 'ChIJWbiioCcBM4wRz3FGVgwRkU8' },
