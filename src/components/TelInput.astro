@@ -1,0 +1,15 @@
+---
+import { CODIGOS } from '../lib/telefono';
+interface Props { name: string; label: string; required?: boolean; id?: string; ccDefault?: string; placeholder?: string }
+const { name, label, required = false, id, ccDefault = '58', placeholder = '414 123 4567' } = Astro.props;
+---
+<div class="h-tel" data-tel id={id}>
+  <span class="h-tel-lab">{label}</span>
+  <div class="h-tel-row">
+    <select data-tel-cc aria-label="Código de país">
+      {CODIGOS.map((c) => <option value={c.cc} selected={c.cc === ccDefault}>{c.bandera} +{c.cc}</option>)}
+    </select>
+    <input data-tel-num type="tel" inputmode="tel" autocomplete="tel-national" placeholder={placeholder} required={required} aria-label={label} />
+  </div>
+  <input type="hidden" name={name} />
+</div>

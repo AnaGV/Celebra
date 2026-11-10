@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import '../../styles/home.css';
 import { CATEGORIAS } from '../../config/directorio';
+import TelInput from '../../components/TelInput.astro';
 ---
 
 <Base image="/img/og-celebra.jpg" title="Aliados · Admin Celebra" description="Administración de aliados.">
@@ -32,7 +33,7 @@ import { CATEGORIAS } from '../../config/directorio';
             <h3><span>1</span> Datos del negocio</h3>
             <div class="h-form-2">
               <label>Nombre del negocio<input name="nombre" required /></label>
-              <label>WhatsApp donde recibe las reservas<input name="whatsapp" inputmode="tel" placeholder="584141234567" required /></label>
+              <TelInput name="whatsapp" label="WhatsApp donde recibe las reservas" id="a-tel" required />
             </div>
             <label>Descripción corta <small>(lo que se lee en su ficha)</small><textarea name="descripcion" rows="2" maxlength="400"></textarea></label>
             <label>Zona<input name="zona" value="Caripe" /></label>
@@ -85,6 +86,8 @@ import { CATEGORIAS } from '../../config/directorio';
 </Base>
 
 <script>
+  import { montarTel, ponerTel } from '../../lib/telefono';
+  montarTel();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   let K = ''; try { K = sessionStorage.getItem('celebra-admin') || ''; } catch {}
   let lista: any[] = [];
@@ -114,7 +117,7 @@ import { CATEGORIAS } from '../../config/directorio';
     const f = $<HTMLFormElement>('#a-form'); f.reset();
     (f.elements.namedItem('id') as HTMLInputElement).value = a.id;
     (f.elements.namedItem('nombre') as HTMLInputElement).value = a.nombre;
-    (f.elements.namedItem('whatsapp') as HTMLInputElement).value = a.whatsapp;
+    ponerTel(document.getElementById('a-tel'), a.whatsapp);
     f.querySelectorAll<HTMLInputElement>('input[name=plan]').forEach((c) => (c.checked = c.value === (a.plan || 'gratis')));
     if (a.descripcion) (f.elements.namedItem('descripcion') as HTMLTextAreaElement).value = a.descripcion;
     if (a.zona) (f.elements.namedItem('zona') as HTMLInputElement).value = a.zona;
@@ -127,7 +130,7 @@ import { CATEGORIAS } from '../../config/directorio';
     $('#a-guardar').textContent = editando ? 'Guardar cambios' : 'Crear aliado';
     if (!editando) $('#a-tit').textContent = 'Crear un aliado nuevo';
   }
-  $('#a-cancelar').addEventListener('click', () => { $<HTMLFormElement>('#a-form').reset(); (($('#a-form') as HTMLFormElement).elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); });
+  $('#a-cancelar').addEventListener('click', () => { $<HTMLFormElement>('#a-form').reset(); ponerTel(document.getElementById('a-tel'), ''); (($('#a-form') as HTMLFormElement).elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); });
 
   $<HTMLFormElement>('#k-form').addEventListener('submit', async (e) => {
     e.preventDefault(); K = String(new FormData(e.target as HTMLFormElement).get('k') || '');
@@ -150,7 +153,7 @@ import { CATEGORIAS } from '../../config/directorio';
       const msg = `¡Hola! Ya eres aliado de Celebra 🎉 Este es tu panel privado para cargar tus servicios, precios, fotos y días disponibles, y ver tus reservas:\n${d.enlace}\n\nGuárdalo y no lo compartas: es tu llave.`;
       wa.href = `https://wa.me/${String(fd.get('whatsapp')).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`; wa.hidden = false;
     } else { $('#a-ok-txt').textContent = 'Cambios guardados (el enlace privado sigue siendo el mismo).'; wa.hidden = true; }
-    f.reset(); (f.elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); $('#a-ok').scrollIntoView({ behavior: 'smooth', block: 'center' }); await cargar();
+    f.reset(); ponerTel(document.getElementById('a-tel'), ''); (f.elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); $('#a-ok').scrollIntoView({ behavior: 'smooth', block: 'center' }); await cargar();
   });
 
   if (K) cargar().then(() => { $('#k-form').hidden = true; $('#adm').hidden = false; }).catch(() => {});

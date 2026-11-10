@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import '../styles/home.css';
+import TelInput from '../components/TelInput.astro';
 ---
 
 <Base image="/img/og-celebra.jpg" title="Mi panel de aliado · Celebra" description="Panel privado de los aliados de Celebra.">
@@ -47,7 +48,7 @@ import '../styles/home.css';
           <form class="h-form" id="p-ficha" novalidate>
             <label>Descripción corta<textarea name="descripcion" rows="3" maxlength="400"></textarea></label>
             <div class="h-form-2">
-              <label>WhatsApp donde recibes las reservas<input name="whatsapp" inputmode="tel" /></label>
+              <TelInput name="whatsapp" label="WhatsApp donde recibes las reservas" id="p-tel" />
               <label>Zona<input name="zona" /></label>
             </div>
             <label>Instagram <small>(opcional)</small><input name="instagram" placeholder="@tunegocio" /></label>
@@ -69,6 +70,8 @@ import '../styles/home.css';
 </Base>
 
 <script>
+  import { montarTel, ponerTel } from '../lib/telefono';
+  montarTel();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   let tok = location.hash.slice(1);
@@ -158,7 +161,7 @@ import '../styles/home.css';
 
   function pintarFicha() {
     const f = $<HTMLFormElement>('#p-ficha'); const v = (n: string, x: string) => ((f.elements.namedItem(n) as HTMLInputElement).value = x || '');
-    v('descripcion', A.descripcion); v('whatsapp', A.whatsapp); v('zona', A.zona); v('instagram', A.instagram ? '@' + A.instagram : '');
+    v('descripcion', A.descripcion); ponerTel(document.getElementById('p-tel'), A.whatsapp); v('zona', A.zona); v('instagram', A.instagram ? '@' + A.instagram : '');
     v('pm_banco', A.pago.pagoMovil?.banco); v('pm_tel', A.pago.pagoMovil?.telefono); v('pm_ced', A.pago.pagoMovil?.cedula);
     v('bi_id', A.pago.binance?.id); v('pago_nota', A.pago.nota);
     f.addEventListener('input', marcar);

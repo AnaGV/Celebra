@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 import HomeNav from '../components/HomeNav.astro';
 import '../styles/home.css';
+import TelInput from '../components/TelInput.astro';
 ---
 
 <Base image="/img/og-celebra.jpg" title="Reservar con un aliado · Celebra" description="Mira la disponibilidad de los proveedores de fiestas de Caripe y reserva directo por WhatsApp.">
@@ -46,7 +47,7 @@ import '../styles/home.css';
             <legend><span>3</span> Tus datos</legend>
             <div class="h-form-2">
               <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
-              <label>Tu WhatsApp<input type="tel" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="0414 123 4567" required /></label>
+              <TelInput name="whatsapp" label="Tu WhatsApp" id="r-tel" required />
             </div>
             <div class="h-form-2">
               <label>Invitados (aprox.)<input type="number" name="invitados" min="0" inputmode="numeric" /></label>
@@ -89,6 +90,10 @@ import '../styles/home.css';
 </Base>
 
 <script>
+  import { montarTel, ponerTel } from '../lib/telefono';
+  import { detectCountry } from '../lib/country';
+  montarTel();
+  if (detectCountry() === 'CL') { const s = document.querySelector<HTMLSelectElement>('#r-tel [data-tel-cc]'); if (s) s.value = '56'; }
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const id = new URLSearchParams(location.search).get('a') || '';
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
