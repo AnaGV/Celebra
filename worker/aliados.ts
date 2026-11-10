@@ -256,7 +256,9 @@ export async function panel(request: Request, env: any, sub: string) {
 
 export async function admin(request: Request, env: any) {
   const key = request.headers.get('x-celebra-key') || '';
-  if (!env.CELEBRA_FORM_KEY || !igual(key, String(env.CELEBRA_FORM_KEY))) return json({ error: 'Clave incorrecta' }, 401);
+  const clave = String(env.CELEBRA_ADMIN_KEY || '');
+  if (clave.length < 10) return json({ error: 'Falta configurar CELEBRA_ADMIN_KEY en Cloudflare' }, 503);
+  if (!igual(key, clave)) return json({ error: 'Clave incorrecta' }, 401);
   if (request.method === 'GET') {
     const out: any[] = []; let cursor: string | undefined;
     do {
