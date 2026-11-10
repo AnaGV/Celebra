@@ -733,3 +733,4 @@
 .home .h-res-revisa .h-res-revisa-num{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:.02em}
 .home .h-res-revisa-b{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .home .h-res-revisa-b .h-btn{flex:1 1 160px;justify-content:center}
+.home .h-pan-entrar{max-width:560px}.home .h-pan-entrar .h-form{margin:16px 0}
