@@ -101,7 +101,7 @@ import TelInput from '../components/TelInput.astro';
   }
 
   function fechaTxt(f: string) { const t = new Date(f + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); return t.charAt(0).toUpperCase() + t.slice(1); }
-  const waNum = (n: string) => { const d = String(n || '').replace(/\D/g, ''); return d.length === 11 && d.startsWith('0') ? '58' + d.slice(1) : d.length === 10 && d.startsWith('4') ? '58' + d : d; };
+  const waNum = (n: string) => { const d = String(n || '').replace(/\D/g, ''); const ve = /^(?:56|57)?(4(?:1[246]|2[46])\d{7})$/.exec(d); if (ve) return '58' + ve[1]; return d.length === 11 && d.startsWith('0') ? '58' + d.slice(1) : d.length === 10 && d.startsWith('4') ? '58' + d : d; };
   const cuando = (r: any) => new Date(r.fecha + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }) + (r.hora != null ? ' a las ' + horaTxt(r.hora) : '');
   function aviso(r: any) {
     const t = r.estado === 'confirmada' ? `Hola ${r.cliente.nombre}, soy ${A.nombre}. ¡Tu reserva para el ${cuando(r)} está confirmada! ✅ (Código ${r.id})`
@@ -122,6 +122,7 @@ import TelInput from '../components/TelInput.astro';
       const fin = r.hora != null ? Math.max(...r.items.map((i: any) => (i.min ? r.hora + i.min : r.hora))) : null;
       li.append(el('span', 'h-pan-tag', tag), el('b', '', `${fechaTxt(r.fecha)}${r.hora != null ? ' · ' + horaTxt(r.hora) + (fin && fin > r.hora ? ' a ' + horaTxt(fin) : '') : ''} · ${r.cliente.nombre}`),
         el('p', '', r.items.map((i: any) => i.nombre + (i.horas ? ` (${i.horas} h)` : '') + (i.cant > 1 ? ' ×' + i.cant : '')).join(', ') + (r.estado === 'consulta' ? '' : ` · $${r.total}`) + (r.invitados ? ' · ' + r.invitados + ' inv.' : '')));
+      li.append(el('p', '', '📱 +' + waNum(r.cliente.whatsapp)));
       if (r.direccion) li.append(el('p', '', '📍 ' + r.direccion));
       if (r.estado !== 'consulta') li.append(el('p', 'h-pan-pago', r.metodo === 'pagomovil' ? `Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Pago por coordinar'));
       if (r.nota) li.append(el('p', 'h-pan-nota', '“' + r.nota + '”'));

@@ -11,5 +11,6 @@ const { name, label, required = false, id, ccDefault = '58', placeholder = '414 
     </select>
     <input data-tel-num type="tel" inputmode="tel" autocomplete="tel-national" placeholder={placeholder} required={required} aria-label={label} />
   </div>
+  <small class="h-tel-ver" data-tel-ver hidden></small>
   <input type="hidden" name={name} />
 </div>

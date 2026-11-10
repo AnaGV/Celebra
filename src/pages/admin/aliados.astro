@@ -135,6 +135,10 @@ import TelInput from '../../components/TelInput.astro';
     f.reset(); ponerTel(document.getElementById('a-tel'), ''); (f.elements.namedItem('id') as HTMLInputElement).value = ''; modo(false);
     $('#a-ok').hidden = false; $('#a-ok-txt').textContent = nombre + ' fue eliminado.'; $('#a-ok-wa').hidden = true; await cargar();
   });
+  let tOk = 0;
+  const ocultarOk = () => { $('#a-ok').hidden = true; };
+  $('#a-form').addEventListener('input', ocultarOk);
+  new MutationObserver(() => { if (!$('#a-ok').hidden) { clearTimeout(tOk); tOk = window.setTimeout(ocultarOk, $<HTMLAnchorElement>('#a-ok-wa').hidden ? 6000 : 60000); } }).observe($('#a-ok'), { attributes: true, attributeFilter: ['hidden'] });
   function modo(editando: boolean) {
     $('#a-enlace').hidden = !editando; $('#a-cancelar').hidden = !editando; $('#a-borrar').hidden = !editando;
     $('#a-guardar').textContent = editando ? 'Guardar cambios' : 'Crear aliado';

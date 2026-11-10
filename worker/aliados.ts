@@ -63,6 +63,8 @@ const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCa
 export function waNum(n: string) {
   const d = String(n || '').replace(/\D/g, '');
   if (d.length === 11 && d.startsWith('0')) return '58' + d.slice(1);
+  const ve = /^(?:56|57)?(4(?:1[246]|2[46])\d{7})$/.exec(d); // celular venezolano guardado con otro código
+  if (ve) return '58' + ve[1];
   if (d.length === 10 && d.startsWith('4')) return '58' + d;
   return d;
 }

@@ -724,3 +724,5 @@
 .home .h-cal-ley .lleno{background:#fde8e8;border:1px solid #f3c7c7}
 .home .h-adm-botones{flex-wrap:wrap;align-items:center}
 .home .h-adm-borrar{margin-left:auto;font:700 14px 'Figtree',sans-serif;color:#b42318;background:none;border:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 0}
+.home .h-tel-ver{font-size:13px;font-weight:700;color:#17603b}
+.home .h-tel-ver.mal{color:#b42318}

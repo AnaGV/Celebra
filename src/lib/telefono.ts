@@ -12,12 +12,38 @@ export const CODIGOS = [
   { cc: '1', pais: 'EE. UU.', bandera: '🇺🇸' },
 ];
 
-/** Une código + número local: quita espacios, el 0 inicial (0414 → 414) y un código repetido. */
+const VE_MOVIL = /^0?4(1[246]|2[46])\d{7}$/; // 0412, 0414, 0416, 0424, 0426
+
+/**
+ * Une código + número. Corrige los errores comunes:
+ * - un celular venezolano (0414…) siempre va con +58, aunque el selector diga otro país;
+ * - si escriben el número con su código (+56 9…, 58414…), se respeta;
+ * - quita el 0 inicial y los espacios.
+ */
 export function unirTel(cc: string, local: string): string {
-  let n = String(local || '').replace(/\D/g, '');
-  if (n.startsWith(cc) && n.length > cc.length + 8) n = n.slice(cc.length);
+  const raw = String(local || '').trim();
+  let n = raw.replace(/\D/g, '');
+  if (!n) return '';
+  if (VE_MOVIL.test(n)) return '58' + n.replace(/^0/, '');
+  if (raw.startsWith('+') || raw.startsWith('00')) return n.replace(/^00/, '');
+  const otro = CODIGOS.find((k) => n.startsWith(k.cc) && n.length >= k.cc.length + 9);
+  if (otro) return n;
   n = n.replace(/^0+/, '');
-  return n ? cc + n : '';
+  return cc + n;
+}
+
+/** ¿Parece un WhatsApp válido? (revisa Venezuela y Chile; el resto, largo razonable) */
+export function telValido(full: string) {
+  if (full.startsWith('58')) return /^584\d{9}$/.test(full);
+  if (full.startsWith('56')) return /^569\d{8}$/.test(full);
+  return full.length >= 10 && full.length <= 15;
+}
+
+export function telBonito(full: string) {
+  const c = [...CODIGOS].sort((a, b) => b.cc.length - a.cc.length).find((k) => full.startsWith(k.cc));
+  if (!c) return '+' + full;
+  const r = full.slice(c.cc.length);
+  return `${c.bandera} +${c.cc} ${r.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3')}`;
 }
 
 /** Separa un número completo en código + resto (para editar). */
@@ -35,7 +61,17 @@ export function montarTel(root: ParentNode = document) {
   root.querySelectorAll<HTMLElement>('[data-tel]').forEach((w) => {
     if (w.dataset.listo) return; w.dataset.listo = '1';
     const sel = w.querySelector<HTMLSelectElement>('[data-tel-cc]')!, num = w.querySelector<HTMLInputElement>('[data-tel-num]')!, out = w.querySelector<HTMLInputElement>('input[type=hidden]')!;
-    const sync = () => { out.value = unirTel(sel.value, num.value); };
+    const ver = w.querySelector<HTMLElement>('[data-tel-ver]');
+    const sync = () => {
+      out.value = unirTel(sel.value, num.value);
+      const c = CODIGOS.find((k) => out.value.startsWith(k.cc) && k.cc !== sel.value && out.value.length >= k.cc.length + 9 && !out.value.startsWith(sel.value));
+      if (c) sel.value = c.cc;
+      if (ver) {
+        const ok = !out.value || telValido(out.value);
+        ver.hidden = !out.value; ver.classList.toggle('mal', !ok);
+        ver.textContent = ok ? `WhatsApp: ${telBonito(out.value)}` : `Revisa el número: ${telBonito(out.value)} no parece un WhatsApp válido`;
+      }
+    };
     sel.addEventListener('change', sync); num.addEventListener('input', sync);
     (w as any).poner = (full: string) => { const s = separarTel(full); sel.value = s.cc; num.value = s.local; sync(); };
     (w as any).limpiar = () => { num.value = ''; sync(); };
