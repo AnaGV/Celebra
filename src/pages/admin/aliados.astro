@@ -72,6 +72,7 @@ import TelInput from '../../components/TelInput.astro';
           <div class="h-adm-botones">
             <button class="h-btn" type="submit" id="a-guardar">Crear aliado</button>
             <button class="h-btn h-btn-line" type="button" id="a-cancelar" hidden>Cancelar</button>
+            <button class="h-adm-borrar" type="button" id="a-borrar" hidden>Eliminar aliado</button>
           </div>
           <p class="h-form-err" role="alert" hidden></p>
         </form>
@@ -125,8 +126,17 @@ import TelInput from '../../components/TelInput.astro';
     f.querySelectorAll<HTMLInputElement>('input[name=cat]').forEach((c) => (c.checked = a.categorias.includes(c.value)));
     $('#a-tit').textContent = 'Editar: ' + a.nombre; modo(true); $('#a-ok').hidden = true; f.scrollIntoView({ behavior: 'smooth' });
   }
+  $('#a-borrar').addEventListener('click', async () => {
+    const f = $<HTMLFormElement>('#a-form'); const id = (f.elements.namedItem('id') as HTMLInputElement).value;
+    const nombre = (f.elements.namedItem('nombre') as HTMLInputElement).value;
+    if (!id || !confirm(`¿Eliminar a ${nombre} para siempre? Se borran su ficha, sus fotos y sus reservas, y su enlace deja de funcionar. Si solo quieres esconderlo, usa "Oculto" en el paso 4.`)) return;
+    const r = await fetch('/api/admin/aliados?id=' + encodeURIComponent(id), { method: 'DELETE', headers: H() });
+    if (!r.ok) { alert('No se pudo eliminar.'); return; }
+    f.reset(); ponerTel(document.getElementById('a-tel'), ''); (f.elements.namedItem('id') as HTMLInputElement).value = ''; modo(false);
+    $('#a-ok').hidden = false; $('#a-ok-txt').textContent = nombre + ' fue eliminado.'; $('#a-ok-wa').hidden = true; await cargar();
+  });
   function modo(editando: boolean) {
-    $('#a-enlace').hidden = !editando; $('#a-cancelar').hidden = !editando;
+    $('#a-enlace').hidden = !editando; $('#a-cancelar').hidden = !editando; $('#a-borrar').hidden = !editando;
     $('#a-guardar').textContent = editando ? 'Guardar cambios' : 'Crear aliado';
     if (!editando) $('#a-tit').textContent = 'Crear un aliado nuevo';
   }

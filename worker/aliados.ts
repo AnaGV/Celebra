@@ -119,7 +119,7 @@ export async function listaAliados(env: any) {
     for (const o of l.objects) { const a = await leer<Aliado>(env, o.key); if (a?.activo) out.push(publico(a)); }
     cursor = l.truncated ? l.cursor : undefined;
   } while (cursor);
-  return json({ aliados: out }, 200, 'public, max-age=60');
+  return json({ aliados: out });
 }
 
 export async function fichaAliado(request: Request, env: any, id: string) {
@@ -299,6 +299,17 @@ export async function admin(request: Request, env: any) {
       cursor = l.truncated ? l.cursor : undefined;
     } while (cursor);
     return json({ aliados: out });
+  }
+  if (request.method === 'DELETE') {
+    const id = new URL(request.url).searchParams.get('id') || '';
+    if (!ID.test(id) || !(await env.FOTOS.head(`aliados/${id}.json`))) return json({ error: 'No encontrado' }, 404);
+    // Borra la ficha, sus fotos y sus reservas.
+    for (const pre of [`aliados-fotos/${id}/`, `reservas/${id}/`]) {
+      let cursor: string | undefined;
+      do { const l = await env.FOTOS.list({ prefix: pre, cursor }); if (l.objects.length) await env.FOTOS.delete(l.objects.map((o: any) => o.key)); cursor = l.truncated ? l.cursor : undefined; } while (cursor);
+    }
+    await env.FOTOS.delete(`aliados/${id}.json`);
+    return json({ ok: true });
   }
   if (request.method !== 'POST') return json({ error: 'Método no permitido' }, 405);
   const b = (await request.json().catch(() => ({}))) as Record<string, any>;
