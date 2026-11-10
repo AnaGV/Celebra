@@ -263,7 +263,7 @@ export async function admin(request: Request, env: any) {
     const out: any[] = []; let cursor: string | undefined;
     do {
       const l = await env.FOTOS.list({ prefix: 'aliados/', cursor });
-      for (const o of l.objects) { const a = await leer<Aliado>(env, o.key); if (a) out.push({ id: a.id, nombre: a.nombre, categorias: a.categorias, whatsapp: a.whatsapp, plan: a.plan, activo: a.activo, confirmadoActivo: a.confirmadoActivo || null }); }
+      for (const o of l.objects) { const a = await leer<Aliado>(env, o.key); if (a) out.push({ id: a.id, nombre: a.nombre, categorias: a.categorias, whatsapp: a.whatsapp, descripcion: a.descripcion, zona: a.zona, plan: a.plan, activo: a.activo, confirmadoActivo: a.confirmadoActivo || null }); }
       cursor = l.truncated ? l.cursor : undefined;
     } while (cursor);
     return json({ aliados: out });

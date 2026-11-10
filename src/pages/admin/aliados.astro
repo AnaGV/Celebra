@@ -16,27 +16,62 @@ import { CATEGORIAS } from '../../config/directorio';
       </form>
 
       <div id="adm" hidden>
-        <h1>Aliados</h1>
+        <div class="h-adm-intro">
+          <p><b>Esta página es solo para ti.</b> Aquí creas a los aliados y los editas.</p>
+          <p>Los aliados <b>no entran aquí</b>: cada uno entra a su propio panel con el enlace privado que le mandas por WhatsApp al crearlo.</p>
+        </div>
+
+        <h1>Tus aliados</h1>
         <ul class="h-adm-lista" id="a-lista"></ul>
 
-        <h2 id="a-tit">Nuevo aliado</h2>
-        <form class="h-form" id="a-form" novalidate>
+        <h2 id="a-tit">Crear un aliado nuevo</h2>
+        <form class="h-form h-adm-form" id="a-form" novalidate>
           <input type="hidden" name="id" />
-          <div class="h-form-2">
-            <label>Nombre del negocio<input name="nombre" required /></label>
-            <label>WhatsApp (con código, ej. 584141234567)<input name="whatsapp" inputmode="tel" required /></label>
-          </div>
-          <fieldset class="h-adm-cats"><legend>Categorías</legend>
-            {CATEGORIAS.filter((k) => k.id !== 'lugares' || true).map((k) => <label><input type="checkbox" name="cat" value={k.id} /> {k.icono} {k.nombre}</label>)}
-          </fieldset>
-          <label>Descripción corta<textarea name="descripcion" rows="2" maxlength="400"></textarea></label>
-          <div class="h-form-2">
+
+          <section class="h-adm-paso">
+            <h3><span>1</span> Datos del negocio</h3>
+            <div class="h-form-2">
+              <label>Nombre del negocio<input name="nombre" required /></label>
+              <label>WhatsApp donde recibe las reservas<input name="whatsapp" inputmode="tel" placeholder="584141234567" required /></label>
+            </div>
+            <label>Descripción corta <small>(lo que se lee en su ficha)</small><textarea name="descripcion" rows="2" maxlength="400"></textarea></label>
             <label>Zona<input name="zona" value="Caripe" /></label>
-            <label>Plan<select name="plan"><option value="gratis">Gratis</option><option value="pro">Pro</option></select></label>
+          </section>
+
+          <section class="h-adm-paso">
+            <h3><span>2</span> ¿Qué ofrece? <small>Marca una o varias</small></h3>
+            <div class="h-adm-cats">
+              {CATEGORIAS.map((k) => <label class="h-adm-chip"><input type="checkbox" name="cat" value={k.id} /><span>{k.icono} {k.nombre}</span></label>)}
+            </div>
+          </section>
+
+          <section class="h-adm-paso">
+            <h3><span>3</span> Plan</h3>
+            <div class="h-adm-planes">
+              <label class="h-adm-plan"><input type="radio" name="plan" value="gratis" checked />
+                <span><b>Gratis</b>El cliente llena la reserva y la envía al WhatsApp del aliado con un botón. El aliado confirma el pago en su panel.</span></label>
+              <label class="h-adm-plan"><input type="radio" name="plan" value="pro" />
+                <span><b>Pro <em>Próximamente</em></b>Igual que el gratis, más avisos automáticos por WhatsApp sin que el cliente toque nada. Se cobra aparte.</span></label>
+            </div>
+          </section>
+
+          <section class="h-adm-paso">
+            <h3><span>4</span> ¿Se muestra en el directorio?</h3>
+            <label class="h-adm-vis"><input type="checkbox" name="activo" checked />
+              <span class="si">✓ Visible: aparece en el Directorio y los clientes pueden reservar</span>
+              <span class="no">✕ Oculto: no aparece en el Directorio (útil para pruebas o si deja de trabajar)</span></label>
+          </section>
+
+          <section class="h-adm-paso" id="a-enlace" hidden>
+            <h3><span>5</span> Enlace privado del aliado</h3>
+            <p class="h-adm-nota">Solo úsalo si el aliado <b>perdió su enlace</b> o si <b>alguien más lo tiene</b>. Se crea un enlace nuevo para mandarle y el viejo deja de abrir su panel.</p>
+            <label class="h-adm-chip h-adm-chip-solo"><input type="checkbox" name="nuevoEnlace" /><span>Crear enlace nuevo al guardar</span></label>
+          </section>
+
+          <div class="h-adm-botones">
+            <button class="h-btn" type="submit" id="a-guardar">Crear aliado</button>
+            <button class="h-btn h-btn-line" type="button" id="a-cancelar" hidden>Cancelar</button>
           </div>
-          <label class="h-pan-switch"><input type="checkbox" name="activo" checked /> Visible en el directorio</label>
-          <label class="h-pan-switch"><input type="checkbox" name="nuevoEnlace" /> Generar un enlace privado nuevo (el anterior deja de funcionar)</label>
-          <button class="h-btn" type="submit">Guardar aliado</button>
           <p class="h-form-err" role="alert" hidden></p>
         </form>
         <div class="h-form-ok" id="a-ok" hidden>
@@ -63,7 +98,14 @@ import { CATEGORIAS } from '../../config/directorio';
     const ul = $('#a-lista'); ul.replaceChildren();
     if (!lista.length) ul.append(el('li', '', 'Aún no hay aliados.'));
     for (const a of lista) {
-      const li = el('li'); li.append(el('b', '', a.nombre), el('span', '', `${a.plan === 'pro' ? 'Pro' : 'Gratis'} · ${a.activo ? 'visible' : 'oculto'} · ${a.confirmadoActivo ? 'activo ' + a.confirmadoActivo.slice(0, 10) : 'sin confirmar'}`));
+      const li = el('li', a.activo ? '' : 'oculto');
+      const info = el('div', 'h-adm-info'); info.append(el('b', '', a.nombre));
+      const tags = el('div', 'h-adm-tags');
+      tags.append(el('span', 'h-adm-t ' + (a.plan === 'pro' ? 'pro' : 'gratis'), a.plan === 'pro' ? '★ Pro' : 'Gratis'));
+      tags.append(el('span', 'h-adm-t ' + (a.activo ? 'vis' : 'ocu'), a.activo ? '✓ Visible' : '✕ Oculto del directorio'));
+      if (!a.confirmadoActivo) tags.append(el('span', 'h-adm-t pend', 'Aún no entra a su panel'));
+      info.append(tags); li.append(info);
+      const ver = el('a', 'h-adm-ver', 'Ver su ficha') as HTMLAnchorElement; ver.href = '/reservar/?a=' + a.id; ver.target = '_blank'; li.append(ver);
       const ed = el('button', 'h-btn h-btn-line', 'Editar') as HTMLButtonElement; ed.type = 'button';
       ed.addEventListener('click', () => editar(a)); li.append(ed); ul.append(li);
     }
@@ -73,11 +115,19 @@ import { CATEGORIAS } from '../../config/directorio';
     (f.elements.namedItem('id') as HTMLInputElement).value = a.id;
     (f.elements.namedItem('nombre') as HTMLInputElement).value = a.nombre;
     (f.elements.namedItem('whatsapp') as HTMLInputElement).value = a.whatsapp;
-    (f.elements.namedItem('plan') as HTMLSelectElement).value = a.plan;
+    f.querySelectorAll<HTMLInputElement>('input[name=plan]').forEach((c) => (c.checked = c.value === (a.plan || 'gratis')));
+    if (a.descripcion) (f.elements.namedItem('descripcion') as HTMLTextAreaElement).value = a.descripcion;
+    if (a.zona) (f.elements.namedItem('zona') as HTMLInputElement).value = a.zona;
     (f.elements.namedItem('activo') as HTMLInputElement).checked = a.activo;
     f.querySelectorAll<HTMLInputElement>('input[name=cat]').forEach((c) => (c.checked = a.categorias.includes(c.value)));
-    $('#a-tit').textContent = 'Editar: ' + a.nombre; f.scrollIntoView({ behavior: 'smooth' });
+    $('#a-tit').textContent = 'Editar: ' + a.nombre; modo(true); $('#a-ok').hidden = true; f.scrollIntoView({ behavior: 'smooth' });
   }
+  function modo(editando: boolean) {
+    $('#a-enlace').hidden = !editando; $('#a-cancelar').hidden = !editando;
+    $('#a-guardar').textContent = editando ? 'Guardar cambios' : 'Crear aliado';
+    if (!editando) $('#a-tit').textContent = 'Crear un aliado nuevo';
+  }
+  $('#a-cancelar').addEventListener('click', () => { $<HTMLFormElement>('#a-form').reset(); (($('#a-form') as HTMLFormElement).elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); });
 
   $<HTMLFormElement>('#k-form').addEventListener('submit', async (e) => {
     e.preventDefault(); K = String(new FormData(e.target as HTMLFormElement).get('k') || '');
@@ -100,7 +150,7 @@ import { CATEGORIAS } from '../../config/directorio';
       const msg = `¡Hola! Ya eres aliado de Celebra 🎉 Este es tu panel privado para cargar tus servicios, precios, fotos y días disponibles, y ver tus reservas:\n${d.enlace}\n\nGuárdalo y no lo compartas: es tu llave.`;
       wa.href = `https://wa.me/${String(fd.get('whatsapp')).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`; wa.hidden = false;
     } else { $('#a-ok-txt').textContent = 'Cambios guardados (el enlace privado sigue siendo el mismo).'; wa.hidden = true; }
-    f.reset(); $('#a-tit').textContent = 'Nuevo aliado'; await cargar();
+    f.reset(); (f.elements.namedItem('id') as HTMLInputElement).value = ''; modo(false); $('#a-ok').scrollIntoView({ behavior: 'smooth', block: 'center' }); await cargar();
   });
 
   if (K) cargar().then(() => { $('#k-form').hidden = true; $('#adm').hidden = false; }).catch(() => {});
