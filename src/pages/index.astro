@@ -163,7 +163,7 @@ const hoy = new Date().toISOString().slice(0, 10);
                 <img class="h-ref-img" alt="Tu foto de referencia" hidden />
               </label>
               <p class="h-ref-estado" role="status" hidden></p>
-              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la vemos.</p>
+              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la descargamos.</p>
             </div>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
             <label><span>Correo <span class="h-opt">(opcional)</span></span><input type="email" name="correo" autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.com" /></label>
@@ -351,7 +351,7 @@ const hoy = new Date().toISOString().slice(0, 10);
     const necesito = fd.getAll('necesito').map((x) => x === 'pack' ? d.pack : x === 'otro' ? (String(d.otro || '').trim() || 'Otra cosa') : x);
     const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
     const hayFoto = foto.files && foto.files.length > 0;
-    const linea = fotoUrl ? `\n📷 Foto de referencia (guárdala al abrirla, se borra a los 15 min): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
+    const linea = fotoUrl ? `\n📷 Foto de referencia (se borra al descargarla o a las 24 h): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
     const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + (String(d.correo || '').trim() ? `\n• Correo: ${String(d.correo).trim()}${d.promos ? ' (acepta recibir descuentos)' : ''}` : '') + linea;
     const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
     // Deja el formulario limpio para una nueva cotización (también al volver con "atrás").

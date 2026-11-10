@@ -32,37 +32,49 @@ import TelInput from '../components/TelInput.astro';
           </fieldset>
 
           <fieldset>
-            <legend><span>2</span> ¿Para qué fecha?</legend>
+            <legend><span>2</span> ¿Qué día?</legend>
             <div class="h-cal" id="r-cal" hidden>
               <div class="h-cal-top"><button type="button" class="h-cal-nav" data-d="-1" aria-label="Mes anterior">‹</button><b id="r-mes"></b><button type="button" class="h-cal-nav" data-d="1" aria-label="Mes siguiente">›</button></div>
               <div class="h-cal-sem"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
               <div class="h-cal-grid" id="r-grid"></div>
-              <p class="h-cal-ley"><i class="ok"></i> Disponible <i class="parcial"></i> Quedan pocos <i class="no"></i> No disponible</p>
+              <p class="h-cal-ley"><i class="ok"></i> Disponible <i class="parcial"></i> Quedan pocas horas <i class="lleno"></i> Lleno <i class="no"></i> No trabaja</p>
             </div>
             <label class="h-res-fecha" id="r-fecha-libre" hidden>Fecha de la fiesta<input type="date" name="fecha" /></label>
             <p class="h-res-sel" id="r-sel" hidden></p>
           </fieldset>
 
+          <fieldset id="r-horaset">
+            <legend><span>3</span> ¿A qué hora empieza?</legend>
+            <p class="h-res-fine" id="r-hora-ayuda">Primero elige el día.</p>
+            <div class="h-res-horas" id="r-horas"></div>
+            <p class="h-res-fin" id="r-fin" hidden></p>
+            <div class="h-res-lleno" id="r-lleno" hidden>
+              <p id="r-lleno-txt"></p>
+            </div>
+            <label class="h-res-extra" id="r-extra" hidden><input type="checkbox" id="r-consulta" /> <span id="r-extra-txt">Quiero pedirle una hora extra o un horario especial</span></label>
+          </fieldset>
+
           <fieldset>
-            <legend><span>3</span> Tus datos</legend>
+            <legend><span>4</span> Tus datos</legend>
             <div class="h-form-2">
               <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
               <TelInput name="whatsapp" label="Tu WhatsApp" id="r-tel" required />
             </div>
+            <label id="r-dir">¿Dónde es la fiesta? <small>(dirección o sector y un punto de referencia)</small><input type="text" name="direccion" maxlength="160" autocomplete="street-address" placeholder="Ej. Urb. Los Pinos, casa 12, frente a la plaza" /></label>
             <div class="h-form-2">
               <label>Invitados (aprox.)<input type="number" name="invitados" min="0" inputmode="numeric" /></label>
-              <label>Nota para el aliado <small>(opcional)</small><input type="text" name="nota" maxlength="300" placeholder="Hora, dirección, tema…" /></label>
+              <label>Nota para el aliado <small>(opcional)</small><input type="text" name="nota" maxlength="300" placeholder="Tema, edad, detalles…" /></label>
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend><span>4</span> Pago</legend>
+          <fieldset id="r-pagoset">
+            <legend><span>5</span> Pago</legend>
             <p class="h-res-total">Total estimado: <b id="r-total">$0</b></p>
             <div class="h-res-metodos" id="r-metodos"></div>
             <div class="h-res-pago" id="r-pago" hidden></div>
             <div class="h-res-comprobante" id="r-comp" hidden>
               <label>Número de referencia<input type="text" name="referencia" maxlength="40" placeholder="Ej. 004512" /></label>
-              <label class="h-res-file">Captura del pago <small>(se borra sola después de que el aliado la ve)</small>
+              <label class="h-res-file">Captura del pago <small>(se borra cuando el aliado la descarga, o a las 24 horas)</small>
                 <input type="file" accept="image/*" id="r-file" />
               </label>
               <p class="h-res-fileok" id="r-fileok" hidden></p>
@@ -90,34 +102,35 @@ import TelInput from '../components/TelInput.astro';
 </Base>
 
 <script>
-  import { montarTel, ponerTel } from '../lib/telefono';
+  import { montarTel } from '../lib/telefono';
   import { detectCountry } from '../lib/country';
+  import { cabe, horasLibres, horaTxt, diaSemana, duracionDe, subtotal, pedidoMinimo, PASO, type ServicioAg, type Horario, type Ocupa, type Pedido } from '../lib/agenda';
   montarTel();
   if (detectCountry() === 'CL') { const s = document.querySelector<HTMLSelectElement>('#r-tel [data-tel-cc]'); if (s) s.value = '56'; }
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const id = new URLSearchParams(location.search).get('a') || '';
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  let A: any, ocupado: Record<string, Record<string, number>> = {}, bloqueados: string[] = [], hoy = '', mes = '', fecha = '', metodo = '', captura = '';
-  const cant: Record<string, number> = {};
+  let A: any, S: ServicioAg[] = [], HOR: Horario, ocupado: Record<string, Ocupa[]> = {}, bloqueados: string[] = [], hoy = '', mes = '', fecha = '', hora: number | null = null, metodo = '', captura = '';
+  const sel: Record<string, Pedido> = {};
   const el = (t: string, c?: string, x?: string) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const usd = (n: number) => '$' + (Math.round(n * 100) / 100).toLocaleString('es-VE');
+  const pedido = () => Object.values(sel).filter((p) => p.cant > 0);
+  const consulta = () => $<HTMLInputElement>('#r-consulta').checked;
 
   async function cargarMes(m: string) {
     const r = await fetch(`/api/aliados/${encodeURIComponent(id)}?mes=${m}`);
     if (!r.ok) throw new Error('404');
-    const d = await r.json(); A = d.aliado; ocupado = d.ocupado || {}; bloqueados = d.bloqueados || []; hoy = d.hoy; mes = m;
+    const d = await r.json(); A = d.aliado; S = A.servicios; HOR = A.horario; ocupado = d.ocupado || {}; bloqueados = d.bloqueados || []; hoy = d.hoy; mes = m;
   }
 
-  function libreDe(f: string, sid: string) {
-    const s = A.servicios.find((x: any) => x.id === sid); return s ? s.cantidad - ((ocupado[f] || {})[sid] || 0) : 0;
-  }
+  /** no = no trabaja / pasado; lleno = trabaja pero no cabe lo elegido; parcial = ya tiene reservas; ok */
   function estadoDia(f: string) {
-    if (f < hoy || bloqueados.includes(f)) return 'no';
-    const sel = Object.keys(cant).filter((k) => cant[k] > 0);
-    const ids = sel.length ? sel : A.servicios.map((s: any) => s.id);
-    const libres = ids.map((s: string) => libreDe(f, s) - (sel.length ? cant[s] - 1 : 0));
-    if (sel.length ? libres.some((l: number) => l < 1) : libres.every((l: number) => l < 1)) return 'no';
-    return ids.some((s: string) => { const sv = A.servicios.find((x: any) => x.id === s); return sv && libreDe(f, s) < sv.cantidad; }) ? 'parcial' : 'ok';
+    if (f < hoy || bloqueados.includes(f) || !HOR.dias.includes(diaSemana(f))) return 'no';
+    const occ = ocupado[f] || [];
+    const ped = pedido();
+    const libre = ped.length ? horasLibres(S, HOR, occ, ped).length > 0 : S.some((s) => horasLibres(S, HOR, occ, [pedidoMinimo(s)]).length > 0);
+    if (!libre) return 'lleno';
+    return occ.length ? 'parcial' : 'ok';
   }
 
   function pintarCal() {
@@ -130,8 +143,9 @@ import TelInput from '../components/TelInput.astro';
     for (let d = 1; d <= dias; d++) {
       const f = `${mes}-${String(d).padStart(2, '0')}`; const st = estadoDia(f);
       const b = el('button', `h-cal-d ${st}${f === fecha ? ' sel' : ''}`, String(d)) as HTMLButtonElement;
-      b.type = 'button'; b.disabled = st === 'no'; b.setAttribute('aria-label', `${d} de ${MESES[m - 1]}${st === 'no' ? ', no disponible' : ''}`);
-      b.addEventListener('click', () => { fecha = f; pintarCal(); pintarSel(); });
+      b.type = 'button'; b.disabled = st === 'no';
+      b.setAttribute('aria-label', `${d} de ${MESES[m - 1]}${st === 'no' ? ', no disponible' : st === 'lleno' ? ', lleno' : ''}`);
+      b.addEventListener('click', () => { fecha = f; hora = null; pintarCal(); pintarSel(); pintarHoras(); });
       g.append(b);
     }
     (document.querySelector('.h-cal-nav[data-d="-1"]') as HTMLButtonElement).disabled = mes <= hoy.slice(0, 7);
@@ -140,25 +154,78 @@ import TelInput from '../components/TelInput.astro';
     const s = $('#r-sel');
     if (!fecha) { s.hidden = true; return; }
     const d = new Date(fecha + 'T12:00:00Z');
-    s.hidden = false; s.textContent = `Fecha elegida: ${d.toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}`;
+    s.hidden = false; s.textContent = `Día elegido: ${d.toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}`;
   }
-  function total() { return A.servicios.reduce((t: number, s: any) => t + (cant[s.id] || 0) * s.precio, 0); }
-  function pintarTotal() {
-    $('#r-total').textContent = usd(total());
-    if (metodo) pintarPago();
+
+  function finDe(h: number) {
+    const durs = pedido().map((p) => duracionDe(S.find((s) => s.id === p.id)!, p)).filter((x): x is number => x != null);
+    return durs.length ? h + Math.max(...durs) : null;
   }
+  function pintarHoras() {
+    const box = $('#r-horas'), ayuda = $('#r-hora-ayuda'), lleno = $('#r-lleno'), extra = $('#r-extra'), fin = $('#r-fin');
+    box.replaceChildren(); lleno.hidden = true; fin.hidden = true;
+    if (!fecha) { ayuda.hidden = false; ayuda.textContent = 'Primero elige el día.'; extra.hidden = true; return; }
+    const ped = pedido();
+    if (!ped.length) { ayuda.hidden = false; ayuda.textContent = 'Primero elige qué necesitas (paso 1).'; extra.hidden = true; return; }
+    ayuda.hidden = true; extra.hidden = false;
+    const occ = A.calendario ? ocupado[fecha] || [] : [];
+    const libres = new Set(A.calendario ? horasLibres(S, HOR, occ, ped) : []);
+    let alguna = false;
+    for (let h = HOR.desde; h < HOR.hasta; h += PASO) {
+      const ok = A.calendario ? libres.has(h) : !cabe(S, HOR, [], ped, h);
+      if (!A.calendario && !ok) continue;
+      alguna ||= ok;
+      const b = el('button', 'h-res-h' + (h === hora ? ' on' : ''), horaTxt(h)) as HTMLButtonElement; b.type = 'button'; b.disabled = !ok || consulta();
+      if (!ok) b.title = 'Ocupado';
+      b.addEventListener('click', () => { hora = h; pintarHoras(); });
+      box.append(b);
+    }
+    if (hora != null && !libres.has(hora) && A.calendario) hora = null;
+    if (hora != null) { const f = finDe(hora); if (f) { fin.hidden = false; fin.textContent = `Empieza a las ${horaTxt(hora)} y termina a las ${horaTxt(f)}`; } }
+    if (!alguna) {
+      lleno.hidden = false;
+      $('#r-lleno-txt').textContent = `Ese día ${A.nombre} ya no tiene horarios libres para lo que elegiste.`;
+      $('#r-extra-txt').textContent = `Quiero preguntarle a ${A.nombre} si puede hacer una hora extra para mí`;
+    } else $('#r-extra-txt').textContent = '¿No ves la hora que necesitas? Quiero pedirle un horario especial';
+  }
+
+  function total() { return pedido().reduce((t, p) => t + subtotal(S.find((s) => s.id === p.id)!, p), 0); }
+  function cambio() { $('#r-total').textContent = usd(total()); if (metodo) pintarPago(); if (A.calendario) pintarCal(); pintarHoras(); }
 
   function pintarServicios() {
     const ul = $('#r-serv'); ul.replaceChildren();
-    for (const s of A.servicios) {
+    for (const s of S) {
+      const p: Pedido = (sel[s.id] ||= { id: s.id, cant: 0, horas: s.minHoras });
       const li = el('li', 'h-res-s');
-      const info = el('div'); info.append(el('b', '', s.nombre), el('span', '', `${usd(s.precio)}${s.unidad ? ' / ' + s.unidad : ''}`));
+      const info = el('div');
+      const precio = s.tipo === 'hora' ? `${usd(s.precio)} por hora${s.minHoras > 1 ? ` · mínimo ${s.minHoras} horas` : ''}`
+        : s.tipo === 'evento' ? `${usd(s.precio)} por evento · ${s.duracion} ${s.duracion === 1 ? 'hora' : 'horas'}`
+        : `${usd(s.precio)} por ${s.unidad}`;
+      info.append(el('b', '', s.nombre), el('span', '', precio));
       const ctl = el('div', 'h-res-q');
-      const menos = el('button', '', '−') as HTMLButtonElement, mas = el('button', '', '+') as HTMLButtonElement, n = el('output', '', '0');
-      menos.type = mas.type = 'button'; menos.setAttribute('aria-label', 'Quitar ' + s.nombre); mas.setAttribute('aria-label', 'Agregar ' + s.nombre);
-      const set = (v: number) => { cant[s.id] = Math.max(0, Math.min(s.cantidad, v)); n.textContent = String(cant[s.id]); li.classList.toggle('on', cant[s.id] > 0); pintarTotal(); if (A.calendario) pintarCal(); };
-      menos.addEventListener('click', () => set((cant[s.id] || 0) - 1)); mas.addEventListener('click', () => set((cant[s.id] || 0) + 1));
-      ctl.append(menos, n, mas); li.append(info, ctl); ul.append(li);
+      const menos = el('button', '', '−') as HTMLButtonElement, mas = el('button', '', '+') as HTMLButtonElement;
+      menos.type = mas.type = 'button';
+      const out = el('output');
+      const etiqueta = () => s.tipo === 'hora' ? (p.cant ? `${p.horas} h` : '0 h') : s.tipo === 'unidad' ? `${p.cant} ${s.unidad}` : String(p.cant);
+      const pintar = () => { out.textContent = etiqueta(); li.classList.toggle('on', p.cant > 0); menos.disabled = p.cant === 0; };
+      const maxH = Math.floor((HOR.hasta - HOR.desde) / 60);
+      if (s.tipo === 'hora') {
+        mas.addEventListener('click', () => { if (!p.cant) { p.cant = 1; p.horas = s.minHoras; } else p.horas = Math.min(maxH, p.horas + 1); pintar(); cambio(); });
+        menos.addEventListener('click', () => { if (p.horas > s.minHoras) p.horas--; else p.cant = 0; pintar(); cambio(); });
+        menos.setAttribute('aria-label', 'Menos horas de ' + s.nombre); mas.setAttribute('aria-label', 'Más horas de ' + s.nombre);
+      } else {
+        const tope = s.cantidad;
+        mas.addEventListener('click', () => { p.cant = Math.min(tope, p.cant + 1); pintar(); cambio(); });
+        menos.addEventListener('click', () => { p.cant = Math.max(0, p.cant - 1); pintar(); cambio(); });
+        menos.setAttribute('aria-label', 'Quitar ' + s.nombre); mas.setAttribute('aria-label', 'Agregar ' + s.nombre);
+      }
+      ctl.append(menos, out, mas); li.append(info, ctl);
+      if (s.tipo === 'unidad' && s.cantidad > 20) {
+        const n = el('input', 'h-res-num') as HTMLInputElement; n.type = 'number'; n.min = '0'; n.max = String(s.cantidad); n.inputMode = 'numeric'; n.placeholder = 'Escribe la cantidad';
+        n.addEventListener('input', () => { p.cant = Math.max(0, Math.min(s.cantidad, Math.round(Number(n.value) || 0))); pintar(); cambio(); });
+        li.append(n);
+      }
+      pintar(); ul.append(li);
     }
   }
 
@@ -186,6 +253,14 @@ import TelInput from '../components/TelInput.astro';
     if (metodo === 'pagomovil') { const pm = A.pago.pagoMovil; p.append(el('h3', '', `Paga ${usd(total())} por Pago Móvil a ${A.nombre}`), fila('Banco', pm.banco), fila('Teléfono', pm.telefono), fila('Cédula / RIF', pm.cedula), el('p', 'h-res-fine', 'Calcula los bolívares con la tasa del día que te indique el aliado.')); }
     if (metodo === 'binance') { p.append(el('h3', '', `Paga ${usd(total())} en USDT por Binance a ${A.nombre}`), fila('Binance Pay ID / correo', A.pago.binance.id)); }
   }
+  function modoConsulta() {
+    const c = consulta();
+    $('#r-pagoset').hidden = c;
+    $<HTMLButtonElement>('.h-res-go').textContent = c ? 'Enviar consulta por WhatsApp' : 'Enviar reserva por WhatsApp';
+    $('#r-fine').textContent = c ? `No apartamos nada: le preguntas directo a ${A.nombre} y ustedes se coordinan por WhatsApp.` : A.calendario ? 'Al enviar, apartamos la hora 24 horas mientras el aliado verifica tu pago.' : 'El aliado te confirmará la disponibilidad por WhatsApp.';
+    pintarHoras();
+  }
+  $<HTMLInputElement>('#r-consulta').addEventListener('change', modoConsulta);
 
   async function achicar(f: File): Promise<Blob> {
     const img = await createImageBitmap(f); const k = Math.min(1, 1600 / Math.max(img.width, img.height));
@@ -208,33 +283,40 @@ import TelInput from '../components/TelInput.astro';
     const [y, m] = mes.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + Number(b.dataset.d), 1));
     await cargarMes(d.toISOString().slice(0, 7)); pintarCal();
   }));
+  $<HTMLInputElement>('#r-fecha-libre input').addEventListener('change', (e) => { fecha = (e.target as HTMLInputElement).value; hora = null; pintarHoras(); });
 
   $<HTMLFormElement>('#r-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target as HTMLFormElement, fd = new FormData(f), err = f.querySelector<HTMLElement>('.h-form-err')!;
-    if (!A.calendario) fecha = String(fd.get('fecha') || '');
-    const items = Object.entries(cant).filter(([, v]) => v > 0).map(([id, c]) => ({ id, cant: c }));
+    const c = consulta();
+    const items = pedido().map((p) => ({ id: p.id, cant: p.cant, horas: p.horas }));
+    const esLugar = (A.categorias || []).includes('lugares');
     const falta: string[] = [];
-    if (!items.length) falta.push('elegir al menos un servicio');
-    if (!fecha) falta.push('elegir la fecha');
+    if (!items.length) falta.push('elegir qué necesitas');
+    if (!fecha) falta.push('elegir el día');
+    if (!c && hora == null) falta.push('elegir la hora');
     if (!String(fd.get('nombre') || '').trim()) falta.push('tu nombre');
     if (String(fd.get('whatsapp') || '').replace(/\D/g, '').length < 10) falta.push('tu WhatsApp');
-    if (!metodo) falta.push('elegir cómo pagas');
+    if (!esLugar && !String(fd.get('direccion') || '').trim()) falta.push('la dirección de la fiesta');
+    if (!c && !metodo) falta.push('elegir cómo pagas');
     if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
     err.hidden = true;
-    const btn = f.querySelector<HTMLButtonElement>('.h-res-go')!; btn.disabled = true; btn.textContent = 'Apartando la fecha…';
+    const btn = f.querySelector<HTMLButtonElement>('.h-res-go')!; btn.disabled = true; btn.textContent = c ? 'Preparando tu mensaje…' : 'Apartando la hora…';
     try {
       const r = await fetch(`/api/aliados/${encodeURIComponent(id)}/reserva`, { method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ fecha, items, nombre: fd.get('nombre'), whatsapp: fd.get('whatsapp'), invitados: fd.get('invitados'), nota: fd.get('nota'), metodo, referencia: fd.get('referencia'), captura, empresa: fd.get('empresa') }) });
-      const d = await r.json(); if (!r.ok) throw new Error(d.error || 'No pudimos apartar la fecha.');
-      $('#r-ok-txt').textContent = d.apartadaHasta
-        ? `Apartamos la fecha por 24 horas (código ${d.id}). Envíale la solicitud a ${A.nombre}: cuando verifique tu pago, la reserva queda confirmada y te escribe.`
-        : `Envíale la solicitud a ${A.nombre} (código ${d.id}). Te responderá por WhatsApp para confirmar.`;
+        body: JSON.stringify({ fecha, hora, consulta: c, items, nombre: fd.get('nombre'), whatsapp: fd.get('whatsapp'), direccion: fd.get('direccion'), invitados: fd.get('invitados'), nota: fd.get('nota'), metodo, referencia: fd.get('referencia'), captura, empresa: fd.get('empresa') }) });
+      const d = await r.json(); if (!r.ok) throw new Error(d.error || 'No pudimos apartar la hora.');
+      $('#r-ok b').textContent = c ? '¡Listo! Tu consulta está preparada' : '¡Listo! Tu solicitud está apartada 🎉';
+      $('#r-ok-txt').textContent = c
+        ? `Envíale el mensaje a ${A.nombre} (código ${d.id}). Él te responde por WhatsApp si puede hacer la hora extra.`
+        : d.apartadaHasta
+          ? `Apartamos la hora por 24 horas (código ${d.id}). Envíale la solicitud a ${A.nombre}: cuando verifique tu pago, la reserva queda confirmada y te escribe.`
+          : `Envíale la solicitud a ${A.nombre} (código ${d.id}). Te responderá por WhatsApp para confirmar.`;
       const wa = $<HTMLAnchorElement>('#r-ok-wa'); wa.href = d.wa;
       f.hidden = true; $('#r-ok').hidden = false; $('#r-ok').scrollIntoView({ block: 'center' });
       if (matchMedia('(pointer: coarse)').matches) location.href = d.wa; else window.open(d.wa, '_blank', 'noopener');
-    } catch (x) { err.textContent = (x as Error).message; err.hidden = false; await cargarMes(mes); pintarCal(); }
-    btn.disabled = false; btn.textContent = 'Enviar reserva por WhatsApp';
+    } catch (x) { err.textContent = (x as Error).message; err.hidden = false; await cargarMes(mes); pintarCal(); pintarHoras(); }
+    btn.disabled = false; btn.textContent = c ? 'Enviar consulta por WhatsApp' : 'Enviar reserva por WhatsApp';
   });
 
   (async () => {
@@ -245,9 +327,10 @@ import TelInput from '../components/TelInput.astro';
     $('#r-cat').textContent = 'Aliado de Celebra';
     const fotos = $('#r-fotos'); for (const u of A.fotos) { const i = el('img') as HTMLImageElement; i.src = u; i.alt = A.nombre; i.loading = 'lazy'; fotos.append(i); }
     if (!A.fotos.length) fotos.hidden = true;
+    if ((A.categorias || []).includes('lugares')) $('#r-dir').hidden = true;
     pintarServicios(); pintarMetodos();
     if (A.calendario) { $('#r-cal').hidden = false; pintarCal(); } else { $('#r-fecha-libre').hidden = false; const inp = $<HTMLInputElement>('#r-fecha-libre input'); inp.min = hoy; }
-    $('#r-fine').textContent = A.calendario ? 'Al enviar, apartamos la fecha 24 horas mientras el aliado verifica tu pago.' : 'El aliado te confirmará la disponibilidad por WhatsApp.';
+    modoConsulta();
     $('#res-load').hidden = true; $('#res-app').hidden = false;
   })();
 </script>

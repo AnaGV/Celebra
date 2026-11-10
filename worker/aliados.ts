@@ -20,24 +20,27 @@
  *   GET /api/admin/aliados   POST /api/admin/aliados  (crear/editar; devuelve el enlace privado)
  */
 
+import { normServicio, normHorario, cabe, duracionDe, subtotal, diaSemana, horaTxt, HORARIO_BASE, type Ocupa, type Horario, type Tipo } from '../src/lib/agenda';
+
 const DOM = 'https://somoscelebrave.com';
 const APARTADO_MS = 24 * 3600 * 1000;
 const MAX_FOTO = 1_500_000;
 
-type Servicio = { id: string; nombre: string; precio: number; unidad: string; cantidad: number; activo: boolean };
+type Servicio = { id: string; nombre: string; precio: number; tipo?: Tipo; unidad: string; duracion?: number; minHoras?: number; cantidad: number; activo: boolean };
 type Aliado = {
   id: string; nombre: string; categorias: string[]; descripcion: string; zona: string;
   whatsapp: string; instagram: string; placeId: string;
-  plan: 'gratis' | 'pro'; activo: boolean; calendario: boolean;
+  plan: 'gratis' | 'pro'; activo: boolean; calendario: boolean; horario?: Horario;
   servicios: Servicio[]; bloqueados: string[]; fotos: number[];
   pago: { pagoMovil?: { banco: string; telefono: string; cedula: string }; binance?: { id: string }; nota?: string };
   tokenHash: string; creado: string; confirmadoActivo?: string;
 };
 type Reserva = {
-  id: string; aliado: string; fecha: string; items: { id: string; nombre: string; cant: number; precio: number }[];
+  id: string; aliado: string; fecha: string; hora?: number | null; direccion?: string;
+  items: { id: string; nombre: string; tipo?: Tipo; cant: number; horas?: number; min?: number | null; precio: number }[];
   total: number; cliente: { nombre: string; whatsapp: string }; invitados: number; nota: string;
   metodo: string; referencia: string; captura: string;
-  estado: 'apartada' | 'confirmada' | 'rechazada' | 'vencida'; creada: string; actualizada?: string;
+  estado: 'apartada' | 'confirmada' | 'rechazada' | 'vencida' | 'consulta' | 'archivada'; creada: string; actualizada?: string;
 };
 
 const json = (d: unknown, s = 200, cache = 'no-store') => new Response(JSON.stringify(d), { status: s, headers: { 'content-type': 'application/json', 'cache-control': cache } });
@@ -56,6 +59,13 @@ async function sha(s: string) {
 }
 function igual(a: string, b: string) { if (a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }
 const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+/** Número de WhatsApp en formato internacional (arregla 0414… de Venezuela). */
+export function waNum(n: string) {
+  const d = String(n || '').replace(/\D/g, '');
+  if (d.length === 11 && d.startsWith('0')) return '58' + d.slice(1);
+  if (d.length === 10 && d.startsWith('4')) return '58' + d;
+  return d;
+}
 const hoyVE = () => new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10);
 
 async function leer<T>(env: any, k: string): Promise<T | null> {
@@ -67,9 +77,9 @@ const guardar = (env: any, k: string, v: unknown) => env.FOTOS.put(k, JSON.strin
 function publico(a: Aliado) {
   return {
     id: a.id, nombre: a.nombre, categorias: a.categorias, descripcion: a.descripcion, zona: a.zona,
-    instagram: a.instagram, placeId: a.placeId, plan: a.plan, calendario: a.calendario,
-    whatsapp: a.whatsapp, fotos: a.fotos.map((n) => `/api/aliados/${a.id}/foto/${n}`),
-    servicios: a.servicios.filter((s) => s.activo).map(({ id, nombre, precio, unidad, cantidad }) => ({ id, nombre, precio, unidad, cantidad })),
+    instagram: a.instagram, placeId: a.placeId, plan: a.plan, calendario: a.calendario, horario: normHorario(a.horario || HORARIO_BASE),
+    fotos: a.fotos.map((n) => `/api/aliados/${a.id}/foto/${n}`),
+    servicios: a.servicios.filter((s) => s.activo).map(normServicio),
     pago: { pagoMovil: a.pago.pagoMovil || null, binance: a.pago.binance || null, nota: a.pago.nota || '' },
   };
 }
@@ -88,11 +98,14 @@ async function reservasDe(env: any, aliado: string): Promise<Reserva[]> {
   return out.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.creada.localeCompare(b.creada));
 }
 
-/** Unidades usadas por servicio y por día (apartadas + confirmadas). */
+/** Lo ocupado por día (apartadas + confirmadas): qué servicio, cuántos y de qué hora a qué hora. */
 function ocupacion(res: Reserva[]) {
-  const m: Record<string, Record<string, number>> = {};
+  const m: Record<string, Ocupa[]> = {};
   for (const r of res) if (r.estado === 'apartada' || r.estado === 'confirmada')
-    for (const it of r.items) { (m[r.fecha] ||= {}); m[r.fecha][it.id] = (m[r.fecha][it.id] || 0) + it.cant; }
+    for (const it of r.items) {
+      const ini = it.min != null && r.hora != null ? r.hora : null;
+      (m[r.fecha] ||= []).push({ id: it.id, cant: it.cant, ini, fin: ini != null ? ini + (it.min as number) : null });
+    }
   return m;
 }
 
@@ -114,7 +127,7 @@ export async function fichaAliado(request: Request, env: any, id: string) {
   if (!a || !a.activo) return json({ error: 'No encontrado' }, 404);
   const mes = new URL(request.url).searchParams.get('mes') || hoyVE().slice(0, 7);
   const occ = a.calendario ? ocupacion(await reservasDe(env, a.id)) : {};
-  const dias: Record<string, Record<string, number>> = {};
+  const dias: Record<string, Ocupa[]> = {};
   for (const [f, v] of Object.entries(occ)) if (f.startsWith(mes)) dias[f] = v;
   return json({ aliado: publico(a), ocupado: dias, bloqueados: a.calendario ? a.bloqueados.filter((f) => f.startsWith(mes)) : [], hoy: hoyVE() });
 }
@@ -135,48 +148,66 @@ export async function crearReserva(request: Request, env: any, id: string) {
   if (solo(b.empresa, 40)) return json({ ok: true });
   const fecha = solo(b.fecha, 10);
   if (!FECHA.test(fecha) || fecha < hoyVE()) return json({ error: 'Elige una fecha válida.' }, 400);
-  const nombre = solo(b.nombre, 60), whatsapp = solo(b.whatsapp, 25).replace(/[^\d+ ]/g, '');
-  if (!nombre || whatsapp.replace(/\D/g, '').length < 10) return json({ error: 'Escribe tu nombre y tu WhatsApp.' }, 400);
-  const items: Reserva['items'] = [];
+  const consulta = b.consulta === true;
+  const nombre = solo(b.nombre, 60), whatsapp = waNum(solo(b.whatsapp, 25));
+  if (!nombre || whatsapp.length < 10) return json({ error: 'Escribe tu nombre y tu WhatsApp.' }, 400);
+  const esLugar = a.categorias.includes('lugares');
+  const direccion = solo(b.direccion, 160);
+  if (!esLugar && !direccion) return json({ error: 'Escribe la dirección de la fiesta.' }, 400);
+  const servicios = a.servicios.filter((x) => x.activo).map(normServicio);
+  const horario = normHorario(a.horario || HORARIO_BASE);
+  const items: Reserva['items'] = []; const pedido: { id: string; cant: number; horas: number }[] = [];
   for (const it of Array.isArray(b.items) ? b.items.slice(0, 20) : []) {
-    const s = a.servicios.find((x) => x.id === it?.id && x.activo); const cant = Math.max(1, Math.min(999, Math.round(Number(it?.cant) || 1)));
-    if (s) items.push({ id: s.id, nombre: s.nombre, cant, precio: s.precio });
+    const s = servicios.find((x) => x.id === it?.id); if (!s) continue;
+    const cant = Math.max(1, Math.min(999, Math.round(Number(it?.cant) || 1)));
+    const horas = s.tipo === 'hora' ? Math.max(s.minHoras, Math.min(24, Math.round(Number(it?.horas) || s.minHoras))) : 0;
+    const p = { id: s.id, cant, horas }; pedido.push(p);
+    items.push({ id: s.id, nombre: s.nombre, tipo: s.tipo, cant, horas: horas || undefined, min: duracionDe(s, p), precio: Math.round(subtotal(s, p) * 100) / 100 });
   }
   if (!items.length) return json({ error: 'Elige al menos un servicio.' }, 400);
-  const captura = solo(b.captura, 120);
+  const hora = Number.isFinite(Number(b.hora)) && b.hora !== null && b.hora !== '' ? Math.round(Number(b.hora)) : null;
+  if (!consulta && (hora == null || hora < 0 || hora >= 30 * 60)) return json({ error: 'Elige la hora.' }, 400);
+  const captura = consulta ? '' : solo(b.captura, 120);
   if (captura) {
     let ok = false; try { const u = new URL(captura); ok = /^\/ref\/[A-Za-z0-9]{16}$/.test(u.pathname) && [new URL(request.url).host, 'somoscelebrave.com'].includes(u.host); } catch {}
     if (!ok) return json({ error: 'Captura no válida' }, 400);
   }
 
-  if (a.calendario) {
-    if (a.bloqueados.includes(fecha)) return json({ error: 'Ese día no está disponible.' }, 409);
-    const occ = ocupacion(await reservasDe(env, a.id))[fecha] || {};
-    for (const it of items) {
-      const s = a.servicios.find((x) => x.id === it.id)!;
-      if ((occ[it.id] || 0) + it.cant > s.cantidad) return json({ error: `${s.nombre}: no queda disponibilidad para esa fecha.` }, 409);
-    }
+  if (a.calendario && !consulta) {
+    if (a.bloqueados.includes(fecha) || !horario.dias.includes(diaSemana(fecha))) return json({ error: 'Ese día no está disponible.' }, 409);
+    const occ = ocupacion(await reservasDe(env, a.id))[fecha] || [];
+    const no = cabe(servicios, horario, occ, pedido, hora as number);
+    if (no) return json({ error: no === 'horario' ? 'Esa hora queda fuera del horario del aliado.' : `${no}: no alcanza la disponibilidad a esa hora. Elige otra hora u otra cantidad.` }, 409);
   }
   const r: Reserva = {
-    id: azar(10), aliado: a.id, fecha, items, total: Math.round(items.reduce((t, i) => t + i.cant * i.precio, 0) * 100) / 100,
+    id: azar(10), aliado: a.id, fecha, hora, direccion, items, total: Math.round(items.reduce((t, i) => t + i.precio, 0) * 100) / 100,
     cliente: { nombre, whatsapp }, invitados: Math.max(0, Math.min(5000, Math.round(Number(b.invitados) || 0))), nota: solo(b.nota, 300),
-    metodo: ['pagomovil', 'binance', 'despues'].includes(b.metodo) ? b.metodo : 'despues', referencia: solo(b.referencia, 40), captura,
-    estado: 'apartada', creada: new Date().toISOString(),
+    metodo: consulta ? 'despues' : ['pagomovil', 'binance', 'despues'].includes(b.metodo) ? b.metodo : 'despues', referencia: consulta ? '' : solo(b.referencia, 40), captura,
+    estado: consulta ? 'consulta' : 'apartada', creada: new Date().toISOString(),
   };
   await guardar(env, `reservas/${a.id}/${r.id}.json`, r);
 
   const fechaTxt = new Date(fecha + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
-  const lineas = [
-    `Hola, ${a.nombre}. Te encontré en Celebra (somoscelebrave.com) y quiero reservar para el ${fechaTxt}:`,
-    ...items.map((i) => `• ${i.nombre}${i.cant > 1 ? ' ×' + i.cant : ''}`),
+  const linea = (i: Reserva['items'][number]) => `• ${i.nombre}${i.horas ? ` · ${i.horas} h` : ''}${i.cant > 1 ? ' ×' + i.cant : ''}`;
+  const lineas = consulta ? [
+    `Hola, ${a.nombre}. Te encontré en Celebra (somoscelebrave.com).`,
+    `Vi que el ${fechaTxt} ya no tienes horarios disponibles, pero ¿podrías hacer una hora extra para mí?${hora != null ? ` Me gustaría empezar a las ${horaTxt(hora)}.` : ''}`,
+    'Necesito:', ...items.map(linea),
+    ...(direccion ? [`Dirección: ${direccion}`] : []),
+    ...(r.nota ? [`Nota: ${r.nota}`] : []),
+    `Soy ${nombre}. Código: ${r.id}`,
+  ] : [
+    `Hola, ${a.nombre}. Te encontré en Celebra (somoscelebrave.com) y quiero reservar para el ${fechaTxt} a las ${horaTxt(hora as number)}:`,
+    ...items.map(linea),
     `Total: $${r.total}${r.invitados ? ` · ${r.invitados} invitados` : ''}`,
+    ...(direccion ? [`Dirección: ${direccion}`] : []),
     r.metodo === 'pagomovil' ? `Pagué por Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Pagué por Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Quiero coordinar el pago.',
-    ...(r.captura ? [`Captura del pago: ${r.captura}`] : []),
+    ...(r.captura ? [`Captura del pago (descárgala, se borra al descargarla): ${r.captura}`] : []),
     ...(r.nota ? [`Nota: ${r.nota}`] : []),
     `Soy ${nombre}. Código de reserva: ${r.id}`,
   ];
-  const wa = `https://wa.me/${a.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(lineas.join('\n'))}`;
-  return json({ ok: true, id: r.id, wa, apartadaHasta: a.calendario ? new Date(Date.parse(r.creada) + APARTADO_MS).toISOString() : null });
+  const wa = `https://wa.me/${waNum(a.whatsapp)}?text=${encodeURIComponent(lineas.join('\n'))}`;
+  return json({ ok: true, id: r.id, wa, consulta, apartadaHasta: a.calendario && !consulta ? new Date(Date.parse(r.creada) + APARTADO_MS).toISOString() : null });
 }
 
 /* ---------------- Panel del aliado ---------------- */
@@ -194,7 +225,7 @@ export async function panel(request: Request, env: any, sub: string) {
   if (!a) return json({ error: 'Enlace no válido. Pídele uno nuevo a Celebra.' }, 401);
   const k = `aliados/${a.id}.json`;
   if (sub === '' && request.method === 'GET') {
-    return json({ aliado: { ...publico(a), whatsapp: a.whatsapp, servicios: a.servicios, bloqueados: a.bloqueados, activo: a.activo }, reservas: await reservasDe(env, a.id), hoy: hoyVE() });
+    return json({ aliado: { ...publico(a), whatsapp: a.whatsapp, servicios: a.servicios.map((s) => ({ ...normServicio(s), activo: s.activo !== false })), bloqueados: a.bloqueados, activo: a.activo }, reservas: await reservasDe(env, a.id), hoy: hoyVE() });
   }
   if (sub === '' && request.method === 'PUT') {
     const b = (await request.json().catch(() => ({}))) as Record<string, any>;
@@ -203,11 +234,11 @@ export async function panel(request: Request, env: any, sub: string) {
     if (b.instagram !== undefined) a.instagram = solo(b.instagram, 40).replace(/^@/, '');
     if (b.whatsapp !== undefined) { const w = solo(b.whatsapp, 20).replace(/\D/g, ''); if (w.length >= 10) a.whatsapp = w; }
     if (b.calendario !== undefined) a.calendario = !!b.calendario;
-    if (Array.isArray(b.servicios)) a.servicios = b.servicios.slice(0, 15).map((s: any) => ({
-      id: typeof s?.id === 'string' && ID.test(s.id) ? s.id : slug(solo(s?.nombre, 40)) || azar(6).toLowerCase(), nombre: solo(s?.nombre, 50),
-      precio: Math.max(0, Math.round(Number(s?.precio) * 100) / 100 || 0), unidad: solo(s?.unidad, 20),
-      cantidad: Math.max(1, Math.min(999, Math.round(Number(s?.cantidad) || 1))), activo: s?.activo !== false,
-    })).filter((s: Servicio) => s.nombre);
+    if (Array.isArray(b.servicios)) a.servicios = b.servicios.slice(0, 15).map((s: any) => {
+      const n = normServicio({ ...s, nombre: solo(s?.nombre, 50), unidad: solo(s?.unidad, 20) });
+      return { ...n, id: typeof s?.id === 'string' && ID.test(s.id) ? s.id : slug(n.nombre) || azar(6).toLowerCase(), precio: Math.max(0, Math.round(Number(s?.precio) * 100) / 100 || 0), activo: s?.activo !== false };
+    }).filter((s: Servicio) => s.nombre);
+    if (b.horario) a.horario = normHorario(b.horario);
     if (Array.isArray(b.bloqueados)) a.bloqueados = [...new Set(b.bloqueados.filter((f: any) => FECHA.test(f) && f >= hoyVE()))].sort().slice(0, 400) as string[];
     if (b.pago) {
       const pm = b.pago.pagoMovil, bi = b.pago.binance;
@@ -239,15 +270,16 @@ export async function panel(request: Request, env: any, sub: string) {
     const rk = `reservas/${a.id}/${mr[1]}.json`; const r = await leer<Reserva>(env, rk);
     if (!r) return json({ error: 'No encontrada' }, 404);
     const b = (await request.json().catch(() => ({}))) as Record<string, any>;
-    const map: Record<string, Reserva['estado']> = { confirmar: 'confirmada', rechazar: 'rechazada', reabrir: 'apartada' };
+    const map: Record<string, Reserva['estado']> = { confirmar: 'confirmada', rechazar: 'rechazada', reabrir: 'apartada', archivar: 'archivada' };
     if (!map[b.accion]) return json({ error: 'Acción no válida' }, 400);
     r.estado = map[b.accion]; r.actualizada = new Date().toISOString();
     if (b.accion === 'reabrir') r.creada = r.actualizada;
     await guardar(env, rk, r);
+    const cuando = new Date(r.fecha + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }) + (r.hora != null ? ' a las ' + horaTxt(r.hora) : '');
     const msg = r.estado === 'confirmada'
-      ? `Hola ${r.cliente.nombre}, soy ${a.nombre}. ¡Tu reserva para el ${r.fecha} está confirmada! ✅ (Código ${r.id})`
-      : r.estado === 'rechazada' ? `Hola ${r.cliente.nombre}, soy ${a.nombre}. No pude confirmar tu reserva del ${r.fecha} (código ${r.id}). ¿Lo revisamos?` : '';
-    return json({ ok: true, avisar: msg ? `https://wa.me/${r.cliente.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}` : null });
+      ? `Hola ${r.cliente.nombre}, soy ${a.nombre}. ¡Tu reserva para el ${cuando} está confirmada! ✅ (Código ${r.id})`
+      : r.estado === 'rechazada' ? `Hola ${r.cliente.nombre}, soy ${a.nombre}. No pude confirmar tu reserva del ${cuando} (código ${r.id}). ¿Lo revisamos?` : '';
+    return json({ ok: true, avisar: msg ? `https://wa.me/${waNum(r.cliente.whatsapp)}?text=${encodeURIComponent(msg)}` : null });
   }
   return json({ error: 'No encontrado' }, 404);
 }

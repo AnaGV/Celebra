@@ -599,7 +599,7 @@
 .home .h-pan-res{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
 .home .h-pan-r{background:#fff;border:1px solid #ebe7e1;border-left:5px solid #c9c3da;border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
 .home .h-pan-r.apartada{border-left-color:#f0b429}.home .h-pan-r.confirmada{border-left-color:#2f9e63}.home .h-pan-r.rechazada,.home .h-pan-r.vencida{opacity:.7}
-.home .h-pan-r b{font-size:17px;color:var(--ink);text-transform:capitalize}
+.home .h-pan-r b{font-size:17px;color:var(--ink)}
 .home .h-pan-r p{margin:0;color:#4a4a55;font-size:14.5px}
 .home .h-pan-tag{align-self:flex-start;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:#f2f1f5;color:#5c5470}
 .home .h-pan-r.apartada .h-pan-tag{background:#fff4d6;color:#7a5600}.home .h-pan-r.confirmada .h-pan-tag{background:#e7f6ee;color:#17603b}
@@ -686,3 +686,39 @@
 .home .h-tel-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px}
 .home .h-tel-row select,.home .h-tel-row input{font:500 16px 'Figtree',sans-serif;min-height:48px;padding:0 12px;border:1.5px solid #d8d2ca;border-radius:12px;background:#fff;color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
 .home .h-tel-row select{width:auto;padding-right:8px}
+
+/* Panel: horario, servicios por tipo */
+.home .h-pan h3{font-size:17px;color:var(--ink);margin:18px 0 8px}
+.home .h-pan-hor{background:#fff;border:1px solid #ebe7e1;border-radius:16px;padding:4px 16px 16px;margin:0 0 18px}
+.home .h-pan-hor-r{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:420px}
+.home .h-pan-hor label,.home .h-pan-s2 label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--ink);min-width:0}
+.home .h-pan-hor select,.home .h-pan-s2 select,.home .h-pan-s2 input:not([type=checkbox]){font:500 15px 'Figtree',sans-serif;min-height:44px;padding:0 12px;border:1px solid #d8d2ca;border-radius:10px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box;min-width:0}
+.home .h-pan-lab{font-size:13px;font-weight:700;margin:14px 0 8px}
+.home .h-pan-dias{display:flex;flex-wrap:wrap;gap:8px}
+.home .h-pan-dias input,.home .h-pan-act input{width:18px;height:18px;accent-color:#16171a;margin:0}
+.home .h-pan-s2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px;border:1px solid #ebe7e1;border-radius:16px;background:#fff;margin-bottom:12px}
+.home .h-pan-s2-pie{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #f0ece6;padding-top:10px}
+.home .h-pan-s2-pie .h-pan-act{flex-direction:row;font-weight:600;font-size:14px;gap:8px;padding:0}
+.home .h-pan-s2-pie .h-pan-del{padding:0}
+.home .h-pan-r.consulta{border-left-color:#db3978}.home .h-pan-r.consulta .h-pan-tag{background:#fde2ec;color:#a3164f}
+.home .h-pan-flash{animation:hpflash 1.6s ease 2}
+@keyframes hpflash{50%{box-shadow:0 0 0 4px #9fd7b8}}
+.home .h-pan-capt{margin-top:14px}
+
+/* Reserva: horas */
+.home .h-res-horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.home .h-res-h{font:700 15px 'Figtree',sans-serif;min-height:46px;border-radius:12px;border:1.5px solid #e2ddd6;background:#fff;color:var(--ink);cursor:pointer}
+.home .h-res-h:disabled{background:#f4f2ef;color:#b3aea6;text-decoration:line-through;cursor:not-allowed;border-color:#f0ece6}
+.home .h-res-h.on{background:#16171a;border-color:#16171a;color:#fff}
+.home .h-res-fin{margin:0;font-weight:700;color:#17603b}
+.home .h-res-lleno{background:#fff1f1;border:1px solid #f3c7c7;border-radius:14px;padding:12px 14px;color:#8f1d1d;font-weight:600}
+.home .h-res-lleno p{margin:0}
+.home .h-res-extra{flex-direction:row!important;align-items:center;gap:10px!important;font-weight:600!important;font-size:15px!important;padding:12px 14px;border:1.5px dashed #e2ddd6;border-radius:14px;cursor:pointer}
+.home .h-res-extra input{width:20px;height:20px;accent-color:#db3978;flex:none;margin:0}
+.home .h-res-extra:has(input:checked){border-style:solid;border-color:#db3978;background:#fdf3f6}
+.home .h-res-s{flex-wrap:wrap}
+.home .h-res-q output{min-width:64px}
+.home .h-res-q button:disabled{opacity:.35;cursor:default}
+.home .h-res-num{flex-basis:100%;font:500 15px 'Figtree',sans-serif;min-height:42px;padding:0 12px;border:1px solid #d8d2ca;border-radius:10px}
+.home .h-cal-d.lleno{background:#fde8e8;color:#b42318}
+.home .h-cal-ley .lleno{background:#fde8e8;border:1px solid #f3c7c7}

@@ -3,16 +3,16 @@
  *
  * POST /api/foto   → guarda una foto (JPEG, ya achicada en el navegador) en R2
  *                    y devuelve el link https://somoscelebrave.com/ref/<id>.
- * GET  /ref/<id>   → la primera persona que lo abre ve la foto y la foto se borra
- *                    en ese momento. Los "robots" de vista previa (WhatsApp,
- *                    Facebook…) no cuentan como abrirla y no ven la foto.
+ * GET  /ref/<id>   → muestra la foto con un botón "Descargar". Al descargarla se borra.
+ *                    Los "robots" de vista previa (WhatsApp, Facebook…) no ven la foto.
+ * POST /ref/<id>/descargada → la borra (lo llama el botón después de descargar).
  *
- * Si nadie la abre, se borra a las 72 horas (regla de ciclo de vida del bucket
- * y, por si acaso, también se revisa aquí).
+ * Si nadie la descarga, se borra a las 24 horas de subida (se revisa aquí; la regla
+ * de ciclo de vida del bucket la elimina del todo a las 72 h).
  */
 
 const MAX_BYTES = 1_500_000; // la foto ya llega achicada (~200-500 KB); 1,5 MB es el techo
-const MAX_EDAD_MS = 72 * 60 * 60 * 1000;
+const MAX_EDAD_MS = 24 * 60 * 60 * 1000;
 const BOTS = /whatsapp|facebookexternalhit|facebot|meta-externalagent|twitterbot|telegrambot|slackbot|discordbot|linkedinbot|skypeuripreview|googlebot|bingbot|bot\b|crawler|spider|preview/i;
 
 const ID_RE = /^[A-Za-z0-9]{16}$/;
@@ -83,11 +83,10 @@ function aBase64(buf: ArrayBuffer): string {
   return btoa(s);
 }
 
-const GRACIA_MS = 15 * 60 * 1000; // después de abrirla por primera vez, 15 minutos para guardarla
-
+/** Se llama solo después de descargar la foto: la borra del servidor. */
 export async function borrarFoto(env: any, id: string): Promise<Response> {
   if (env.FOTOS && ID_RE.test(id)) await env.FOTOS.delete(`ref/${id}`);
-  return pagina('Foto borrada · Celebra', '<h1>Listo, foto borrada</h1><p>La foto ya no está guardada en la página. Si la guardaste, la encuentras en la galería de tu teléfono.</p>');
+  return json({ ok: true });
 }
 
 export async function verFoto(request: Request, env: any, id: string): Promise<Response> {
@@ -95,39 +94,30 @@ export async function verFoto(request: Request, env: any, id: string): Promise<R
   if (request.method === 'HEAD' || BOTS.test(ua)) {
     return pagina('Foto de referencia · Celebra', '<h1>Foto de referencia</h1><p>Ábrela para verla.</p>');
   }
-  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos de referencia se borran 15 minutos después de abrirlas, o a las 72 horas si nadie las abre. Pídele a la clienta que la envíe de nuevo por WhatsApp.</p>', 404);
+  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos se borran al descargarlas, o a las 24 horas si nadie las descarga. Pídele a la persona que te la envíe de nuevo por WhatsApp.</p>', 404);
   if (!env.FOTOS || !ID_RE.test(id)) return noEsta();
 
   const key = `ref/${id}`;
   const obj = await env.FOTOS.get(key);
   if (!obj) return noEsta();
   const subida = Number(obj.customMetadata?.subida || 0);
-  const vista = Number(obj.customMetadata?.vista || 0);
   const ahora = Date.now();
-  if ((subida && ahora - subida > MAX_EDAD_MS) || (vista && ahora - vista > GRACIA_MS)) {
-    await env.FOTOS.delete(key);
-    return noEsta();
-  }
+  if (subida && ahora - subida > MAX_EDAD_MS) { await env.FOTOS.delete(key); return noEsta(); }
   const datos = await obj.arrayBuffer();
-  // Primera vez que se abre: se marca la hora; desde ahí corren los 15 minutos.
-  if (!vista) {
-    await env.FOTOS.put(key, datos, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { subida: String(subida || ahora), vista: String(ahora) } });
-  }
-  const quedan = Math.max(1, Math.ceil(((vista || ahora) + GRACIA_MS - ahora) / 60000));
+  const horas = Math.max(1, Math.ceil(((subida || ahora) + MAX_EDAD_MS - ahora) / 3600e3));
   const src = `data:image/jpeg;base64,${aBase64(datos)}`;
   return pagina(
-    'Foto de referencia · Celebra',
-    `<h1>Foto de referencia</h1>
-<div class="aviso">Tienes <b>${quedan} minuto${quedan === 1 ? '' : 's'}</b> para guardarla. Después se borra sola.</div>
-<img id="foto" src="${src}" alt="Foto de referencia enviada por la clienta">
-<p style="font-size:14px"><b>En iPhone:</b> mantén el dedo sobre la foto y toca <b>Guardar en Fotos</b>.</p>
-<a class="b" id="guardar" href="${src}" download="referencia-${id}.jpg">Guardar foto</a>
-<form method="post" action="/ref/${id}/borrar" style="margin-top:14px"><button type="submit" style="background:none;border:0;color:#5c6070;text-decoration:underline;font-size:15px;cursor:pointer">Ya la guardé, borrarla ahora</button></form>
+    'Foto · Celebra',
+    `<h1>Descarga esta foto</h1>
+<div class="aviso">Se borra en cuanto la descargas. <b>Si no la descargas en ${horas} hora${horas === 1 ? '' : 's'}, se elimina sola.</b></div>
+<img id="foto" src="${src}" alt="Foto enviada por WhatsApp">
+<a class="b" id="guardar" href="${src}" download="foto-${id}.jpg">Descargar foto</a>
+<p id="listo" style="display:none;margin-top:14px;font-weight:700;color:#17603b">✓ Descargada. Ya está en tu teléfono y se borró de la página.</p>
 <script>
-(function(){var b=document.getElementById('guardar'),f=null;
-if(!navigator.canShare||!window.File)return;
-fetch(b.href).then(function(r){return r.blob()}).then(function(bl){var x=new File([bl],'referencia-${id}.jpg',{type:'image/jpeg'});if(navigator.canShare({files:[x]}))f=x;});
-b.addEventListener('click',function(e){if(!f)return;e.preventDefault();navigator.share({files:[f]}).catch(function(){});});})();
+(function(){var b=document.getElementById('guardar'),f=null,hecho=false;
+function borrar(){if(hecho)return;hecho=true;setTimeout(function(){fetch('/ref/${id}/descargada',{method:'POST',keepalive:true});document.getElementById('listo').style.display='block';b.style.display='none';},1500);}
+if(navigator.canShare&&window.File){fetch(b.href).then(function(r){return r.blob()}).then(function(bl){var x=new File([bl],'foto-${id}.jpg',{type:'image/jpeg'});if(navigator.canShare({files:[x]}))f=x;});}
+b.addEventListener('click',function(e){if(f){e.preventDefault();navigator.share({files:[f]}).then(borrar).catch(function(){});}else{borrar();}});})();
 </script>`,
   );
 }

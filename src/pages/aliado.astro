@@ -17,7 +17,7 @@ import TelInput from '../components/TelInput.astro';
         <p class="h-pan-sub">Lo que cambies aquí se ve en tu ficha en <a class="h-link" id="p-ver" target="_blank" rel="noopener">somoscelebrave.com</a>. Guarda este enlace: es tu llave privada.</p>
         <nav class="h-pan-tabs" role="tablist">
           <button role="tab" data-t="reservas" aria-selected="true">Reservas <span id="p-nres"></span></button>
-          <button role="tab" data-t="calendario" aria-selected="false">Calendario</button>
+          <button role="tab" data-t="calendario" aria-selected="false">Horario y calendario</button>
           <button role="tab" data-t="servicios" aria-selected="false">Servicios y precios</button>
           <button role="tab" data-t="ficha" aria-selected="false">Mi ficha y pagos</button>
         </nav>
@@ -25,11 +25,23 @@ import TelInput from '../components/TelInput.astro';
         <section data-p="reservas">
           <p class="h-pan-help">Cuando te llegue una solicitud por WhatsApp, revisa el pago en tu banco o Binance y márcala aquí. Al confirmar, el día queda ocupado en tu calendario.</p>
           <ul class="h-pan-res" id="p-res"></ul>
+          <p class="h-pan-help h-pan-capt">Las capturas de pago se borran apenas las descargas. Si no las descargas en 24 horas, se eliminan solas.</p>
         </section>
 
         <section data-p="calendario" hidden>
           <label class="h-pan-switch"><input type="checkbox" id="p-usacal" /> Mostrar mi disponibilidad en la página y apartar fechas</label>
-          <p class="h-pan-help">Toca un día para <b>bloquearlo</b> (no trabajas) o desbloquearlo. Los días con reservas confirmadas se ven en verde.</p>
+          <div class="h-pan-hor">
+            <h3>Tu horario de trabajo</h3>
+            <p class="h-pan-help">Los clientes solo pueden elegir horas dentro de este horario. Cada día recibes reservas hasta que se llena.</p>
+            <div class="h-pan-hor-r">
+              <label>Desde<select id="p-desde"></select></label>
+              <label>Hasta<select id="p-hasta"></select></label>
+            </div>
+            <p class="h-pan-lab">Días que trabajas</p>
+            <div class="h-pan-dias" id="p-dias"></div>
+          </div>
+          <h3>Días libres o bloqueados</h3>
+          <p class="h-pan-help">Toca un día para <b>bloquearlo</b> (no trabajas ese día) o desbloquearlo. El número indica cuántas reservas tiene.</p>
           <div class="h-cal h-pan-cal">
             <div class="h-cal-top"><button type="button" class="h-cal-nav" data-d="-1" aria-label="Mes anterior">‹</button><b id="p-mes"></b><button type="button" class="h-cal-nav" data-d="1" aria-label="Mes siguiente">›</button></div>
             <div class="h-cal-sem"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
@@ -39,7 +51,7 @@ import TelInput from '../components/TelInput.astro';
         </section>
 
         <section data-p="servicios" hidden>
-          <p class="h-pan-help"><b>Cantidad</b> = cuántos puedes atender el mismo día (por ejemplo, 2 equipos de sonido). El precio es en dólares.</p>
+          <p class="h-pan-help">Elige <b>cómo cobras</b> cada servicio. Así el cliente ve exactamente eso: horas, evento o cantidades. Los precios son en dólares.</p>
           <div id="p-serv"></div>
           <button type="button" class="h-btn h-btn-line" id="p-addserv">+ Agregar servicio</button>
         </section>
@@ -71,6 +83,7 @@ import TelInput from '../components/TelInput.astro';
 
 <script>
   import { montarTel, ponerTel } from '../lib/telefono';
+  import { horaTxt, HORARIO_BASE } from '../lib/agenda';
   montarTel();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -87,27 +100,40 @@ import TelInput from '../components/TelInput.astro';
     const d = await r.json(); A = d.aliado; R = d.reservas; hoy = d.hoy; if (!mes) mes = hoy.slice(0, 7);
   }
 
-  function fechaTxt(f: string) { return new Date(f + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); }
+  function fechaTxt(f: string) { const t = new Date(f + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  const waNum = (n: string) => { const d = String(n || '').replace(/\D/g, ''); return d.length === 11 && d.startsWith('0') ? '58' + d.slice(1) : d.length === 10 && d.startsWith('4') ? '58' + d : d; };
+  const cuando = (r: any) => new Date(r.fecha + 'T12:00:00Z').toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }) + (r.hora != null ? ' a las ' + horaTxt(r.hora) : '');
+  function aviso(r: any) {
+    const t = r.estado === 'confirmada' ? `Hola ${r.cliente.nombre}, soy ${A.nombre}. ¡Tu reserva para el ${cuando(r)} está confirmada! ✅ (Código ${r.id})`
+      : r.estado === 'rechazada' ? `Hola ${r.cliente.nombre}, soy ${A.nombre}. No pude confirmar tu reserva del ${cuando(r)} (código ${r.id}). ¿Lo revisamos?`
+      : `Hola ${r.cliente.nombre}, soy ${A.nombre}. Recibí tu mensaje por Celebra (código ${r.id}).`;
+    return `https://wa.me/${waNum(r.cliente.whatsapp)}?text=${encodeURIComponent(t)}`;
+  }
   function pintarReservas() {
     const ul = $('#p-res'); ul.replaceChildren();
-    const pend = R.filter((r) => r.estado === 'apartada').length;
+    const pend = R.filter((r) => r.estado === 'apartada' || r.estado === 'consulta').length;
     $('#p-nres').textContent = pend ? String(pend) : '';
-    const orden = { apartada: 0, confirmada: 1, rechazada: 2, vencida: 3 } as any;
-    const lista = [...R].filter((r) => r.fecha >= hoy || r.estado === 'apartada').sort((a, b) => orden[a.estado] - orden[b.estado] || a.fecha.localeCompare(b.fecha));
+    const orden = { consulta: 0, apartada: 0, confirmada: 1, rechazada: 2, vencida: 3, archivada: 4 } as any;
+    const lista = [...R].filter((r) => r.estado !== 'archivada' && (r.fecha >= hoy || r.estado === 'apartada' || r.estado === 'consulta')).sort((a, b) => orden[a.estado] - orden[b.estado] || a.fecha.localeCompare(b.fecha) || (a.hora ?? 0) - (b.hora ?? 0));
     if (!lista.length) { ul.append(el('li', 'h-pan-vacio', 'Todavía no tienes solicitudes. Cuando alguien reserve desde la página, aparecerá aquí.')); return; }
     for (const r of lista) {
       const li = el('li', 'h-pan-r ' + r.estado);
-      const tag = { apartada: 'Por verificar', confirmada: 'Confirmada', rechazada: 'Rechazada', vencida: 'Vencida (no respondiste en 24 h)' }[r.estado as string]!;
-      li.append(el('span', 'h-pan-tag', tag), el('b', '', `${fechaTxt(r.fecha)} · ${r.cliente.nombre}`),
-        el('p', '', r.items.map((i: any) => i.nombre + (i.cant > 1 ? ' ×' + i.cant : '')).join(', ') + ` · $${r.total}${r.invitados ? ' · ' + r.invitados + ' inv.' : ''}`),
-        el('p', 'h-pan-pago', r.metodo === 'pagomovil' ? `Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Pago por coordinar'));
+      const tag = { apartada: 'Por verificar el pago', confirmada: 'Confirmada', rechazada: 'Rechazada', vencida: 'Vencida (no respondiste en 24 h)', consulta: 'Pide una hora extra' }[r.estado as string]!;
+      const fin = r.hora != null ? Math.max(...r.items.map((i: any) => (i.min ? r.hora + i.min : r.hora))) : null;
+      li.append(el('span', 'h-pan-tag', tag), el('b', '', `${fechaTxt(r.fecha)}${r.hora != null ? ' · ' + horaTxt(r.hora) + (fin && fin > r.hora ? ' a ' + horaTxt(fin) : '') : ''} · ${r.cliente.nombre}`),
+        el('p', '', r.items.map((i: any) => i.nombre + (i.horas ? ` (${i.horas} h)` : '') + (i.cant > 1 ? ' ×' + i.cant : '')).join(', ') + (r.estado === 'consulta' ? '' : ` · $${r.total}`) + (r.invitados ? ' · ' + r.invitados + ' inv.' : '')));
+      if (r.direccion) li.append(el('p', '', '📍 ' + r.direccion));
+      if (r.estado !== 'consulta') li.append(el('p', 'h-pan-pago', r.metodo === 'pagomovil' ? `Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Pago por coordinar'));
       if (r.nota) li.append(el('p', 'h-pan-nota', '“' + r.nota + '”'));
       const acc = el('div', 'h-pan-acc');
-      if (r.captura) { const a = el('a', 'h-link', 'Ver captura') as HTMLAnchorElement; a.href = r.captura; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
-      const w = el('a', 'h-link', 'Escribirle') as HTMLAnchorElement; w.href = `https://wa.me/${r.cliente.whatsapp.replace(/\D/g, '')}`; w.target = '_blank'; w.rel = 'noopener'; acc.append(w);
+      if (r.captura) { const a = el('a', 'h-link', 'Descargar captura') as HTMLAnchorElement; a.href = r.captura; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
       const boton = (t: string, accion: string, cls: string) => { const b = el('button', 'h-btn ' + cls, t) as HTMLButtonElement; b.type = 'button'; b.addEventListener('click', () => accionar(r.id, accion, b)); acc.append(b); };
-      if (r.estado === 'apartada') { boton('✅ Pago verificado', 'confirmar', 'h-dir-wa'); boton('No llegó el pago', 'rechazar', 'h-btn-line'); }
-      else if (r.estado !== 'confirmada') boton('Volver a apartar', 'reabrir', 'h-btn-line');
+      const avisar = (t: string, cls = 'h-btn h-dir-wa') => { const w = el('a', cls, t) as HTMLAnchorElement; w.href = aviso(r); w.target = '_blank'; w.rel = 'noopener'; acc.append(w); };
+      if (r.estado === 'apartada') { boton('✅ Pago verificado', 'confirmar', 'h-dir-wa'); boton('No llegó el pago', 'rechazar', 'h-btn-line'); avisar('Escribirle', 'h-link'); }
+      else if (r.estado === 'confirmada') avisar('Enviarle la confirmación por WhatsApp');
+      else if (r.estado === 'rechazada') { avisar('Avisarle por WhatsApp', 'h-btn h-btn-line'); boton('Volver a apartar', 'reabrir', 'h-btn-line'); }
+      else if (r.estado === 'consulta') { avisar('Responderle por WhatsApp'); boton('Ya lo atendí', 'archivar', 'h-btn-line'); }
+      else boton('Volver a apartar', 'reabrir', 'h-btn-line');
       li.append(acc); ul.append(li);
     }
   }
@@ -115,9 +141,11 @@ import TelInput from '../components/TelInput.astro';
     if (accion === 'rechazar' && !confirm('¿Seguro? La fecha se libera para otros clientes.')) return;
     b.disabled = true;
     const r = await fetch('/api/panel/reserva/' + id, { method: 'POST', headers: H(), body: JSON.stringify({ accion }) });
-    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { b.disabled = false; alert('No se pudo guardar. Revisa tu conexión.'); return; }
     await cargar(); pintarReservas(); pintarCal();
-    if (d.avisar) { if (matchMedia('(pointer: coarse)').matches) location.href = d.avisar; else window.open(d.avisar, '_blank', 'noopener'); }
+    // El botón verde "Enviarle la confirmación" queda en la tarjeta: un toque abre WhatsApp con el mensaje listo.
+    const li = [...document.querySelectorAll('#p-res .h-pan-r')].find((x) => x.querySelector('a.h-dir-wa')?.getAttribute('href')?.includes(encodeURIComponent(id)));
+    li?.scrollIntoView({ behavior: 'smooth', block: 'center' }); li?.classList.add('h-pan-flash');
   }
 
   function pintarCal() {
@@ -129,10 +157,10 @@ import TelInput from '../components/TelInput.astro';
     for (let d = 1; d <= dias; d++) {
       const f = `${mes}-${String(d).padStart(2, '0')}`;
       const nconf = R.filter((r) => r.fecha === f && r.estado === 'confirmada').length, napar = R.filter((r) => r.fecha === f && r.estado === 'apartada').length;
-      const bloq = A.bloqueados.includes(f);
-      const b = el('button', `h-cal-d ${bloq ? 'no' : nconf || napar ? 'res' : 'ok'}`) as HTMLButtonElement;
+      const bloq = A.bloqueados.includes(f); const nolab = !(A.horario || HORARIO_BASE).dias.includes((new Date(f + 'T12:00:00Z').getUTCDay() + 6) % 7);
+      const b = el('button', `h-cal-d ${bloq || nolab ? 'no' : nconf || napar ? 'res' : 'ok'}`) as HTMLButtonElement;
       b.type = 'button'; b.append(el('span', '', String(d))); if (nconf + napar) b.append(el('small', '', String(nconf + napar)));
-      b.disabled = f < hoy; b.title = bloq ? 'Bloqueado' : `${nconf} confirmada(s), ${napar} por verificar`;
+      b.disabled = f < hoy || nolab; b.title = nolab ? 'No trabajas este día de la semana' : bloq ? 'Bloqueado' : `${nconf} confirmada(s), ${napar} por verificar`;
       b.addEventListener('click', () => { A.bloqueados = bloq ? A.bloqueados.filter((x: string) => x !== f) : [...A.bloqueados, f]; marcar(); pintarCal(); });
       g.append(b);
     }
@@ -144,20 +172,49 @@ import TelInput from '../components/TelInput.astro';
   function pintarServicios() {
     const box = $('#p-serv'); box.replaceChildren();
     A.servicios.forEach((s: any, i: number) => {
-      const row = el('div', 'h-pan-s');
+      const row = el('div', 'h-pan-s2');
       const inp = (lbl: string, k: string, type = 'text', extra: Record<string, string> = {}) => {
         const l = el('label', '', lbl); const x = el('input') as HTMLInputElement; x.type = type; x.value = s[k] ?? ''; Object.assign(x, extra);
         x.addEventListener('input', () => { s[k] = type === 'number' ? Number(x.value) : x.value; marcar(); }); l.append(x); return l;
       };
+      const tipo = el('label', '', 'Cómo cobras'); const sel = el('select') as HTMLSelectElement;
+      for (const [v, t] of [['hora', 'Por hora'], ['evento', 'Por evento (duración fija)'], ['unidad', 'Por unidad (sillas, tortas…)']]) { const o = el('option', '', t) as HTMLOptionElement; o.value = v; sel.append(o); }
+      sel.value = s.tipo || 'evento';
+      sel.addEventListener('change', () => { s.tipo = sel.value; if (s.tipo === 'unidad' && (!s.unidad || s.unidad === 'hora' || s.unidad === 'evento')) s.unidad = ''; marcar(); pintarServicios(); });
+      tipo.append(sel);
+      const extra: HTMLElement[] = [];
+      if (s.tipo === 'hora') extra.push(inp('Mínimo de horas', 'minHoras', 'number', { min: '1', max: '24' }), inp('¿Cuántos puedes atender a la vez?', 'cantidad', 'number', { min: '1' }));
+      else if (s.tipo === 'unidad') extra.push(inp('¿Qué unidad? (ej. sillas, tortas)', 'unidad', 'text', { placeholder: 'sillas' }), inp('¿Cuántas tienes por día?', 'cantidad', 'number', { min: '1' }));
+      else extra.push(inp('Duración del evento (horas)', 'duracion', 'number', { min: '1', max: '24' }), inp('¿Cuántos puedes atender a la vez?', 'cantidad', 'number', { min: '1' }));
+      const precioLbl = s.tipo === 'hora' ? 'Precio por hora (USD)' : s.tipo === 'unidad' ? `Precio por ${s.unidad || 'unidad'} (USD)` : 'Precio por evento (USD)';
+      const pie = el('div', 'h-pan-s2-pie');
       const act = el('label', 'h-pan-act'); const cb = el('input') as HTMLInputElement; cb.type = 'checkbox'; cb.checked = s.activo !== false;
-      cb.addEventListener('change', () => { s.activo = cb.checked; marcar(); }); act.append(cb, document.createTextNode(' Visible'));
-      const del = el('button', 'h-pan-del', 'Quitar') as HTMLButtonElement; del.type = 'button';
-      del.addEventListener('click', () => { A.servicios.splice(i, 1); marcar(); pintarServicios(); });
-      row.append(inp('Servicio', 'nombre'), inp('Precio (USD)', 'precio', 'number', { min: '0', step: '0.5' }), inp('Por (ej. evento, hora, persona)', 'unidad'), inp('Cantidad por día', 'cantidad', 'number', { min: '1' }), act, del);
+      cb.addEventListener('change', () => { s.activo = cb.checked; marcar(); }); act.append(cb, document.createTextNode(' Visible en mi ficha'));
+      const del = el('button', 'h-pan-del', 'Quitar servicio') as HTMLButtonElement; del.type = 'button';
+      del.addEventListener('click', () => { if (confirm('¿Quitar ' + (s.nombre || 'este servicio') + '?')) { A.servicios.splice(i, 1); marcar(); pintarServicios(); } });
+      pie.append(act, del);
+      row.append(inp('Servicio', 'nombre'), tipo, inp(precioLbl, 'precio', 'number', { min: '0', step: '0.5' }), ...extra, pie);
       box.append(row);
     });
   }
-  $('#p-addserv').addEventListener('click', () => { A.servicios.push({ nombre: '', precio: 0, unidad: 'evento', cantidad: 1, activo: true }); marcar(); pintarServicios(); });
+  $('#p-addserv').addEventListener('click', () => { A.servicios.push({ nombre: '', precio: 0, tipo: 'evento', unidad: 'evento', duracion: 4, minHoras: 1, cantidad: 1, activo: true }); marcar(); pintarServicios(); });
+
+  function pintarHorario() {
+    const h = A.horario || HORARIO_BASE;
+    const d = $<HTMLSelectElement>('#p-desde'), a = $<HTMLSelectElement>('#p-hasta');
+    d.replaceChildren(); a.replaceChildren();
+    for (let m = 6 * 60; m <= 22 * 60; m += 60) { const o = el('option', '', horaTxt(m)) as HTMLOptionElement; o.value = String(m); d.append(o); }
+    for (let m = 10 * 60; m <= 30 * 60; m += 60) { const o = el('option', '', horaTxt(m)) as HTMLOptionElement; o.value = String(m); a.append(o); }
+    d.value = String(h.desde); a.value = String(h.hasta);
+    const sync = () => { A.horario = { ...(A.horario || HORARIO_BASE), desde: Number(d.value), hasta: Math.max(Number(a.value), Number(d.value) + 60) }; marcar(); };
+    d.onchange = sync; a.onchange = sync;
+    const box = $('#p-dias'); box.replaceChildren();
+    ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].forEach((t, i) => {
+      const l = el('label', 'h-adm-chip'); const c = el('input') as HTMLInputElement; c.type = 'checkbox'; c.checked = h.dias.includes(i);
+      c.addEventListener('change', () => { const ds = new Set<number>((A.horario || HORARIO_BASE).dias); c.checked ? ds.add(i) : ds.delete(i); A.horario = { ...(A.horario || HORARIO_BASE), dias: [...ds].sort() }; marcar(); pintarCal(); });
+      l.append(c, el('span', '', t)); box.append(l);
+    });
+  }
 
   function pintarFicha() {
     const f = $<HTMLFormElement>('#p-ficha'); const v = (n: string, x: string) => ((f.elements.namedItem(n) as HTMLInputElement).value = x || '');
@@ -187,7 +244,7 @@ import TelInput from '../components/TelInput.astro';
     const f = $<HTMLFormElement>('#p-ficha'); const g = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value;
     const body = {
       descripcion: g('descripcion'), whatsapp: g('whatsapp'), zona: g('zona'), instagram: g('instagram'),
-      calendario: $<HTMLInputElement>('#p-usacal').checked, servicios: A.servicios, bloqueados: A.bloqueados,
+      calendario: $<HTMLInputElement>('#p-usacal').checked, servicios: A.servicios, bloqueados: A.bloqueados, horario: A.horario,
       pago: { pagoMovil: { banco: g('pm_banco'), telefono: g('pm_tel'), cedula: g('pm_ced') }, binance: { id: g('bi_id') }, nota: g('pago_nota') }, sigoActivo: true,
     };
     $('#p-msg').textContent = 'Guardando…';
@@ -208,7 +265,7 @@ import TelInput from '../components/TelInput.astro';
     $('#p-nombre').textContent = 'Hola, ' + A.nombre;
     $<HTMLAnchorElement>('#p-ver').href = '/reservar/?a=' + A.id;
     $<HTMLInputElement>('#p-usacal').checked = !!A.calendario;
-    pintarReservas(); pintarCal(); pintarServicios(); pintarFicha();
+    pintarReservas(); pintarCal(); pintarServicios(); pintarFicha(); pintarHorario();
     $('#p-load').hidden = true; $('#p-app').hidden = false;
   })();
 </script>
