@@ -727,3 +727,9 @@
 .home .h-tel-ver{font-size:13px;font-weight:700;color:#17603b}
 .home .h-tel-ver.mal{color:#b42318}
 .home .h-pan-copiar{font:600 14px Figtree,sans-serif;background:none;border:0;padding:4px 0;cursor:pointer;text-align:left}
+.home .h-res-revisa{background:#fffaf0;border:2px solid #f0b429;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.home .h-res-revisa b{font-size:18px}
+.home .h-res-revisa p{margin:0;color:#4a4a55}
+.home .h-res-revisa .h-res-revisa-num{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:.02em}
+.home .h-res-revisa-b{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.home .h-res-revisa-b .h-btn{flex:1 1 160px;justify-content:center}

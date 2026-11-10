@@ -83,6 +83,15 @@ import TelInput from '../components/TelInput.astro';
 
           <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
           <p class="h-form-err" role="alert" hidden></p>
+          <div class="h-res-revisa" id="r-revisa" hidden role="alertdialog" aria-labelledby="r-revisa-t">
+            <b id="r-revisa-t">Revisa tu WhatsApp antes de enviar</b>
+            <p>El aliado te va a confirmar a este número. Si tiene un dígito mal, no le llegará tu confirmación.</p>
+            <p class="h-res-revisa-num" id="r-revisa-num"></p>
+            <div class="h-res-revisa-b">
+              <button type="button" class="h-btn h-dir-wa" id="r-revisa-ok">Sí, es mi número</button>
+              <button type="button" class="h-btn h-btn-line" id="r-revisa-no">Corregir</button>
+            </div>
+          </div>
           <button class="h-btn h-dir-wa h-res-go" type="submit">Enviar reserva por WhatsApp</button>
           <p class="h-res-fine" id="r-fine"></p>
         </form>
@@ -102,7 +111,7 @@ import TelInput from '../components/TelInput.astro';
 </Base>
 
 <script>
-  import { montarTel } from '../lib/telefono';
+  import { montarTel, telBonito } from '../lib/telefono';
   import { detectCountry } from '../lib/country';
   import { cabe, horasLibres, horaTxt, diaSemana, duracionDe, subtotal, pedidoMinimo, PASO, type ServicioAg, type Horario, type Ocupa, type Pedido } from '../lib/agenda';
   montarTel();
@@ -116,6 +125,9 @@ import TelInput from '../components/TelInput.astro';
   const usd = (n: number) => '$' + (Math.round(n * 100) / 100).toLocaleString('es-VE');
   const pedido = () => Object.values(sel).filter((p) => p.cant > 0);
   const consulta = () => $<HTMLInputElement>('#r-consulta').checked;
+  let telRevisado = '';
+  $('#r-revisa-ok').addEventListener('click', () => { telRevisado = String(new FormData($<HTMLFormElement>('#r-form')).get('whatsapp') || ''); $('#r-revisa').hidden = true; $('.h-res-go').hidden = false; $<HTMLFormElement>('#r-form').requestSubmit(); });
+  $('#r-revisa-no').addEventListener('click', () => { $('#r-revisa').hidden = true; $('.h-res-go').hidden = false; const n = $<HTMLInputElement>('#r-tel [data-tel-num]'); n.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => n.focus(), 350); });
 
   async function cargarMes(m: string) {
     const r = await fetch(`/api/aliados/${encodeURIComponent(id)}?mes=${m}`);
@@ -301,6 +313,12 @@ import TelInput from '../components/TelInput.astro';
     if (!c && !metodo) falta.push('elegir cómo pagas');
     if (falta.length) { err.textContent = 'Falta ' + falta.join(', ') + '.'; err.hidden = false; return; }
     err.hidden = true;
+    const tel = String(fd.get('whatsapp') || '');
+    if (telRevisado !== tel) {
+      $('#r-revisa-num').textContent = telBonito(tel);
+      $('#r-revisa').hidden = false; $('.h-res-go').hidden = true;
+      $('#r-revisa').scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
+    }
     const btn = f.querySelector<HTMLButtonElement>('.h-res-go')!; btn.disabled = true; btn.textContent = c ? 'Preparando tu mensaje…' : 'Apartando la hora…';
     try {
       const r = await fetch(`/api/aliados/${encodeURIComponent(id)}/reserva`, { method: 'POST', headers: { 'content-type': 'application/json' },

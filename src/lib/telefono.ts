@@ -45,7 +45,8 @@ export function telBonito(full: string) {
   const c = [...CODIGOS].sort((a, b) => b.cc.length - a.cc.length).find((k) => full.startsWith(k.cc));
   if (!c) return '+' + full;
   const r = full.slice(c.cc.length);
-  return `${c.bandera} +${c.cc} ${r.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3')}`;
+  const f = c.cc === '56' && r.length === 9 ? r.replace(/(\d)(\d{4})(\d{4})/, '$1 $2 $3') : r.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3');
+  return `${c.bandera} +${c.cc} ${f}`;
 }
 
 /** Separa un número completo en código + resto (para editar). */
