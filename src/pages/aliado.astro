@@ -130,7 +130,14 @@ import TelInput from '../components/TelInput.astro';
       const acc = el('div', 'h-pan-acc');
       if (r.captura) { const a = el('a', 'h-link', 'Descargar captura') as HTMLAnchorElement; a.href = r.captura + '?aliado=1'; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
       const boton = (t: string, accion: string, cls: string) => { const b = el('button', 'h-btn ' + cls, t) as HTMLButtonElement; b.type = 'button'; b.addEventListener('click', () => accionar(r.id, accion, b)); acc.append(b); };
-      const avisar = (t: string, cls = 'h-btn h-dir-wa') => { const w = el('a', cls, t) as HTMLAnchorElement; w.href = aviso(r); w.target = '_blank'; w.rel = 'noopener'; acc.append(w); };
+      const avisar = (t: string, cls = 'h-btn h-dir-wa') => {
+        const w = el('a', cls, t) as HTMLAnchorElement; w.href = aviso(r); w.target = '_blank'; w.rel = 'noopener'; acc.append(w);
+        if (cls.includes('h-btn')) {
+          const c = el('button', 'h-link h-pan-copiar', 'Copiar mensaje') as HTMLButtonElement; c.type = 'button';
+          c.addEventListener('click', async () => { const txt = decodeURIComponent(aviso(r).split('?text=')[1] || ''); try { await navigator.clipboard.writeText(txt); c.textContent = '✓ Copiado: pégalo en el chat donde te llegó la reserva'; } catch { prompt('Copia este mensaje:', txt); } });
+          acc.append(c);
+        }
+      };
       if (r.estado === 'apartada') { boton('✅ Pago verificado', 'confirmar', 'h-dir-wa'); boton('No llegó el pago', 'rechazar', 'h-btn-line'); avisar('Escribirle', 'h-link'); }
       else if (r.estado === 'confirmada') avisar('Enviarle la confirmación por WhatsApp');
       else if (r.estado === 'rechazada') { avisar('Avisarle por WhatsApp', 'h-btn h-btn-line'); boton('Volver a apartar', 'reabrir', 'h-btn-line'); }
