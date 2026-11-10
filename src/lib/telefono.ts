@@ -1,4 +1,6 @@
 /** Códigos de país para WhatsApp. Venezuela y Chile primero (familia Celebra), luego la diáspora más común. */
+export const EJEMPLO: Record<string, string> = { '58': '414 123 4567', '56': '9 1234 5678', '57': '300 123 4567', '51': '912 345 678', '593': '99 123 4567', '54': '9 11 1234 5678', '507': '6123 4567', '52': '55 1234 5678', '34': '612 345 678', '1': '305 123 4567' };
+
 export const CODIGOS = [
   { cc: '58', pais: 'Venezuela', bandera: '🇻🇪' },
   { cc: '56', pais: 'Chile', bandera: '🇨🇱' },
@@ -65,14 +67,15 @@ export function montarTel(root: ParentNode = document) {
     const sync = () => {
       out.value = unirTel(sel.value, num.value);
       const c = CODIGOS.find((k) => out.value.startsWith(k.cc) && k.cc !== sel.value && out.value.length >= k.cc.length + 9 && !out.value.startsWith(sel.value));
-      if (c) sel.value = c.cc;
+      if (c) { sel.value = c.cc; num.placeholder = 'Ej. ' + (EJEMPLO[c.cc] || ''); }
       if (ver) {
         const ok = !out.value || telValido(out.value);
         ver.hidden = !out.value; ver.classList.toggle('mal', !ok);
         ver.textContent = ok ? `WhatsApp: ${telBonito(out.value)}` : `Revisa el número: ${telBonito(out.value)} no parece un WhatsApp válido`;
       }
     };
-    sel.addEventListener('change', sync); num.addEventListener('input', sync);
+    const ph = () => { num.placeholder = 'Ej. ' + (EJEMPLO[sel.value] || ''); };
+    ph(); sel.addEventListener('change', () => { ph(); sync(); }); num.addEventListener('input', sync);
     (w as any).poner = (full: string) => { const s = separarTel(full); sel.value = s.cc; num.value = s.local; sync(); };
     (w as any).limpiar = () => { num.value = ''; sync(); };
   });

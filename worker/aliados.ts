@@ -204,7 +204,7 @@ export async function crearReserva(request: Request, env: any, id: string) {
     `Total: $${r.total}${r.invitados ? ` · ${r.invitados} invitados` : ''}`,
     ...(direccion ? [`Dirección: ${direccion}`] : []),
     r.metodo === 'pagomovil' ? `Pagué por Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Pagué por Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Quiero coordinar el pago.',
-    ...(r.captura ? [`Captura del pago (descárgala, se borra al descargarla): ${r.captura}`] : []),
+    ...(r.captura ? [`Captura del pago (descárgala, se borra al descargarla): ${r.captura}?aliado=1`] : []),
     ...(r.nota ? [`Nota: ${r.nota}`] : []),
     `Soy ${nombre}. Código de reserva: ${r.id}`,
   ];

@@ -89,12 +89,13 @@ export async function borrarFoto(env: any, id: string): Promise<Response> {
   return json({ ok: true });
 }
 
-export async function verFoto(request: Request, env: any, id: string): Promise<Response> {
+export async function verFoto(request: Request, env: any, id: string, aliado = false): Promise<Response> {
   const ua = request.headers.get('user-agent') || '';
   if (request.method === 'HEAD' || BOTS.test(ua)) {
     return pagina('Foto de referencia · Celebra', '<h1>Foto de referencia</h1><p>Ábrela para verla.</p>');
   }
-  const noEsta = () => pagina('Foto no disponible', '<h1>Esta foto ya no está</h1><p>Las fotos se borran al descargarlas, o a las 24 horas si nadie las descarga. Pídele a la persona que te la envíe de nuevo por WhatsApp.</p>', 404);
+  const panel = aliado ? '<a class="b" href="/aliado/" style="background:#16171a;margin-top:12px">Ir a mi panel para confirmar la reserva</a>' : '';
+  const noEsta = () => pagina('Foto no disponible', `<h1>Esta foto ya no está</h1><p>Las fotos se borran al descargarlas, o a las 24 horas si nadie las descarga. Pídele a la persona que te la envíe de nuevo por WhatsApp.</p>${panel}`, 404);
   if (!env.FOTOS || !ID_RE.test(id)) return noEsta();
 
   const key = `ref/${id}`;
@@ -113,6 +114,7 @@ export async function verFoto(request: Request, env: any, id: string): Promise<R
 <img id="foto" src="${src}" alt="Foto enviada por WhatsApp">
 <a class="b" id="guardar" href="${src}" download="foto-${id}.jpg">Descargar foto</a>
 <p id="listo" style="display:none;margin-top:14px;font-weight:700;color:#17603b">✓ Descargada. Ya está en tu teléfono y se borró de la página.</p>
+${panel ? `<p style="margin:16px 0 0">${panel}</p>` : ''}
 <script>
 (function(){var b=document.getElementById('guardar'),f=null,hecho=false;
 function borrar(){if(hecho)return;hecho=true;setTimeout(function(){fetch('/ref/${id}/descargada',{method:'POST',keepalive:true});document.getElementById('listo').style.display='block';b.style.display='none';},1500);}

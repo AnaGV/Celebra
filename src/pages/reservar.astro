@@ -58,7 +58,7 @@ import TelInput from '../components/TelInput.astro';
             <legend><span>4</span> Tus datos</legend>
             <div class="h-form-2">
               <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
-              <TelInput name="whatsapp" label="Tu WhatsApp" id="r-tel" required />
+              <TelInput name="whatsapp" label="Tu WhatsApp (el número que usas en WhatsApp)" id="r-tel" required />
             </div>
             <label id="r-dir">¿Dónde es la fiesta? <small>(dirección o sector y un punto de referencia)</small><input type="text" name="direccion" maxlength="160" autocomplete="street-address" placeholder="Ej. Urb. Los Pinos, casa 12, frente a la plaza" /></label>
             <div class="h-form-2">
@@ -106,7 +106,7 @@ import TelInput from '../components/TelInput.astro';
   import { detectCountry } from '../lib/country';
   import { cabe, horasLibres, horaTxt, diaSemana, duracionDe, subtotal, pedidoMinimo, PASO, type ServicioAg, type Horario, type Ocupa, type Pedido } from '../lib/agenda';
   montarTel();
-  if (detectCountry() === 'CL') { const s = document.querySelector<HTMLSelectElement>('#r-tel [data-tel-cc]'); if (s) s.value = '56'; }
+  if (detectCountry() === 'CL') { const s = document.querySelector<HTMLSelectElement>('#r-tel [data-tel-cc]'); if (s) { s.value = '56'; s.dispatchEvent(new Event('change')); } }
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const id = new URLSearchParams(location.search).get('a') || '';
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];

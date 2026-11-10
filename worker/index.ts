@@ -47,7 +47,7 @@ export default {
     if (url.pathname.startsWith('/ref/')) {
       const partes = url.pathname.slice(5).split('/');
       if (partes[1] === 'descargada' && request.method === 'POST') return borrarFoto(env, partes[0]);
-      return verFoto(request, env, partes[0]);
+      return verFoto(request, env, partes[0], url.searchParams.has('aliado'));
     }
     if (url.pathname.startsWith('/api/ig/')) {
       if (request.method !== 'GET') return new Response('Método no permitido', { status: 405, headers: { allow: 'GET' } });

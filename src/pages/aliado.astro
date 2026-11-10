@@ -10,7 +10,7 @@ import TelInput from '../components/TelInput.astro';
     <header class="h-pan-top"><a href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra" /></a><span>Panel de aliado</span></header>
     <main class="h-wrap h-pan">
       <p id="p-load">Cargando tu panel…</p>
-      <div id="p-err" hidden><h1>Este enlace no funciona</h1><p>Pídele a Celebra un enlace nuevo por WhatsApp.</p></div>
+      <div id="p-err" hidden><h1>No pudimos abrir tu panel</h1><p>Abre el <b>enlace privado</b> que te mandó Celebra por WhatsApp (empieza con somoscelebrave.com/aliado/#). Después de abrirlo una vez, este teléfono lo recuerda.</p><p>¿No lo encuentras? Pídele uno nuevo a Celebra.</p></div>
 
       <div id="p-app" hidden>
         <h1 id="p-nombre"></h1>
@@ -88,7 +88,8 @@ import TelInput from '../components/TelInput.astro';
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   let tok = location.hash.slice(1);
-  try { if (tok) sessionStorage.setItem('celebra-aliado', tok); else tok = sessionStorage.getItem('celebra-aliado') || ''; } catch {}
+  // Se recuerda en este teléfono, así el aliado vuelve al panel desde la foto de la captura sin buscar su enlace.
+  try { if (tok) { localStorage.setItem('celebra-aliado', tok); } else tok = localStorage.getItem('celebra-aliado') || sessionStorage.getItem('celebra-aliado') || ''; } catch {}
   const H = () => ({ 'x-aliado': tok, 'content-type': 'application/json' });
   let A: any, R: any[] = [], hoy = '', mes = '', sucio = false;
   const el = (t: string, c?: string, x?: string) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
@@ -127,7 +128,7 @@ import TelInput from '../components/TelInput.astro';
       if (r.estado !== 'consulta') li.append(el('p', 'h-pan-pago', r.metodo === 'pagomovil' ? `Pago Móvil${r.referencia ? ' · Ref. ' + r.referencia : ''}` : r.metodo === 'binance' ? `Binance${r.referencia ? ' · ' + r.referencia : ''}` : 'Pago por coordinar'));
       if (r.nota) li.append(el('p', 'h-pan-nota', '“' + r.nota + '”'));
       const acc = el('div', 'h-pan-acc');
-      if (r.captura) { const a = el('a', 'h-link', 'Descargar captura') as HTMLAnchorElement; a.href = r.captura; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
+      if (r.captura) { const a = el('a', 'h-link', 'Descargar captura') as HTMLAnchorElement; a.href = r.captura + '?aliado=1'; a.target = '_blank'; a.rel = 'noopener'; acc.append(a); }
       const boton = (t: string, accion: string, cls: string) => { const b = el('button', 'h-btn ' + cls, t) as HTMLButtonElement; b.type = 'button'; b.addEventListener('click', () => accionar(r.id, accion, b)); acc.append(b); };
       const avisar = (t: string, cls = 'h-btn h-dir-wa') => { const w = el('a', cls, t) as HTMLAnchorElement; w.href = aviso(r); w.target = '_blank'; w.rel = 'noopener'; acc.append(w); };
       if (r.estado === 'apartada') { boton('✅ Pago verificado', 'confirmar', 'h-dir-wa'); boton('No llegó el pago', 'rechazar', 'h-btn-line'); avisar('Escribirle', 'h-link'); }
