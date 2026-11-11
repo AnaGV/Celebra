@@ -16,15 +16,16 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   <div class="home">
     <HomeNav />
     <main>
-      <section class="h-wrap h-page-hero">
+      <section class="h-wrap h-page-hero h-dir-hero">
         <div class="h-top-head rv" style="margin:0">
           <span class="h-kicker">Directorio de Caripe</span>
           <h1>¿Dónde y con quién hacer tu fiesta?</h1>
           <p class="h-lead">Lugares, tortas, fotografía, maquillaje y más servicios para fiestas en Caripe. Busca, mira sus reseñas en Google y escríbeles directo.</p>
         </div>
-        <div class="h-page-art rv" style="--bg:#e3f5ff;--d:100ms">
-          <svg viewBox="0 0 160 160" aria-hidden="true"><path d="M30 70l50-34 50 34" fill="#c8f0dc" stroke="#4a1a4f" stroke-width="2.5" stroke-linejoin="round"></path><rect x="40" y="70" width="80" height="58" fill="#ffffff" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="70" y="94" width="20" height="34" fill="#f8bbd0" stroke="#4a1a4f" stroke-width="2.5"></rect><rect x="48" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><rect x="96" y="80" width="16" height="14" fill="#c5e3f6" stroke="#4a1a4f" stroke-width="2"></rect><path d="M36 64q22 12 44 0t44 0" fill="none" stroke="#c2185b" stroke-width="2.5"></path></svg>
-        </div>
+        <picture class="h-dir-banner rv" style="--d:100ms">
+          <source media="(max-width: 640px)" srcset="/img/directorio/banner-m.webp" width="1100" height="723" />
+          <img src="/img/directorio/banner.webp" width="2400" height="915" alt="Fiesta en Caripe: finca con piscina, torta, DJ, toldo con mesas, cámara, maquillaje, animación, vestidos y arco de decoración, con las montañas de fondo" />
+        </picture>
       </section>
 
       <section class="h-sec h-wrap h-dir" aria-labelledby="t-dir" style="padding-top:40px">
