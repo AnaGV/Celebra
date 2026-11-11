@@ -39,7 +39,9 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       <section class="h-sec h-wrap" aria-labelledby="t-ali">
         <div class="h-head rv"><span class="h-kicker" style="color:#0f6fa3">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p id="ali-intro">Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
         <!-- Aliados reales (los mismos del Directorio): se cargan de /api/aliados. Si hay, reemplazan la lista genérica. -->
-        <ul class="h-dir-grid" id="ali-list" hidden></ul>
+        <div class="h-dir-chips" id="ali-chips" role="group" aria-label="Categorías de aliados" hidden></div>
+        <ul class="h-al-grid" id="ali-list" hidden></ul>
+        <div class="h-ali-ver" id="ali-ver-box" hidden><a class="h-btn h-btn-line" id="ali-ver" href="/directorio/?agenda=1">Ver más en el directorio →</a></div>
         <p class="h-ali-mas" id="ali-mas" hidden>¿Buscas otro servicio? Mira el <a class="h-link" href="/directorio/">directorio de Caripe</a> o <a class="h-link" href={wa('¡Hola Celebra! Busco un proveedor para una fiesta.')} target="_blank" rel="noopener">pídenos una recomendación</a>.</p>
         <script type="application/json" id="ali-cats" set:html={JSON.stringify(CATEGORIAS)}></script>
 
@@ -48,32 +50,65 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
   type Cat = { id: string; nombre: string; icono: string };
   const cats: Record<string, Cat> = Object.fromEntries((JSON.parse(document.getElementById('ali-cats')!.textContent || '[]') as Cat[]).map((k) => [k.id, k]));
   const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, txt?: string) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  // Tarjeta de aliado con identidad Celebra (distinta de la del Directorio, que es una guía).
+  const FONDOS = ['#efe4ff', '#ffe1ec', '#dff3ff', '#fff4c2', '#e4f7ec'];
+  const fondoDe = (id: string) => FONDOS[[...id].reduce((n, ch) => n + ch.charCodeAt(0), 0) % FONDOS.length];
   function tarjeta(a: any) {
-    const li = el('li', 'h-dir-card');
-    const tags = el('div', 'h-dir-tags');
-    for (const id of a.categorias || []) { const k = cats[id]; if (k) tags.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
-    tags.append(el('span', 'h-dir-tag h-dir-al', '✓ Aliado · reserva en línea'));
-    let titulo: HTMLElement = el('h3', '', a.nombre);
-    if (a.fotos && a.fotos[0]) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = a.fotos[0]; im.alt = ''; im.loading = 'lazy'; const h = el('div', 'h-dir-head'); h.append(im, titulo); titulo = h; }
-    li.append(tags, titulo, el('p', 'h-dir-desc', a.descripcion || ''));
-    if (a.zona) li.append(el('p', 'h-dir-zona', '📍 ' + a.zona));
-    const acc = el('div', 'h-dir-acc');
-    const r = el('a', 'h-btn h-dir-wa', 'Ver disponibilidad y reservar') as HTMLAnchorElement;
-    r.href = '/reservar/?a=' + encodeURIComponent(a.id); acc.append(r);
-    if (a.instagram) { const i = el('a', 'h-btn h-btn-line', 'Instagram') as HTMLAnchorElement; i.href = `https://instagram.com/${String(a.instagram).replace('@', '')}`; i.target = '_blank'; i.rel = 'noopener'; acc.append(i); }
-    if (a.placeId) { const m = el('a', 'h-dir-maps', 'Ver reseñas en Google Maps') as HTMLAnchorElement; m.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.nombre + ' Caripe')}&query_place_id=${a.placeId}`; m.target = '_blank'; m.rel = 'noopener'; acc.append(m); }
-    li.append(acc);
+    const k = cats[(a.categorias || [])[0]];
+    const li = el('li', 'h-al');
+    const link = el('a', 'h-al-card') as HTMLAnchorElement;
+    link.href = '/reservar/?a=' + encodeURIComponent(a.id);
+    link.style.setProperty('--bg', fondoDe(k?.id || a.id));
+    const foto = el('div', 'h-al-foto');
+    if (a.fotos && a.fotos[0]) { const im = el('img') as HTMLImageElement; im.src = a.fotos[0]; im.alt = ''; im.loading = 'lazy'; foto.append(im); }
+    else foto.append(el('span', 'h-al-ico', k?.icono || '🎉'));
+    const sello = el('span', 'h-al-sello', '★ Aliado'); sello.title = 'Aliado Celebra'; foto.append(sello);
+    if (k) foto.append(el('span', 'h-al-cat', `${k.icono} ${k.nombre}`));
+    const cuerpo = el('div', 'h-al-body');
+    cuerpo.append(el('h3', '', a.nombre), el('p', 'h-al-desc', a.descripcion || ''));
+    const pie = el('div', 'h-al-pie');
+    pie.append(el('span', 'h-al-zona', '📍 ' + (a.zona || 'Caripe')), el('span', 'h-al-cta', 'Reservar →'));
+    cuerpo.append(pie);
+    link.append(foto, cuerpo);
+    link.setAttribute('aria-label', `${a.nombre}${k ? ', ' + k.nombre : ''}. Ver disponibilidad y reservar`);
+    li.append(link);
     return li;
   }
+
+  // Vitrina: máximo 6 tarjetas en computadora y 3 en el teléfono; el resto, en el Directorio.
+  const mq = matchMedia('(max-width: 640px)');
+  const MAX_CHIPS = 6; // los filtros salen solo con más de 6 aliados
+  let al: any[] = [], cat = '';
+  const lista = document.getElementById('ali-list')!, chipsBox = document.getElementById('ali-chips')!;
+  const verBox = document.getElementById('ali-ver-box')!, ver = document.getElementById('ali-ver') as HTMLAnchorElement;
+  function pintar() {
+    const res = al.filter((a) => !cat || (a.categorias || []).includes(cat));
+    const max = 6; // en el teléfono las 6 van en un carrusel que se desliza hacia el lado
+    lista.replaceChildren(...res.slice(0, max).map(tarjeta));
+    chipsBox.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.cat === cat)));
+    verBox.hidden = res.length <= max;
+    ver.textContent = `Ver más${cat ? ' de ' + cats[cat].nombre : ''} en el directorio →`;
+    ver.href = '/directorio/?agenda=1' + (cat ? '&cat=' + encodeURIComponent(cat) : '');
+  }
   fetch('/api/aliados').then((r) => r.json()).then((d) => {
-    const al = (d.aliados || []) as any[];
+    al = (d.aliados || []) as any[];
     if (!al.length) return; // sin aliados todavía: queda la lista genérica con "Pedir recomendación"
-    const lista = document.getElementById('ali-list')!;
-    lista.replaceChildren(...al.map(tarjeta));
+    // Orden del día (hora de Venezuela): mismo para todos durante el día, distinto cada día. Justo para todos los aliados.
+    let semilla = [...new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10)].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+    const azar = () => ((semilla = (semilla * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+    al = al.map((a) => ({ a, r: azar() })).sort((x, y) => x.r - y.r).map((x) => x.a);
+    if (al.length > MAX_CHIPS) {
+      const chip = (id: string, txt: string, n: number) => { const b = el('button', 'h-dir-chip', txt) as HTMLButtonElement; b.type = 'button'; b.dataset.cat = id; b.append(el('span', '', String(n))); b.addEventListener('click', () => { cat = id; pintar(); }); return b; };
+      chipsBox.append(chip('', 'Todos ', al.length));
+      for (const k of Object.values(cats)) { const n = al.filter((a) => (a.categorias || []).includes(k.id)).length; if (n) chipsBox.append(chip(k.id, `${k.icono} ${k.nombre} `, n)); }
+      chipsBox.hidden = false;
+    }
     lista.hidden = false;
     document.getElementById('ali-generico')!.hidden = true;
     document.getElementById('ali-mas')!.hidden = false;
     document.getElementById('ali-intro')!.textContent = 'Proveedores de Caripe que trabajan con nosotras. Mira su disponibilidad y reserva en línea.';
+    pintar();
+    mq.addEventListener('change', pintar);
   }).catch(() => {});
 </script>
         <div class="h-servs" id="ali-generico">

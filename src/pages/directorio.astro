@@ -41,12 +41,13 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
             <button type="button" class="h-dir-chip" data-cat={k.id} aria-pressed="false"><span aria-hidden="true">{k.icono}</span> {k.nombre} <span>{conteo[k.id]}</span></button>
           ))}
         </div>
+        <button type="button" class="h-dir-chip h-dir-solo" id="dir-solo" aria-pressed="false" hidden>📅 Con agenda en línea</button>
         <p class="h-dir-info" id="dir-info" aria-live="polite"></p>
         <article class="h-dir-celebra" id="dir-celebra" hidden>
           <img src="/img/club/regalos-m.webp" width="900" height="626" alt="" loading="lazy" />
           <div>
-            <span class="h-dir-own">🎈 Celebra · organizamos este directorio</span>
-            <h3>Piñatas, globos, arreglos y decoración</h3>
+            <span class="h-dir-own">🎈 Celebra</span>
+            <h3>Piñatas, globos y arreglos</h3>
             <p>Hechos a mano en nuestro taller de Caripe: piñatas con número y letra, arreglos de globos, chupeteras, toppers, cotillón y regalos personalizados.</p>
             <div class="h-dir-acc">
               <a class="h-btn" id="dir-cotizar" href="/#reservar">Cotizar con Celebra</a>
@@ -60,7 +61,7 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
           <a class="h-btn" href={agregar} target="_blank" rel="noopener">Recomendar un negocio</a>
         </div>
         <nav class="h-dir-pages" id="dir-pages" aria-label="Páginas"></nav>
-        <p class="h-dir-note">El orden de los negocios cambia cada día para que todos tengan su turno. Celebra no cobra comisión ni gestiona reservas: el trato es directo con cada negocio. ¿Eres dueño y no quieres aparecer? <a href={quitar} target="_blank" rel="noopener">Escríbenos</a> y lo retiramos.</p>
+        <p class="h-dir-note">El orden de los negocios cambia cada día para que todos tengan su turno. Celebra no cobra comisión: el pago es directo con cada negocio. ¿Eres dueño y no quieres aparecer? <a href={quitar} target="_blank" rel="noopener">Escríbenos</a> y lo retiramos.</p>
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-add">
@@ -90,13 +91,14 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   const vacio = document.getElementById('dir-empty')!;
   const pags = document.getElementById('dir-pages')!;
   const q = document.getElementById('dir-q') as HTMLInputElement;
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.h-dir-chip')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.h-dir-chips .h-dir-chip')];
 
   // Orden del día: mismo para todos durante el día (hora de Venezuela), distinto cada día.
   const dia = new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10);
-  let semilla = [...dia].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
-  const azar = () => ((semilla = (semilla * 1664525 + 1013904223) >>> 0) / 2 ** 32);
-  let orden = proveedores.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p);
+  // Clave del día por nombre: así todos (con o sin agenda en línea) se mezclan por igual y el orden no cambia al cargar.
+  const clave = (p: Prov) => [...dia + p.nombre].reduce((a, ch) => Math.imul(a ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261);
+  const mezclar = (l: Prov[]) => l.map((p) => ({ p, r: clave(p) })).sort((a, b) => a.r - b.r).map((x) => x.p);
+  let orden = mezclar(proveedores);
 
   const sinAcentos = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const esCelular = (t: string) => /^58(412|414|416|422|424|426)/.test(t);
@@ -104,6 +106,8 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
 
   const params = new URLSearchParams(location.search);
   let cat = params.get('cat') || '';
+  let soloAl = params.get('agenda') === '1'; // negocios con agenda en línea (los aliados), sin marcarlos como recomendados
+  const solo = document.getElementById('dir-solo') as HTMLButtonElement;
   let pagina = Math.max(1, Number(params.get('p')) || 1);
   q.value = params.get('q') || '';
 
@@ -115,7 +119,7 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
     const li = el('li', 'h-dir-card');
     const top = el('div', 'h-dir-tags');
     for (const id of p.categorias) { const k = nombreCat[id]; if (k) top.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
-    if (p.aliado) top.append(el('span', 'h-dir-tag h-dir-al', '✓ Aliado · reserva en línea'));
+    if (p.aliado) top.append(el('span', 'h-dir-tag h-dir-agenda', '📅 Agenda en línea'));
     let titulo: HTMLElement = el('h3', '', p.nombre);
     if (p.foto) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = p.foto; im.alt = ''; im.loading = 'lazy'; const h = el('div', 'h-dir-head'); h.append(im, titulo); titulo = h; }
     li.append(top, titulo, el('p', 'h-dir-desc', p.descripcion));
@@ -155,14 +159,15 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
   function pintar(scroll = false) {
     const texto = sinAcentos(q.value.trim());
     const buscaLoNuestro = !!texto && PROPIO.some((k) => texto.includes(k) || (texto.length >= 4 && k.startsWith(texto)));
-    celebra.hidden = !(buscaLoNuestro || (!cat && !texto));
-    const res = orden.filter((p) => (!cat || p.categorias.includes(cat)) &&
+    celebra.hidden = false; // Celebra siempre presente, busquen lo que busquen
+    const res = orden.filter((p) => (!soloAl || !!p.aliado) && (!cat || p.categorias.includes(cat)) &&
       (!texto || sinAcentos([p.nombre, p.descripcion, p.zona || '', ...p.categorias.map((id) => nombreCat[id]?.nombre || '')].join(' ')).includes(texto)));
     const total = Math.max(1, Math.ceil(res.length / POR_PAGINA));
     pagina = Math.min(pagina, total);
     lista.replaceChildren(...res.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map(tarjeta));
-    vacio.hidden = res.length > 0 || buscaLoNuestro;
-    info.textContent = res.length ? `${res.length} resultado${res.length === 1 ? '' : 's'}${cat ? ' en ' + nombreCat[cat].nombre : ''}` : '';
+    vacio.hidden = res.length > 0 || buscaLoNuestro || (soloAl && solo.hidden); // con el filtro de agenda, espera a que carguen
+    info.textContent = res.length ? `${res.length} resultado${res.length === 1 ? '' : 's'}${soloAl ? ' con agenda en línea' : ''}${cat ? ' en ' + nombreCat[cat].nombre : ''}` : '';
+    solo.setAttribute('aria-pressed', String(soloAl));
     chips.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cat === cat)));
     pags.replaceChildren();
     if (total > 1) {
@@ -177,22 +182,24 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
       pags.append(btn('Siguiente ›', pagina + 1, false, pagina === total));
     }
     const u = new URLSearchParams();
-    if (cat) u.set('cat', cat); if (q.value.trim()) u.set('q', q.value.trim()); if (pagina > 1) u.set('p', String(pagina));
+    if (soloAl) u.set('agenda', '1'); if (cat) u.set('cat', cat); if (q.value.trim()) u.set('q', q.value.trim()); if (pagina > 1) u.set('p', String(pagina));
     history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
     if (scroll) document.getElementById('dir-q')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   chips.forEach((b) => b.addEventListener('click', () => { cat = b.dataset.cat || ''; pagina = 1; pintar(); }));
+  solo.addEventListener('click', () => { soloAl = !soloAl; pagina = 1; pintar(); });
   let t: number | undefined;
   q.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(() => { pagina = 1; pintar(); }, 150); });
   pintar();
-  // Aliados con reserva en línea: van primero (en orden del día entre ellos) y reemplazan su ficha simple.
+  // Negocios con agenda en línea (aliados): se mezclan con el resto en el orden del día y reemplazan su ficha simple.
   fetch('/api/aliados').then((r) => r.json()).then((d) => {
     const al: Prov[] = (d.aliados || []).map((a: any) => ({ nombre: a.nombre, categorias: a.categorias, descripcion: a.descripcion, zona: a.zona, placeId: a.placeId, aliado: a.id, foto: a.fotos[0] }));
-    if (!al.length) return;
+    if (!al.length) { if (soloAl) { soloAl = false; pintar(); } return; }
+    solo.hidden = false;
     const nombres = new Set(al.map((a) => sinAcentos(a.nombre)));
     const resto = orden.filter((p) => !nombres.has(sinAcentos(p.nombre)));
-    orden = [...al.map((p) => ({ p, r: azar() })).sort((a, b) => a.r - b.r).map((x) => x.p), ...resto];
+    orden = mezclar([...al, ...resto]);
     for (const b of chips) { const k = b.dataset.cat || ''; const n = orden.filter((p) => !k || p.categorias.includes(k)).length; const sp = b.querySelector('span:last-child'); if (sp) sp.textContent = String(n); }
     pintar();
   }).catch(() => {});
