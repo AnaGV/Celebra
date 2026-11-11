@@ -89,16 +89,32 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       <section class="h-sec h-wrap" aria-labelledby="t-unete">
         <div class="h-res rv" style="background:#e3f5ff">
           <div class="h-res-info">
-            <span class="h-kicker" style="color:#0f6fa3">Para proveedores</span>
-            <h2 id="t-unete">¿Ofreces un servicio para fiestas?</h2>
-            <p class="h-lead" style="font-size:18px">Tortas, sonido, animación, mobiliario, fotografía… Publica tu negocio en Celebra y llega a las familias que están organizando su fiesta en Caripe.</p>
+            <span class="h-kicker" style="color:#0f6fa3">Aliados Celebra</span>
+            <h2 id="t-unete">¿Quieres ser aliado de Celebra?</h2>
+            <p class="h-lead" style="font-size:18px">Si tienes un negocio de fiestas en Caripe, únete a nuestros aliados. Te mandamos clientes con nuestra publicidad, ellos reservan contigo en línea según tu disponibilidad y te pagan directo a ti. Tú manejas tus reservas desde tu propio panel.</p>
+            <ul class="h-ali-pts">
+              <li>Reservas en línea con tu calendario</li>
+              <li>El cliente te paga directo a ti</li>
+              <li>Empezar es gratis</li>
+            </ul>
+            <p class="h-ali-nota">Las piñatas, arreglos, globos, cotillón y papelería los hacemos nosotras en el taller. Por eso buscamos aliados que complementen lo nuestro. Revisamos cada solicitud y te escribimos por WhatsApp.</p>
           </div>
           <form class="h-form" id="pub-form" novalidate>
             <label>Nombre del negocio<input type="text" name="negocio" required /></label>
-            <label>Qué servicio ofreces<input type="text" name="servicio" placeholder="Ej. Tortas, sonido, animación" /></label>
+            <label>Tipo de negocio
+              <select name="tipo" required>
+                <option value="">Elige uno</option>
+                {CATEGORIAS.map((k) => <option value={k.nombre}>{k.nombre}</option>)}
+                <option value="Decoración de eventos">Decoración de eventos (montaje completo)</option>
+                <option value="Otro servicio">Otro servicio</option>
+              </select>
+            </label>
+            <label id="deco-tipo" hidden>¿Qué tipo de decoración haces?<input type="text" name="decoracion" placeholder="Ej. Montaje completo: mesas, telas, arcos, fondos" /></label>
+            <label>Qué servicios ofreces<input type="text" name="servicio" placeholder="Ej. Sonido para 8 horas, luces, animador" /></label>
+            <label><span>Instagram <span class="h-opt">(opcional)</span></span><input type="text" name="instagram" placeholder="@tunegocio" autocapitalize="off" /></label>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
-            <button class="h-btn" type="submit">Quiero publicar mi negocio</button>
-            <p class="h-form-err" role="alert" hidden>Falta el nombre del negocio y tu nombre.</p>
+            <button class="h-btn" type="submit">Quiero ser aliado</button>
+            <p class="h-form-err" role="alert" hidden>Falta el nombre del negocio, el tipo de negocio y tu nombre.</p>
           </form>
         </div>
       </section>
@@ -109,13 +125,20 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
 
 <script define:vars={{ waNum: c.localWhatsapp }}>
   const f = document.getElementById('pub-form');
+  const deco = document.getElementById('deco-tipo');
+  f.tipo.addEventListener('change', () => { deco.hidden = f.tipo.value !== 'Decoración de eventos'; if (!deco.hidden) deco.querySelector('input').focus(); });
   f.addEventListener('submit', (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f));
     const err = f.querySelector('.h-form-err');
-    if (!String(d.negocio).trim() || !String(d.nombre).trim()) { err.hidden = false; return; }
+    const esDeco = d.tipo === 'Decoración de eventos';
+    if (!String(d.negocio).trim() || !d.tipo || !String(d.nombre).trim() || (esDeco && !String(d.decoracion || '').trim())) {
+      err.textContent = esDeco && !String(d.decoracion || '').trim() ? 'Cuéntanos qué tipo de decoración haces.' : 'Falta el nombre del negocio, el tipo de negocio y tu nombre.';
+      err.hidden = false; return;
+    }
     err.hidden = true;
-    const txt = `¡Hola Celebra! Quiero publicar mi negocio en la página.\n• Negocio: ${d.negocio}\n• Servicio: ${d.servicio || '-'}\n• Mi nombre: ${d.nombre}`;
+    const ig = String(d.instagram || '').trim();
+    const txt = `¡Hola Celebra! Quiero ser aliado.\n• Negocio: ${d.negocio}\n• Tipo: ${d.tipo}${esDeco ? ' (' + String(d.decoracion).trim() + ')' : ''}\n• Servicios: ${String(d.servicio || '').trim() || '-'}\n• Instagram: ${ig ? '@' + ig.replace(/^@/, '') : '-'}\n• Mi nombre: ${d.nombre}`;
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
   });
 </script>

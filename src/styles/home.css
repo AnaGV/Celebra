@@ -742,3 +742,8 @@
 /* Servicios: aliados reales */
 .home .h-ali-mas{margin-top:22px;color:var(--muted);font-size:15px}
 .home #ali-generico[hidden],.home #ali-list[hidden]{display:none}
+.home .h-ali-pts{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.home .h-ali-pts li{position:relative;padding-left:30px;font-weight:600;color:var(--ink);font-size:16px}
+.home .h-ali-pts li::before{content:"✓";position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;background:#0f6fa3;color:#fff;font-size:13px;display:grid;place-items:center}
+.home .h-ali-nota{font-size:14px;color:var(--muted);margin:0}
+.home #deco-tipo[hidden]{display:none}
