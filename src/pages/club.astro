@@ -166,7 +166,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
       if (!r.ok) throw new Error(out.error || 'No pudimos guardarlo. Inténtalo de nuevo.');
       const cod = ok.querySelector<HTMLElement>('.h-ok-cod')!;
       cod.textContent = out.codigo
-        ? (out.repite ? `Agregamos tus fechas (ya tienes ${out.total}). Tu código sigue siendo ${out.codigo} (es uno por persona).` : `Ya tienes ${out.total} fechas. Tu código de 10% es ${out.codigo}. Guárdalo y muéstralo al hacer tu pedido (válido para una compra).`)
+        ? (out.repite ? `Agregamos tus fechas (ya tienes ${out.total}). Tu código sigue siendo ${out.codigo}.` : `Ya tienes ${out.total} fechas. Tu código de 10% es ${out.codigo}. Guárdalo y muéstralo al hacer tu pedido (válido para una compra).`)
         : `Guardamos ${out.total === 1 ? 'tu fecha' : `tus ${out.total} fechas`}. Anota ${out.faltan} más con este mismo correo y te regalamos tu código de 10%.`;
       f.reset(); box.innerHTML = ''; add(); contar();
       ok.hidden = false; ok.scrollIntoView({ block: 'center', behavior: 'smooth' });
