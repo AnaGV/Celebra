@@ -219,7 +219,7 @@ const hoy = new Date().toISOString().slice(0, 10);
 
       <section class="h-sec h-wrap" aria-labelledby="t-sal">
         <div class="h-duo">
-          <a class="h-tile rv" href="/salones/" style="--bg:#e3f5ff;--ink:#0f6fa3">
+          <a class="h-tile rv" href="/directorio/" style="--bg:#e3f5ff;--ink:#0f6fa3">
             <span class="h-kicker">Directorio de Caripe</span>
             <b id="t-sal">¿Dónde y con quién hacer la fiesta?</b>
             <span>Lugares, tortas, fotografía, maquillaje y más servicios para fiestas en Caripe, en un solo lugar.</span>
@@ -256,6 +256,9 @@ const hoy = new Date().toISOString().slice(0, 10);
 
 <script define:vars={{ waNum: c.localWhatsapp }}>
   const f = document.getElementById('res-form');
+  // La fecha mínima es hoy en el teléfono del cliente (la web es estática: no sirve calcularla al publicar).
+  const fIn = f.querySelector('input[name="fecha"]');
+  if (fIn) { const n = new Date(); fIn.min = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
   const $ = (q) => f.querySelector(q);
   const packToggle = $('[data-pack-toggle]');
   const otroToggle = $('[data-otro-toggle]');

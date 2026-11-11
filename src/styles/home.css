@@ -243,6 +243,10 @@
 .h-date{position:relative}
 .h-date-ph{position:absolute;left:15px;bottom:13px;color:#8a8f9c;font-weight:500;font-size:16px;pointer-events:none}
 .h-date input:valid + .h-date-ph,.h-date input:focus + .h-date-ph{display:none}
+/* Vacío: se esconde la fecha gris que pone el navegador, para que no se encime con «Elige el día» */
+.h-date input:invalid:not(:focus){color:transparent}
+.h-date input:invalid:not(:focus)::-webkit-datetime-edit{color:transparent}
+.h-date input:invalid:not(:focus)::-webkit-datetime-edit-fields-wrapper{opacity:0}
 .h-wa{transition:opacity .25s ease,transform .25s ease}
 .h-wa.off{opacity:0;transform:scale(.8);pointer-events:none}
 
@@ -734,3 +738,7 @@
 .home .h-res-revisa-b{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .home .h-res-revisa-b .h-btn{flex:1 1 160px;justify-content:center}
 .home .h-pan-entrar{max-width:560px}.home .h-pan-entrar .h-form{margin:16px 0}
+
+/* Servicios: aliados reales */
+.home .h-ali-mas{margin-top:22px;color:var(--muted);font-size:15px}
+.home #ali-generico[hidden],.home #ali-list[hidden]{display:none}

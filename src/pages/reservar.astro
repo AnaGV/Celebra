@@ -13,7 +13,7 @@ import TelInput from '../components/TelInput.astro';
       <p class="h-res-load" id="res-load">Cargando…</p>
 
       <div id="res-app" hidden>
-        <a class="h-link h-res-back" href="/salones/">← Volver al directorio</a>
+        <a class="h-link h-res-back" href="/directorio/">← Volver al directorio</a>
         <section class="h-res-head">
           <div class="h-res-fotos" id="r-fotos"></div>
           <div>
@@ -63,7 +63,7 @@ import TelInput from '../components/TelInput.astro';
             <label id="r-dir">¿Dónde es la fiesta? <small>(dirección o sector y un punto de referencia)</small><input type="text" name="direccion" maxlength="160" autocomplete="street-address" placeholder="Ej. Urb. Los Pinos, casa 12, frente a la plaza" /></label>
             <div class="h-form-2">
               <label>Invitados (aprox.)<input type="number" name="invitados" min="0" inputmode="numeric" /></label>
-              <label>Nota para el aliado <small>(opcional)</small><input type="text" name="nota" maxlength="300" placeholder="Tema, edad, detalles…" /></label>
+              <label>Nota para el aliado (opcional)<input type="text" name="nota" maxlength="300" placeholder="Tema, edad, detalles…" /></label>
             </div>
           </fieldset>
 
@@ -104,7 +104,7 @@ import TelInput from '../components/TelInput.astro';
         </div>
       </div>
 
-      <div id="res-404" hidden><h1>No encontramos este aliado</h1><p><a class="h-link" href="/salones/">Volver al directorio</a></p></div>
+      <div id="res-404" hidden><h1>No encontramos este aliado</h1><p><a class="h-link" href="/directorio/">Volver al directorio</a></p></div>
     </main>
     <Footer />
   </div>

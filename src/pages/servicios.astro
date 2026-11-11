@@ -5,6 +5,7 @@ import HomeNav from '../components/HomeNav.astro';
 import '../styles/home.css';
 import { site } from '../config/site';
 import { servicios } from '../config/celebra';
+import { CATEGORIAS } from '../config/directorio';
 const c = site.contact;
 const wa = (t: string) => `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(t)}`;
 const propios = servicios.filter((s) => s.kind === 'propio');
@@ -36,8 +37,46 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-ali">
-        <div class="h-head rv"><span class="h-kicker" style="color:#0f6fa3">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p>Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
-        <div class="h-servs">
+        <div class="h-head rv"><span class="h-kicker" style="color:#0f6fa3">Proveedores aliados</span><h2 id="t-ali">Con nuestros aliados de Caripe</h2><p id="ali-intro">Te ponemos en contacto con proveedores de confianza. Escríbenos y te recomendamos según tu fecha.</p></div>
+        <!-- Aliados reales (los mismos del Directorio): se cargan de /api/aliados. Si hay, reemplazan la lista genérica. -->
+        <ul class="h-dir-grid" id="ali-list" hidden></ul>
+        <p class="h-ali-mas" id="ali-mas" hidden>¿Buscas otro servicio? Mira el <a class="h-link" href="/directorio/">directorio de Caripe</a> o <a class="h-link" href={wa('¡Hola Celebra! Busco un proveedor para una fiesta.')} target="_blank" rel="noopener">pídenos una recomendación</a>.</p>
+        <script type="application/json" id="ali-cats" set:html={JSON.stringify(CATEGORIAS)}></script>
+
+<script>
+  // Aliados con reserva en línea: los mismos que salen en el Directorio.
+  type Cat = { id: string; nombre: string; icono: string };
+  const cats: Record<string, Cat> = Object.fromEntries((JSON.parse(document.getElementById('ali-cats')!.textContent || '[]') as Cat[]).map((k) => [k.id, k]));
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, txt?: string) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  function tarjeta(a: any) {
+    const li = el('li', 'h-dir-card');
+    const tags = el('div', 'h-dir-tags');
+    for (const id of a.categorias || []) { const k = cats[id]; if (k) tags.append(el('span', 'h-dir-tag', `${k.icono} ${k.nombre}`)); }
+    tags.append(el('span', 'h-dir-tag h-dir-al', '✓ Aliado · reserva en línea'));
+    let titulo: HTMLElement = el('h3', '', a.nombre);
+    if (a.fotos && a.fotos[0]) { const im = el('img', 'h-dir-foto') as HTMLImageElement; im.src = a.fotos[0]; im.alt = ''; im.loading = 'lazy'; const h = el('div', 'h-dir-head'); h.append(im, titulo); titulo = h; }
+    li.append(tags, titulo, el('p', 'h-dir-desc', a.descripcion || ''));
+    if (a.zona) li.append(el('p', 'h-dir-zona', '📍 ' + a.zona));
+    const acc = el('div', 'h-dir-acc');
+    const r = el('a', 'h-btn h-dir-wa', 'Ver disponibilidad y reservar') as HTMLAnchorElement;
+    r.href = '/reservar/?a=' + encodeURIComponent(a.id); acc.append(r);
+    if (a.instagram) { const i = el('a', 'h-btn h-btn-line', 'Instagram') as HTMLAnchorElement; i.href = `https://instagram.com/${String(a.instagram).replace('@', '')}`; i.target = '_blank'; i.rel = 'noopener'; acc.append(i); }
+    if (a.placeId) { const m = el('a', 'h-dir-maps', 'Ver reseñas en Google Maps') as HTMLAnchorElement; m.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.nombre + ' Caripe')}&query_place_id=${a.placeId}`; m.target = '_blank'; m.rel = 'noopener'; acc.append(m); }
+    li.append(acc);
+    return li;
+  }
+  fetch('/api/aliados').then((r) => r.json()).then((d) => {
+    const al = (d.aliados || []) as any[];
+    if (!al.length) return; // sin aliados todavía: queda la lista genérica con "Pedir recomendación"
+    const lista = document.getElementById('ali-list')!;
+    lista.replaceChildren(...al.map(tarjeta));
+    lista.hidden = false;
+    document.getElementById('ali-generico')!.hidden = true;
+    document.getElementById('ali-mas')!.hidden = false;
+    document.getElementById('ali-intro')!.textContent = 'Proveedores de Caripe que trabajan con nosotras. Mira su disponibilidad y reserva en línea.';
+  }).catch(() => {});
+</script>
+        <div class="h-servs" id="ali-generico">
           {aliados.map((s, i) => (
             <div class="h-serv rv" style={`--d:${(i % 4) * 60}ms`}>
               <span class="h-serv-ico aliado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={s.icon}></path></svg></span>

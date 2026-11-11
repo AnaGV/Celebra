@@ -20,7 +20,7 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 |---|---|---|
 | / | src/pages/index.astro | Carrusel: el banner de Navidad (`XmasBanner.astro`) es la 1.ª lámina; se quita en enero. Club 10%, Instagram, ideas, mapa |
 | /club/ | src/pages/club.astro + worker/club.ts | Cumpleaños de seres queridos; un código de 10% por persona o correo, válido para una compra |
-| /salones/ | src/pages/salones.astro + src/config/directorio.ts | Directorio de Caripe; Celebra fija arriba, aliados primero con foto pequeña, "Reportar dato incorrecto" |
+| /directorio/ (antes /salones/, redirige) | src/pages/directorio.astro + src/config/directorio.ts | Directorio de Caripe; Celebra fija arriba, aliados primero con foto pequeña, "Reportar dato incorrecto" |
 | /reservar/?a=id | src/pages/reservar.astro | Reserva con un aliado |
 | /aliado/ | src/pages/aliado.astro | Panel del aliado (enlace privado `#<id>.<token>`, se recuerda en localStorage o se pega) |
 | /admin/aliados/ | src/pages/admin/aliados.astro | Admin de Ana (clave CELEBRA_ADMIN_KEY) |
