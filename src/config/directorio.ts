@@ -19,6 +19,7 @@ export const CATEGORIAS = [
   { id: 'belleza', nombre: 'Maquillaje y peinado', icono: '💄' },
   { id: 'animacion', nombre: 'Animadores y recreación', icono: '🤹' },
   { id: 'vestidos', nombre: 'Vestidos y trajes', icono: '👗' },
+  { id: 'decoracion', nombre: 'Decoración de eventos', icono: '🎪' },
 ] as const;
 
 export type CategoriaId = (typeof CATEGORIAS)[number]['id'];
