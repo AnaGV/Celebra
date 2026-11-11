@@ -797,3 +797,5 @@
 }
 .home .h-dir-agenda{background:#f1f2f5;color:#4a4f5c}
 .home .h-dir-celebra .h-dir-acc .h-btn{min-height:46px;padding:0 24px;font-size:15px;border-radius:12px}
+.h-club-meta{margin:2px 0 0;padding:12px 16px;border-radius:14px;background:#fbe6ee;color:var(--rosa-ink,#b8285f);font-size:15px;font-weight:600}
+.h-club-meta b{font-weight:800}

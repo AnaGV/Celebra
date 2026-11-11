@@ -21,7 +21,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <p class="h-lead">Anota los cumpleaños y aniversarios de quienes quieres. Te avisamos antes, con una oferta especial para celebrarlos: piñatas, arreglos de globos, chupeteras y detalles.</p>
           <ul class="h-trust" style="margin-top:4px">
             <li>Aviso antes de cada fecha</li>
-            <li>10% en tu próxima compra</li>
+            <li>10% al anotar 3 fechas</li>
             <li>Te das de baja cuando quieras</li>
           </ul>
         </div>
@@ -41,6 +41,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <h2 id="t-reg" style="font-size:26px">Tus fechas importantes</h2>
           <p class="h-ref-note" style="margin-top:-6px">Solo el primer nombre y el día. Puedes anotar hasta 5.</p>
           <div id="fechas"></div>
+          <p class="h-club-meta" id="club-meta" aria-live="polite"></p>
           <button type="button" class="h-btn h-btn-line" id="mas">+ Agregar otra fecha</button>
 
           <h2 style="font-size:22px;margin-top:10px">¿A quién le avisamos?</h2>
@@ -53,7 +54,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
           <input type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true" class="h-hp" />
           <button class="h-btn" type="submit">Unirme al Club</button>
           <p class="h-form-err" role="alert" hidden></p>
-          <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span class="h-ok-cod"></span><span>Te escribiremos antes de cada fecha. Si quieres cambiar tus fechas, vuelve a registrarte con el mismo correo.</span></div>
+          <div class="h-form-ok" role="status" hidden><b>¡Bienvenida al Club Celebra! 🎉</b><span class="h-ok-cod"></span><span>Te escribiremos antes de cada fecha. Para agregar más fechas, vuelve a registrarte con el mismo correo: se suman a las que ya tienes.</span></div>
         </form>
         <p class="h-fine rv" style="max-width:640px">Guardamos solo lo necesario para avisarte: tu nombre y contacto, y de cada fecha el primer nombre, la relación y el día. Nunca apellidos ni fotos, y no compartimos tus datos. <a class="h-link" href="/privacidad">Privacidad</a></p>
       </section>
@@ -62,7 +63,7 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
         <div class="h-head rv">
           <span class="h-kicker">Ideas para regalar</span>
           <h2 id="t-ideas">¿Y qué le regalo?</h2>
-          <p>Cuando se acerque la fecha te escribimos con ideas como estas, hechas a mano en el taller y con tu código de 10% (válido para una compra).</p>
+          <p>Cuando se acerque la fecha te escribimos con ideas como estas, hechas a mano en el taller y con tu código de 10% si anotaste al menos 3 fechas (válido para una compra).</p>
         </div>
         <div class="h-ideas">
           {[
@@ -123,6 +124,17 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
   });
   mas.addEventListener('click', add);
   add();
+  // Cuántas fechas le faltan para el 10% (no es obligatorio: con menos, igual se guardan).
+  const meta = document.getElementById('club-meta')!;
+  const contar = () => {
+    const n = [...box.querySelectorAll<HTMLInputElement>('[data-k="nombre"]')].filter((i) => i.value.trim()).length || 1;
+    const faltan = 3 - n;
+    meta.innerHTML = faltan >= 2 ? '🎁 <b>Bonus:</b> si anotas 2 fechas más, te llevas tu <b>10% de descuento</b>. Si no, igual te avisamos de esta.'
+      : faltan === 1 ? '🎁 <b>Bonus:</b> una fecha más y te llevas tu <b>10% de descuento</b>.'
+      : '🎉 ¡Listo! Con estas fechas te llevas tu <b>10% de descuento</b>.';
+  };
+  box.addEventListener('input', contar); box.addEventListener('click', () => setTimeout(contar)); mas.addEventListener('click', contar);
+  contar();
   // Viene desde la tarjeta del inicio: rellena la primera fecha con lo que ya eligió.
   {
     const q = new URLSearchParams(location.search);
@@ -153,8 +165,10 @@ const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
       const out = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(out.error || 'No pudimos guardarlo. Inténtalo de nuevo.');
       const cod = ok.querySelector<HTMLElement>('.h-ok-cod')!;
-      cod.textContent = out.codigo ? (out.repite ? `Actualizamos tus fechas. Tu código sigue siendo ${out.codigo} (es uno por persona).` : `Tu código de 10% es ${out.codigo}. Guárdalo y muéstralo al hacer tu pedido (válido para una compra).`) : '';
-      f.reset(); box.innerHTML = ''; add();
+      cod.textContent = out.codigo
+        ? (out.repite ? `Agregamos tus fechas (ya tienes ${out.total}). Tu código sigue siendo ${out.codigo} (es uno por persona).` : `Ya tienes ${out.total} fechas. Tu código de 10% es ${out.codigo}. Guárdalo y muéstralo al hacer tu pedido (válido para una compra).`)
+        : `Guardamos ${out.total === 1 ? 'tu fecha' : `tus ${out.total} fechas`}. Anota ${out.faltan} más con este mismo correo y te regalamos tu código de 10%.`;
+      f.reset(); box.innerHTML = ''; add(); contar();
       ok.hidden = false; ok.scrollIntoView({ block: 'center', behavior: 'smooth' });
     } catch (x) { err.textContent = (x as Error).message; err.hidden = false; }
     btn.disabled = false; btn.textContent = 'Unirme al Club';

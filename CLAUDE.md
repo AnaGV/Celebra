@@ -19,7 +19,7 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 | Ruta | Archivo | Qué es |
 |---|---|---|
 | / | src/pages/index.astro | Carrusel: el banner de Navidad (`XmasBanner.astro`) es la 1.ª lámina; se quita en enero. Club 10%, Instagram, ideas, mapa |
-| /club/ | src/pages/club.astro + worker/club.ts | Cumpleaños de seres queridos; un código de 10% por persona o correo, válido para una compra |
+| /club/ | src/pages/club.astro + worker/club.ts | Cumpleaños de seres queridos. El código de 10% (uno por correo, una compra) llega al juntar 3 fechas (`MIN_FECHAS_CODIGO` en src/config/club.ts); con menos se guardan igual, sin código. Las fechas se SUMAN entre registros del mismo correo (máx. 10). El formulario empieza con 1 fecha y un aviso «🎁 Bonus» opcional |
 | /servicios/ | src/pages/servicios.astro | "Lo hacemos nosotras" + vitrina de aliados con estilo Celebra (máx. 6, 2 por fila en teléfono, filtros si hay más de 6) + formulario "¿Quieres ser aliado de Celebra?" |
 | /directorio/ (antes /salones/, redirige) | src/pages/directorio.astro + src/config/directorio.ts | Guía neutral de Caripe: la tarjeta de Celebra siempre arriba; los aliados NO se marcan como aliados: llevan "📅 Agenda en línea" (filtro `?agenda=1`) y se mezclan con todos en el orden del día |
 | /reservar/?a=id | src/pages/reservar.astro | Reserva con un aliado |
