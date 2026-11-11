@@ -20,7 +20,8 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 |---|---|---|
 | / | src/pages/index.astro | Carrusel: el banner de Navidad (`XmasBanner.astro`) es la 1.ª lámina; se quita en enero. Club 10%, Instagram, ideas, mapa |
 | /club/ | src/pages/club.astro + worker/club.ts | Cumpleaños de seres queridos; un código de 10% por persona o correo, válido para una compra |
-| /directorio/ (antes /salones/, redirige) | src/pages/directorio.astro + src/config/directorio.ts | Directorio de Caripe; Celebra fija arriba, aliados primero con foto pequeña, "Reportar dato incorrecto" |
+| /servicios/ | src/pages/servicios.astro | "Lo hacemos nosotras" + vitrina de aliados con estilo Celebra (máx. 6, 2 por fila en teléfono, filtros si hay más de 6) + formulario "¿Quieres ser aliado de Celebra?" |
+| /directorio/ (antes /salones/, redirige) | src/pages/directorio.astro + src/config/directorio.ts | Guía neutral de Caripe: la tarjeta de Celebra siempre arriba; los aliados NO se marcan como aliados: llevan "📅 Agenda en línea" (filtro `?agenda=1`) y se mezclan con todos en el orden del día |
 | /reservar/?a=id | src/pages/reservar.astro | Reserva con un aliado |
 | /aliado/ | src/pages/aliado.astro | Panel del aliado (enlace privado `#<id>.<token>`, se recuerda en localStorage o se pega) |
 | /admin/aliados/ | src/pages/admin/aliados.astro | Admin de Ana (clave CELEBRA_ADMIN_KEY) |
@@ -60,7 +61,8 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
   - Falta: medidas y materiales reales de Ana para las piñatas, chupeteras y vasos.
 
 ## Pendientes
-- Primer aliado real.
+- Más aliados (hoy solo Cesar, sonido).
+- Aliados de retiro (tortas, pasapalos): guardar el modo y la dirección del local en la ficha y que la reserva diga "Retiras en…".
 - Decidir si se agrega un WhatsApp de respaldo y un campo "Dirección del local".
 - Plan Pro y recordatorio mensual de "sigo activo".
 - Llenar las categorías vacías del directorio.
