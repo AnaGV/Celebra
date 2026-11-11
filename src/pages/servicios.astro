@@ -57,7 +57,7 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
     const k = cats[(a.categorias || [])[0]];
     const li = el('li', 'h-al');
     const link = el('a', 'h-al-card') as HTMLAnchorElement;
-    link.href = '/reservar/?a=' + encodeURIComponent(a.id);
+    link.href = '/reservar/?a=' + encodeURIComponent(a.id) + '&desde=servicios';
     link.style.setProperty('--bg', fondoDe(k?.id || a.id));
     const foto = el('div', 'h-al-foto');
     if (a.fotos && a.fotos[0]) { const im = el('img') as HTMLImageElement; im.src = a.fotos[0]; im.alt = ''; im.loading = 'lazy'; foto.append(im); }

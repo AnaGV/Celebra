@@ -13,7 +13,7 @@ import TelInput from '../components/TelInput.astro';
       <p class="h-res-load" id="res-load">Cargando…</p>
 
       <div id="res-app" hidden>
-        <a class="h-link h-res-back" href="/directorio/">← Volver al directorio</a>
+        <a class="h-link h-res-back" data-volver href="/directorio/">← Volver al directorio</a>
         <section class="h-res-head">
           <div class="h-res-fotos" id="r-fotos"></div>
           <div>
@@ -104,7 +104,7 @@ import TelInput from '../components/TelInput.astro';
         </div>
       </div>
 
-      <div id="res-404" hidden><h1>No encontramos este aliado</h1><p><a class="h-link" href="/directorio/">Volver al directorio</a></p></div>
+      <div id="res-404" hidden><h1>No encontramos este aliado</h1><p><a class="h-link" data-volver href="/directorio/">← Volver al directorio</a></p></div>
     </main>
     <Footer />
   </div>
@@ -351,4 +351,26 @@ import TelInput from '../components/TelInput.astro';
     modoConsulta();
     $('#res-load').hidden = true; $('#res-app').hidden = false;
   })();
+</script>
+
+<script>
+  // «Volver» lleva a donde estaba el cliente: Servicios o el Directorio (con sus filtros y su posición).
+  const ORIGEN: Record<string, { ruta: string; href: string; txt: string }> = {
+    servicios: { ruta: '/servicios/', href: '/servicios/#t-ali', txt: '← Volver a Servicios' },
+    directorio: { ruta: '/directorio/', href: '/directorio/', txt: '← Volver al directorio' },
+  };
+  let ref: URL | null = null;
+  try { ref = document.referrer ? new URL(document.referrer) : null; } catch {}
+  if (ref && ref.origin !== location.origin) ref = null;
+  const desde = new URLSearchParams(location.search).get('desde') || '';
+  const o = ORIGEN[desde] || (ref && Object.values(ORIGEN).find((x) => ref!.pathname.startsWith(x.ruta))) || ORIGEN.directorio;
+  const vieneDeAhi = !!ref && ref.pathname.startsWith(o.ruta);
+  document.querySelectorAll<HTMLAnchorElement>('[data-volver]').forEach((a) => {
+    a.textContent = o.txt;
+    a.href = vieneDeAhi ? ref!.pathname + ref!.search + (o === ORIGEN.servicios ? '#t-ali' : '') : o.href;
+    a.addEventListener('click', (e) => {
+      // Si llegó desde esa página, volver con el historial deja los filtros y el scroll donde estaban.
+      if (vieneDeAhi && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  });
 </script>

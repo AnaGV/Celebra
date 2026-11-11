@@ -128,7 +128,7 @@ const quitar = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('Hola
     const servicio = (nombreCat[cat] || nombreCat[p.categorias[0]])?.nombre.toLowerCase() || 'su servicio';
     if (p.aliado) {
       const a = el('a', 'h-btn h-dir-wa', 'Ver disponibilidad y reservar') as HTMLAnchorElement;
-      a.href = '/reservar/?a=' + encodeURIComponent(p.aliado); acc.append(a);
+      a.href = '/reservar/?a=' + encodeURIComponent(p.aliado) + '&desde=directorio'; acc.append(a);
     } else if (p.tel && esCelular(p.tel)) {
       const a = el('a', 'h-btn h-dir-wa', 'Ir al WhatsApp') as HTMLAnchorElement;
       a.href = `https://wa.me/${p.tel}?text=${encodeURIComponent(`Hola, ${p.nombre}. Los encontré en el directorio de Celebra (somoscelebrave.com) y quisiera información sobre ${servicio} para una fiesta.`)}`;
