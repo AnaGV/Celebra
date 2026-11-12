@@ -871,3 +871,11 @@
   .home .h-ali-info{display:inline-flex}
   .home .h-ali-lead,.home .h-res-info>.h-ali-nota{display:none}
 }
+
+/* Reservar (inicio): «Cómo funciona» en una ventana */
+.home .h-res-tit{width:100%}
+.home .h-res-tit .h-ali-top{width:100%}
+.home .h-info-res{display:inline-flex;border-color:#cfc4f5;color:var(--accent,#6043e1)}
+.home .h-info-res span{background:var(--accent,#6043e1)}
+.home .h-res-aviso{margin:0;font-size:14.5px;font-weight:700;color:var(--plum)}
+.home .h-ali-dlg .h-res-steps{margin:0 0 14px;padding-left:20px;display:grid;gap:8px;font-size:15px;line-height:1.5;color:var(--ink)}

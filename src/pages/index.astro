@@ -120,21 +120,32 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       <section class="h-sec h-wrap" id="reservar" aria-labelledby="t-res">
         <div class="h-res rv">
           <div class="h-res-tit">
-            <span class="h-kicker">Reservar</span>
+            <div class="h-ali-top">
+              <span class="h-kicker">Reservar</span>
+              <button type="button" class="h-ali-info h-info-res" data-res-info aria-haspopup="dialog"><span aria-hidden="true">i</span>Cómo funciona</button>
+            </div>
             <h2 id="t-res">Cotiza y reserva la fecha de tu fiesta</h2>
           </div>
-          <div class="h-res-como">
-            <p class="h-res-como-t">Cómo funciona</p>
-            <ol class="h-res-steps">
-              <li><b>Cuéntanos qué necesitas:</b> un pack completo o solo la piñata, la chupetera o el cotillón.</li>
-              <li><b>Te confirmamos disponibilidad</b> el mismo día, con el precio final por escrito.</li>
-              <li><b>Con un abono reservamos tu fecha</b> y empezamos a trabajar a mano.</li>
-              <li><b>Retiras en el local</b> el día acordado.</li>
-            </ol>
-            <p class="h-fine">Pide con 2 a 3 semanas de anticipación: los fines de semana se llenan primero.</p>
-          </div>
+          <p class="h-res-como h-res-aviso">⏰ Pide con 2 a 3 semanas de anticipación.</p>
           <div id="cot-home" class="cot-home"></div>
         </div>
+        <dialog class="h-ali-dlg" id="res-dlg" aria-labelledby="res-dlg-t">
+          <button type="button" class="h-ali-x" data-cerrar aria-label="Cerrar">✕</button>
+          <h3 id="res-dlg-t">Cómo funciona</h3>
+          <ol class="h-res-steps">
+            <li><b>Cuéntanos qué necesitas:</b> un pack completo o solo la piñata, la chupetera o el cotillón.</li>
+            <li><b>Te confirmamos disponibilidad</b> el mismo día, con el precio final por escrito.</li>
+            <li><b>Con un abono reservamos tu fecha</b> y empezamos a trabajar a mano.</li>
+            <li><b>Retiras en el local</b> el día acordado.</li>
+          </ol>
+          <p>Pide con 2 a 3 semanas de anticipación: los fines de semana se llenan primero.</p>
+          <button type="button" class="h-btn" data-cerrar>Entendido</button>
+        </dialog>
+        <script>
+          const dlg = document.getElementById('res-dlg') as HTMLDialogElement;
+          document.querySelector('[data-res-info]')!.addEventListener('click', () => dlg.showModal());
+          dlg.addEventListener('click', (e) => { const t = e.target as HTMLElement; if (t === dlg || t.closest('[data-cerrar]')) dlg.close(); });
+        </script>
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-club">
