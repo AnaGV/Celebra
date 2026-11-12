@@ -64,7 +64,42 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       .run();
   }
 
-  // TODO: enviar email a OWNER_EMAIL con Resend para verificar el pago.
-
+  // Sin n8n todavía: el pedido se guarda en R2 y te llega un correo para verificar el pago y enviar el libro.
+  const pedido = { ...body, codigo, cfCountry, creado: new Date().toISOString(), estado: 'pendiente' };
+  const e = env as any;
+  try { await e.FOTOS?.put(`pedidos/${body.ref}.json`, JSON.stringify(pedido), { httpMetadata: { contentType: 'application/json' } }); } catch {}
+  try { await avisarPedido(e, pedido); } catch {}
   return json({ ok: true, ref: body.ref });
 };
+
+function b64(t: string) { let o = ''; for (const b of new TextEncoder().encode(t)) o += String.fromCharCode(b); return btoa(o).replace(/.{1,76}/g, '$&\r\n'); }
+const enc = (t: string) => { let o = ''; for (const b of new TextEncoder().encode(t)) o += String.fromCharCode(b); return `=?UTF-8?B?${btoa(o)}?=`; };
+
+/** Correo a Celebra con todo lo necesario para verificar el pago y mandar el libro. */
+async function avisarPedido(env: any, p: any) {
+  if (!env.CONTACTO) return;
+  const metodo = p.method === 'pago_movil' ? 'Pago Móvil' : p.method === 'binance' ? 'Binance' : 'Pagar en el local';
+  const lineas = [
+    `Nuevo pedido ${p.ref} por ${metodo}. Verifica el pago y envía el libro.`, '',
+    `Producto: ${p.productId}`, `Monto: USD ${p.amountUsd}`,
+    `Nombre: ${p.name || '-'}`, `Correo: ${p.email || '-'}`, `Teléfono: ${p.phone || '-'}`,
+    p.method === 'pago_movil' ? `Referencia bancaria: ${p.bankReference}` : '',
+    p.method === 'binance' ? `ID de orden Binance: ${p.binanceOrderId}` : '',
+    p.codigo ? `Código de descuento: ${p.codigo}` : '',
+    `País elegido: ${p.country || '-'} · País según Cloudflare: ${p.cfCountry || '-'}`, '',
+    'Cuando confirmes el pago, respóndele a este correo con el PDF (responder le escribe al cliente).',
+  ].filter((l) => l !== '');
+  const desde = 'contacto@somoscelebrave.com';
+  const para = env.CONTACTO_DESTINO || 'somoscelebra.ve@gmail.com';
+  const okMail = typeof p.email === 'string' && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(p.email);
+  const raw = [
+    `From: ${enc('Celebra · Pedidos')} <${desde}>`, `To: <${para}>`,
+    ...(okMail ? [`Reply-To: <${p.email}>`] : []),
+    `Subject: ${enc(`Pedido ${p.ref} · ${metodo} · USD ${p.amountUsd}`)}`,
+    `Message-ID: <${crypto.randomUUID()}@somoscelebrave.com>`, `Date: ${new Date().toUTCString()}`,
+    'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(lineas.join('\n')),
+  ].join('\r\n');
+  // @ts-ignore módulo propio de Cloudflare Workers
+  const { EmailMessage } = await import('cloudflare:email');
+  await env.CONTACTO.send(new EmailMessage(desde, para, raw));
+}
