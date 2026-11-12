@@ -879,3 +879,8 @@
 .home .h-info-res span{background:var(--accent,#6043e1)}
 .home .h-res-aviso{margin:0;font-size:14.5px;font-weight:700;color:var(--plum)}
 .home .h-ali-dlg .h-res-steps{margin:0 0 14px;padding-left:20px;display:grid;gap:8px;font-size:15px;line-height:1.5;color:var(--ink)}
+.home .h-res-como-web{display:none}
+@media (min-width:900px){
+  .home .h-res-como-web{display:flex}
+  .home .h-res-aviso,.home .h-info-res{display:none}
+}
