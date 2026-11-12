@@ -180,9 +180,7 @@ import '@fontsource/great-vibes/400.css';
   <div class="tag">
     <h2>Feliz Navidad</h2>
     <a href="/fiestas/navidad/" tabindex="0">Haz tu pedido navideño</a>
-    <div class="xm-cuenta" data-cuenta data-v="C" hidden>
-      <div class="xa"><b data-n></b><span><em data-dias>días</em> para Navidad</span></div>
-      <div class="xb"><i>Faltan</i><b data-n></b><span data-dias>días</span></div>
+    <div class="xm-cuenta" data-cuenta data-pill="blanco" hidden>
       <div class="xc"><p>Navidad llega en</p><div><span><b data-n></b><small data-dias>días</small></span><span><b data-h></b><small>horas</small></span><span><b data-m></b><small>min</small></span></div></div>
     </div>
   </div>
@@ -190,8 +188,8 @@ import '@fontsource/great-vibes/400.css';
     (() => {
       const el = document.querySelector<HTMLElement>('[data-cuenta]');
       if (!el) return;
-      const v = new URLSearchParams(location.search).get('cuenta');
-      if (v) el.dataset.v = v.toUpperCase();
+      const pill = new URLSearchParams(location.search).get('pill');
+      if (pill) el.dataset.pill = pill;
       const pintar = () => {
         const ahora = new Date();
         const nav = new Date(ahora.getFullYear(), 11, 25);
@@ -199,8 +197,8 @@ import '@fontsource/great-vibes/400.css';
         const dias = Math.ceil(ms / 864e5);
         if (dias < 1 || dias > 60) { el.hidden = true; return; }
         const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
-        el.querySelectorAll('[data-n]').forEach((x) => (x.textContent = String(el.dataset.v === 'C' ? d : dias)));
-        el.querySelectorAll('[data-dias]').forEach((x) => (x.textContent = (el.dataset.v === 'C' ? d : dias) === 1 ? 'día' : 'días'));
+        el.querySelectorAll('[data-n]').forEach((x) => (x.textContent = String(d)));
+        el.querySelectorAll('[data-dias]').forEach((x) => (x.textContent = d === 1 ? 'día' : 'días'));
         el.querySelectorAll('[data-h]').forEach((x) => (x.textContent = String(h).padStart(2, '0')));
         el.querySelectorAll('[data-m]').forEach((x) => (x.textContent = String(m).padStart(2, '0')));
         el.hidden = false;
@@ -223,7 +221,24 @@ import '@fontsource/great-vibes/400.css';
   .xmas .tag h2{margin:0;font:400 clamp(44px,6.2vw,96px)/1 'Great Vibes',cursive;color:#fff;text-shadow:0 3px 0 rgba(60,40,140,.35),0 8px 18px rgba(30,15,70,.35)}
   .xmas .tag a{display:inline-flex;align-items:center;min-height:46px;padding:0 22px;border-radius:14px;background:#c8102e;color:#fff;font-weight:800;font-size:clamp(14px,1.3vw,17px);text-decoration:none;box-shadow:0 8px 18px rgba(120,0,20,.3);transform:rotate(-2deg)}
   .xmas .tag a:hover{background:#a50d26}
-  .xmas .xm-cuenta{display:none}
+  .xmas .xm-cuenta[hidden]{display:none}
+  @media (min-width:761px){
+    .xmas .tag{left:max(76px,3.5%)}
+    .xmas .xc span{width:62px;height:62px;border-radius:14px}
+    .xmas .xc span b{font-size:26px}
+    .xmas .xc span small{font-size:10px}
+    .xmas .xc p{font-size:13.5px;padding:4px 12px}
+  }
+  .xmas .xm-cuenta>div{display:none}
+  .xmas .xm-cuenta .xc{display:flex;flex-direction:column;align-items:flex-start;gap:8px;color:#fff}
+  .xmas .xc p{margin:0;padding:5px 14px;border-radius:999px;font-weight:800;font-size:15px;letter-spacing:.01em;box-shadow:0 6px 16px -6px rgba(20,10,60,.6);background:#fff;color:#c8102e}
+  .xmas .xm-cuenta[data-pill='dorado'] .xc p{background:#f4c24d;color:#4a1a12}
+  .xmas .xm-cuenta[data-pill='rosa'] .xc p{background:#db3978;color:#fff}
+  .xmas .xm-cuenta[data-pill='negro'] .xc p{background:#16171a;color:#fff}
+  .xmas .xc>div{display:flex;gap:8px}
+  .xmas .xc span{display:flex;flex-direction:column;align-items:center;justify-content:center;width:70px;height:70px;border-radius:16px;background:rgba(255,255,255,.95);color:#c8102e;box-shadow:0 10px 22px -10px rgba(20,10,60,.5)}
+  .xmas .xc span b{font-size:32px;font-weight:900;line-height:1;letter-spacing:-.02em}
+  .xmas .xc span small{font-size:11px;font-weight:800;color:#16171a;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
   /* animaciones (se reinician al activar la escena) */
   .scene.on .slide-in{animation:slideIn 4.5s cubic-bezier(.22,.8,.3,1) both}
   .scene.on .bob{animation:bob 2s ease-in-out infinite alternate}
@@ -275,25 +290,7 @@ import '@fontsource/great-vibes/400.css';
   @media (max-width:760px){.xmas .tag{left:50%;top:4%;transform:translateX(-50%);align-items:center}.xmas .tag h2{font-size:64px;text-align:center;line-height:.95}
     .xmas svg.scene{-webkit-mask-image:linear-gradient(to bottom,transparent calc(var(--top,0px) - 2px),#000 calc(var(--top,0px) + 70px));mask-image:linear-gradient(to bottom,transparent calc(var(--top,0px) - 2px),#000 calc(var(--top,0px) + 70px))}
     .xmas .tag{gap:10px}
-    .xmas .xm-cuenta:not([hidden]){display:block;margin-top:4px;color:#fff;text-align:center}
-    .xmas .xm-cuenta>div{display:none}
-    .xmas .xm-cuenta[data-v='A'] .xa,.xmas .xm-cuenta[data-v='B'] .xb,.xmas .xm-cuenta[data-v='C'] .xc{display:flex}
-    /* A: número grande */
-    .xmas .xa{flex-direction:column;align-items:center;line-height:1}
-    .xmas .xa b{font-size:76px;font-weight:900;letter-spacing:-.04em;text-shadow:0 4px 0 rgba(120,0,20,.35),0 10px 24px rgba(20,10,60,.35)}
-    .xmas .xa span{font-size:17px;font-weight:800;letter-spacing:.02em;margin-top:2px;text-shadow:0 2px 8px rgba(20,10,60,.4)}
-    /* B: hoja de calendario */
-    .xmas .xb{flex-direction:column;align-items:center;width:118px;margin:0 auto;border-radius:16px;overflow:hidden;background:#fff;color:#16171a;box-shadow:0 14px 30px -10px rgba(20,10,60,.55);transform:rotate(3deg)}
-    .xmas .xb i{display:block;width:100%;background:#c8102e;color:#fff;font-style:normal;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:6px 0}
-    .xmas .xb b{font-size:54px;font-weight:900;line-height:1;margin:8px 0 0;color:#c8102e;letter-spacing:-.03em}
-    .xmas .xb span{font-size:14px;font-weight:800;padding:0 0 10px}
-    /* C: reloj con días, horas y minutos */
-    .xmas .xc{flex-direction:column;align-items:center;gap:6px}
-    .xmas .xc p{margin:0;padding:5px 14px;border-radius:999px;background:#16171a;color:#fff;font-weight:800;font-size:15px;letter-spacing:.01em;box-shadow:0 6px 16px -6px rgba(20,10,60,.6)}
-    .xmas .xc>div{display:flex;gap:8px}
-    .xmas .xc span{display:flex;flex-direction:column;align-items:center;justify-content:center;width:70px;height:70px;border-radius:16px;background:rgba(255,255,255,.95);color:#c8102e;box-shadow:0 10px 22px -10px rgba(20,10,60,.5)}
-    .xmas .xc span b{font-size:32px;font-weight:900;line-height:1;letter-spacing:-.02em}
-    .xmas .xc span small{font-size:11px;font-weight:800;color:#16171a;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+    .xmas .xm-cuenta .xc{align-items:center}
     .xmas{background:#3f28ad}.xmas[data-scene='1']{background:#3a5bbd}.xmas[data-scene='2']{background:#c26a5c}.xmas .tag{top:5%;width:90%}}
 
 </style>
