@@ -136,7 +136,7 @@ const datos = {
 
 <script>
   type Datos = { anticipacion: Record<string, number>; waNum: string; tipos: { name: string }[]; packs: { id: string; name: string; invitados: string; max: number; incluye: string[] }[]; items: string[] };
-  type Estado = { tipo: string; tipoOtra: string; fecha: string; invitados: string; modo: string; pack: string; items: string[]; otro: string; tematica: string; fotoUrl: string; nombre: string; correo: string; promos: boolean };
+  type Estado = { tipo: string; tipoOtra: string; fecha: string; invitados: string; modo: string; pack: string; items: string[]; otro: string; tematica: string; fotoUrl: string; nombre: string; correo: string; promos: boolean; invAuto?: boolean };
   const D: Datos = JSON.parse(document.getElementById('cot-datos')!.textContent || '{}');
   const ov = document.getElementById('cot-ov')!;
   const slot = ov.querySelector<HTMLElement>('.cot-slot')!;
@@ -239,13 +239,20 @@ const datos = {
   // ---------- Formulario → estado ----------
   f.addEventListener('input', leer);
   f.addEventListener('change', leer);
+  // Al elegir un pack, invitados toma su máximo (si estaba vacío o lo habíamos puesto nosotros)
+  function invDePack() {
+    const p = packDe(E.pack);
+    if (!p || p.max >= 9999 || (E.invitados && !E.invAuto)) return;
+    E.invitados = String(p.max); E.invAuto = true;
+  }
   function leer(e: Event) {
     const t = e.target as HTMLInputElement;
     if (!t.name || t.name === 'foto') return;
     if (t.name === 'items') E.items = [...f.querySelectorAll<HTMLInputElement>('input[name="items"]:checked')].map((i) => i.value);
     else if (t.name === 'promos') E.promos = t.checked;
     else if (t.name in E) (E as any)[t.name] = t.value;
-    if (t.name === 'pack' && t.checked) E.modo = 'pack';
+    if (t.name === 'invitados') E.invAuto = false;
+    if (t.name === 'pack' && t.checked) { E.modo = 'pack'; invDePack(); fIn('invitados').value = E.invitados; }
     err.hidden = true;
     guardar(); mostrar();
   }
@@ -430,7 +437,7 @@ const datos = {
   // Precarga según el botón tocado
   function precargar(src: { pack?: string; item?: string; tipo?: string; tematica?: string; paso?: string }) {
     if (!$('.cot-ok').hidden) cero();
-    if (src.pack && packDe(src.pack)) { E.modo = 'pack'; E.pack = src.pack; }
+    if (src.pack && packDe(src.pack)) { E.modo = 'pack'; E.pack = src.pack; invDePack(); }
     if (src.item) { E.modo = 'sueltas'; if (!E.items.includes(src.item)) E.items = [...E.items, src.item]; }
     if (src.tipo) {
       if (D.tipos.some((t) => t.name === src.tipo)) E.tipo = src.tipo;
