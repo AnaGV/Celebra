@@ -884,3 +884,12 @@
   .home .h-res-como-web{display:flex}
   .home .h-res-aviso,.home .h-info-res{display:none}
 }
+/* Carrusel del inicio en el teléfono: más bajo, todas las láminas con la misma altura */
+@media (max-width:760px){
+  .h-slide-bg,.h-slide.full .h-slide-bg{aspect-ratio:16/10}
+  .h-slide-in,.h-slide.full .h-slide-in{padding:14px 20px 40px}
+  .h-slide-txt,.h-slide.full .h-slide-txt{gap:8px}
+  .h-slide-t,.h-slide.full .h-slide-t{font-size:28px}
+  .h-slide-d,.h-slide.full .h-slide-d{display:none}
+  .h-xmas-slide{min-height:0}
+}

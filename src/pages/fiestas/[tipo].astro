@@ -12,7 +12,7 @@ export function getStaticPaths() {
 }
 const { t } = Astro.props;
 const c = site.contact;
-const wa = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(`¡Hola Celebra! Quiero cotizar para un ${t.name.toLowerCase()}. Fecha: … Invitados: … Temática: …`)}`;
+const wa = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent(`¡Hola Celebra! Quiero cotizar para ${t.temporada ? t.name : "un " + t.name.toLowerCase()}. Fecha: … Invitados: … Temática: …`)}`;
 const otros = tipos.filter((x) => x.slug !== t.slug);
 const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
 ---
@@ -35,7 +35,7 @@ const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde 
       </section>
 
       <section class="h-sec h-wrap" aria-labelledby="t-hac">
-        <div class="h-head rv"><span class="h-kicker">Lo que hacemos</span><h2 id="t-hac">Para tu {t.name.toLowerCase()}</h2></div>
+        <div class="h-head rv"><span class="h-kicker">Lo que hacemos</span><h2 id="t-hac">Para tu {t.temporada ? t.name : t.name.toLowerCase()}</h2></div>
         <ul class="h-list">{t.hacemos.map((x, i) => <li class="rv" style={`--d:${i * 50}ms`}>{x}</li>)}</ul>
       </section>
 
@@ -44,11 +44,13 @@ const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde 
         <div class="h-tags rv">{t.tematicas.map((x) => <span>{x}</span>)}</div>
       </section>
 
+{!t.temporada && (
       <section class="h-sec h-wrap" aria-labelledby="t-pk">
         <div class="h-head rv"><span class="h-kicker">Packs</span><h2 id="t-pk">Según tus invitados</h2></div>
         <PacksCarrusel tag="El más pedido" tipo={t.name} />
         <p class="h-fine rv">Solo retiro en el local de Caripe. No hacemos envíos a domicilio.</p>
       </section>
+      )}
 
       <section class="h-sec h-wrap" aria-labelledby="t-otr">
         <div class="h-head rv"><span class="h-kicker">Otras celebraciones</span><h2 id="t-otr">También hacemos</h2></div>

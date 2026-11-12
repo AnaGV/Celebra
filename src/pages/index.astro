@@ -71,7 +71,7 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
           </div>
         </div>
         <div class="h-banners">
-          {tipos.map((t, i) => (
+          {tipos.filter((t) => !t.temporada).map((t, i) => (
             <a class:list={['h-banner rv', { big: i === 0 }]} href={`/fiestas/${t.slug}/`} style={`--bg:${t.bg};--ink:${t.ink};--d:${i * 70}ms`}>
               <span class="h-banner-txt">
                 <b>{t.name}</b>

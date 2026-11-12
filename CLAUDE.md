@@ -18,7 +18,7 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 ### Mapa
 | Ruta | Archivo | Qué es |
 |---|---|---|
-| / | src/pages/index.astro | Carrusel: el banner de Navidad (`XmasBanner.astro`) es la 1.ª lámina; se quita en enero. Club 10%, Instagram, ideas, mapa |
+| / | src/pages/index.astro | Carrusel: el banner de Navidad (`XmasBanner.astro`) es la 1.ª lámina; se quita en enero. En el teléfono el carrusel es más bajo (todas las láminas igual de altas, foto 16:10, sin descripción) y el banner muestra la cuenta regresiva «Navidad llega en» (días/horas/min, opción C; `?cuenta=A|B` muestra las otras). «Haz tu pedido navideño» → /fiestas/navidad/ (tipo con `temporada: true`: tiene página y sale en el cotizador, pero no en la grilla del inicio ni con packs). Club 10%, Instagram, ideas, mapa |
 | /club/ | src/pages/club.astro + worker/club.ts | Cumpleaños de seres queridos. El código de 10% (uno por correo, una compra) llega al juntar 3 fechas (`MIN_FECHAS_CODIGO` en src/config/club.ts); con menos se guardan igual, sin código. Las fechas se SUMAN entre registros del mismo correo (máx. 10). El formulario empieza con 1 fecha y un aviso «🎁 Bonus» opcional |
 | /servicios/ | src/pages/servicios.astro | "Lo hacemos nosotras" + vitrina de aliados con estilo Celebra (máx. 6, 2 por fila en teléfono, filtros si hay más de 6) + formulario "¿Quieres ser aliado de Celebra?" (en el teléfono solo título y 3 puntos; el texto completo va en «ⓘ Más info»; «¿Cómo atiendes?» es desplegable) |
 | /directorio/ (antes /salones/, redirige) | src/pages/directorio.astro + src/config/directorio.ts | Guía neutral de Caripe: la tarjeta de Celebra siempre arriba; los aliados NO se marcan como aliados: llevan "📅 Agenda en línea" (filtro `?agenda=1`) y se mezclan con todos en el orden del día |
@@ -79,5 +79,5 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
 - Meta: verificación de dominio y CAPI.
 - Probar el resumen diario del Club.
 - Automatización con n8n.
-- Quitar el banner de Navidad en enero.
+- Quitar el banner de Navidad en enero (y el tipo «navidad» de src/config/celebra.ts).
 - Agenda del taller parte 2: panel «Confirmar pedido» + calendario de colores por carga.

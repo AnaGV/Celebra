@@ -21,6 +21,8 @@ export interface TipoFiesta {
   art: string;
   /** Ilustración de la marca (public/img/marca). */
   img: string;
+  /** De temporada: tiene su página, pero no sale en la grilla del inicio. */
+  temporada?: boolean;
 }
 
 const S = 'stroke="#4a1a4f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"';
@@ -73,6 +75,19 @@ export const tipos: TipoFiesta[] = [
     ink: '#6043e1',
     img: '/img/marca/corona.webp',
     art: `<path d="M44 96l10-40 16 22 10-30 10 30 16-22 10 40z" fill="#fde9a6" ${S}/><rect x="44" y="96" width="72" height="12" rx="3" fill="#e0d1f5" ${S}/><circle cx="54" cy="54" r="5" fill="#f8bbd0" ${S}/><circle cx="80" cy="44" r="5" fill="#c5e3f6" ${S}/><circle cx="106" cy="54" r="5" fill="#c8f0dc" ${S}/>`,
+  },
+  {
+    slug: 'navidad',
+    name: 'Navidad',
+    short: 'Piñatas, chupeteras y detalles navideños hechos a mano.',
+    intro: 'En Celebra la Navidad también se hace a mano: piñatas de Santa, árbol y galleta, chupeteras y vasos navideños para regalar o para la mesa de la familia y la oficina.',
+    hacemos: ['Piñata de Santa, árbol o galleta', 'Chupetera navideña', 'Vasos y detalles para regalar', 'Cotillón navideño', 'Regalos para empresas y equipos'],
+    tematicas: ['Santa Claus', 'Renos', 'Muñeco de nieve', 'Galleta de jengibre', 'Árbol de Navidad', 'Navidad azul'],
+    bg: '#e6ecff',
+    ink: '#c8102e',
+    img: '/img/navidad/pin-santa.webp',
+    art: '',
+    temporada: true,
   },
 ];
 
