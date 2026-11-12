@@ -34,9 +34,9 @@ const datos = {
         </div>
 
         <ol class="cot-pasos" aria-label="Pasos">
-          <li><button type="button" data-ir="0"><span>1</span>Tu fiesta</button></li>
-          <li><button type="button" data-ir="1"><span>2</span>Cómo la imaginas</button></li>
-          <li><button type="button" data-ir="2"><span>3</span>Tus datos</button></li>
+          <li><button type="button" data-ir="0"><span>1</span><em class="cot-pl">Tu fiesta</em></button></li>
+          <li><button type="button" data-ir="1"><span>2</span><em class="cot-pl">Cómo la imaginas</em></button></li>
+          <li><button type="button" data-ir="2"><span>3</span><em class="cot-pl">Tus datos</em></button></li>
         </ol>
 
         <div class="cot-resumen" aria-live="polite" hidden></div>
@@ -46,11 +46,13 @@ const datos = {
             <div class="cot-pista">
               <!-- Paso 1 -->
               <section class="cot-paso" data-paso="0" aria-label="Paso 1 de 3: Tu fiesta">
-                <label class="cot-fecha">
-                  <span class="cot-fecha-t">📅 ¿Para cuándo es tu fiesta?</span>
-                  <input type="date" name="fecha" required />
+                <div class="cot-fecha">
+                  <p class="cot-fecha-t" id="cot-fecha-t">¿Para cuándo es tu fiesta?</p>
+                  <button type="button" class="cot-fecha-sel" data-fecha-sel aria-haspopup="true" aria-expanded="false" aria-labelledby="cot-fecha-t"></button>
+                  <div class="cot-cal" data-cal role="group" aria-labelledby="cot-fecha-t" hidden></div>
                   <small>Primero revisamos que tengamos ese día disponible para ti.</small>
-                </label>
+                  <input type="hidden" name="fecha" />
+                </div>
                 <p class="cot-aviso" data-aviso-fecha hidden></p>
                 <p class="cot-preg">¿Qué celebras?</p>
                 <div class="cot-tipos">
@@ -171,13 +173,13 @@ const datos = {
   // ---------- Estado → formulario ----------
   const fIn = (n: string) => f.elements.namedItem(n) as any;
   function pintar() {
-    fIn('fecha').min = hoy();
     f.querySelectorAll<HTMLInputElement>('input[name="tipo"]').forEach((i) => (i.checked = i.value === E.tipo));
     f.querySelectorAll<HTMLInputElement>('input[name="modo"]').forEach((i) => (i.checked = i.value === E.modo));
     f.querySelectorAll<HTMLInputElement>('input[name="pack"]').forEach((i) => (i.checked = i.value === E.pack));
     f.querySelectorAll<HTMLInputElement>('input[name="items"]').forEach((i) => (i.checked = E.items.includes(i.value)));
-    for (const k of ['tipoOtra', 'fecha', 'invitados', 'otro', 'tematica', 'nombre', 'correo'] as const) if (fIn(k).value !== E[k]) fIn(k).value = E[k];
+    for (const k of ['tipoOtra', 'invitados', 'otro', 'tematica', 'nombre', 'correo'] as const) if (fIn(k).value !== E[k]) fIn(k).value = E[k];
     fIn('promos').checked = E.promos;
+    pintarCal();
     mostrar();
   }
   // Partes que dependen de lo elegido + resumen en vivo
@@ -252,6 +254,50 @@ const datos = {
     if (b) { E.modo = 'pack'; E.pack = b.dataset.usarPack!; guardar(); pintar(); ir(1); }
   });
 
+  // ---------- Calendario propio (mobile first) ----------
+  const cal = $('[data-cal]'), selF = $('[data-fecha-sel]');
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  let mesVista: Date | null = null;
+  const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const fechaCorta = (iso: string) => { const d = new Date(iso + 'T12:00'); return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()].slice(0, 3)} ${d.getFullYear()}`; };
+  let calAbierto = false;
+  function pintarCal() {
+    const h = hoy();
+    const elegida = !!E.fecha && E.fecha >= h;
+    if (!mesVista) mesVista = new Date((elegida ? E.fecha : h).slice(0, 7) + '-01T12:00');
+    const y = mesVista.getFullYear(), m = mesVista.getMonth();
+    const off = (new Date(y, m, 1, 12).getDay() + 6) % 7, nd = new Date(y, m + 1, 0, 12).getDate();
+    const esPrimerMes = `${y}-${p2(m + 1)}` <= h.slice(0, 7);
+    let html = `<div class="cot-cal-top"><button type="button" data-mes="-1" aria-label="Mes anterior"${esPrimerMes ? ' disabled' : ''}>‹</button><b>${MESES[m]} ${y}</b><button type="button" data-mes="1" aria-label="Mes siguiente">›</button></div><div class="cot-cal-grid">`;
+    html += ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d) => `<span class="cot-cal-dow" aria-hidden="true">${d}</span>`).join('') + '<span></span>'.repeat(off);
+    for (let d = 1; d <= nd; d++) {
+      const iso = `${y}-${p2(m + 1)}-${p2(d)}`, pasado = iso < h, dom = (off + d - 1) % 7 === 6;
+      const cls = ['cot-dia', dom ? 'dom' : '', iso === h ? 'hoy' : '', iso === E.fecha ? 'on' : ''].join(' ');
+      html += `<button type="button" class="${cls}" data-d="${iso}"${pasado ? ' disabled' : ''} aria-pressed="${iso === E.fecha}" aria-label="${fechaTxt(iso)}${dom ? ' (solo retiro)' : ''}">${d}</button>`;
+    }
+    cal.innerHTML = html + '</div>';
+    cal.hidden = !calAbierto;
+    selF.classList.toggle('abierto', calAbierto);
+    selF.classList.toggle('vacio', !elegida);
+    selF.setAttribute('aria-expanded', String(calAbierto));
+    selF.innerHTML = `<span class="cot-fecha-ico" aria-hidden="true">📅</span><b>${elegida ? fechaCorta(E.fecha) : 'Elige la fecha'}</b><i aria-hidden="true">▾</i>`;
+    fIn('fecha').value = E.fecha;
+  }
+  cal.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const dia = t.closest<HTMLElement>('[data-d]');
+    if (dia) { E.fecha = dia.dataset.d!; calAbierto = false; err.hidden = true; guardar(); pintarCal(); mostrar(); alto(); return; }
+    const mes = t.closest<HTMLElement>('[data-mes]');
+    if (mes && mesVista) { mesVista = new Date(mesVista.getFullYear(), mesVista.getMonth() + +mes.dataset.mes!, 1, 12); pintarCal(); alto(); }
+  });
+  selF.addEventListener('click', () => { calAbierto = !calAbierto; mesVista = null; pintarCal(); alto(); if (calAbierto) cal.querySelector<HTMLElement>('.cot-dia.on, .cot-dia:not(:disabled)')?.focus({ preventScroll: true }); });
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (calAbierto && t.isConnected && !t.closest('.cot-fecha')) { calAbierto = false; pintarCal(); alto(); }
+  });
+  function abrirCal() { if (!calAbierto) { calAbierto = true; pintarCal(); alto(); } }
+
   // ---------- Pasos que se deslizan ----------
   let paso = 0;
   const atras = $('[data-atras]'), sig = $('[data-sig]'), enviar = $('.cot-enviar');
@@ -276,7 +322,7 @@ const datos = {
   const alto = () => { vista.style.height = pasos[paso].offsetHeight + 'px'; };
   new ResizeObserver(alto).observe(pista);
   pasos.forEach((p) => new ResizeObserver(() => { if (pasos[paso] === p) alto(); }).observe(p));
-  sig.addEventListener('click', () => { const m = falta(paso); if (m) { err.textContent = m; err.hidden = false; return; } err.hidden = true; ir(paso + 1); });
+  sig.addEventListener('click', () => { const m = falta(paso); if (m) { err.textContent = m; err.hidden = false; if (paso === 0 && !E.fecha) setTimeout(abrirCal); return; } err.hidden = true; ir(paso + 1); });
   atras.addEventListener('click', () => { err.hidden = true; ir(paso - 1, true); });
   cot.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-ir]'); if (b) { err.hidden = true; ir(+b.dataset.ir!, +b.dataset.ir! < paso); } });
   // Deslizar con el dedo
@@ -291,7 +337,7 @@ const datos = {
 
   // ---------- Empezar de cero ----------
   function cero() {
-    E = VACIO(); guardar();
+    E = VACIO(); guardar(); calAbierto = false; mesVista = null;
     foto.value = ''; fotoImg.hidden = true; fotoImg.removeAttribute('src'); fotoEst.hidden = true;
     $('.cot-ok').hidden = true; f.hidden = false; cot.querySelector<HTMLElement>('.cot-pasos')!.hidden = false;
     err.hidden = true; pintar(); ir(0, true);
@@ -367,7 +413,7 @@ const datos = {
     slot.append(cot); ov.hidden = false; document.documentElement.classList.add('cot-on');
     requestAnimationFrame(() => ov.classList.add('in'));
     history.pushState({ cot: 1 }, ''); // el botón «atrás» del teléfono cierra el cotizador
-    setTimeout(() => cot.querySelector<HTMLElement>(paso === 0 && !E.fecha ? 'input[name="fecha"]' : '.cot-paso:not([inert]) input, .cot-paso:not([inert]) button')?.focus({ preventScroll: true }), 250);
+    setTimeout(() => cot.querySelector<HTMLElement>(paso === 0 && !E.fecha ? '[data-fecha-sel]' : '.cot-paso:not([inert]) input, .cot-paso:not([inert]) button')?.focus({ preventScroll: true }), 250);
     alto();
   }
   function cerrar(desdeAtras = false) {
@@ -417,12 +463,16 @@ const datos = {
 </script>
 
 <style is:global>
-  .cot{--cot-r:18px;display:flex;flex-direction:column;gap:14px;background:#fff;border:1.5px solid var(--line,#e3e5ea);border-radius:24px;padding:22px;color:var(--ink,#16171a);font-size:16px;min-width:0}
+  .cot{--cot-r:16px;display:flex;flex-direction:column;gap:12px;background:#fff;border:1.5px solid var(--line,#e3e5ea);border-radius:22px;padding:18px 16px;color:var(--ink,#16171a);font-size:15px;min-width:0}
   .cot-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .cot-titulo{font-size:20px;font-weight:800;margin:0;letter-spacing:-.01em}
+  .cot-titulo{font-size:18px;font-weight:800;margin:0;letter-spacing:-.01em}
   .cot-cero{background:none;border:0;padding:4px 0;color:var(--muted,#5c6070);font-weight:600;font-size:14px;line-height:1;font-family:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-  .cot-pasos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-  .cot-pasos button{width:100%;display:flex;align-items:center;gap:8px;background:none;border:0;border-bottom:3px solid var(--line,#e3e5ea);padding:6px 2px 10px;font-weight:600;font-size:14px;line-height:1.2;font-family:inherit;color:var(--muted,#5c6070);cursor:pointer;text-align:left}
+  .cot-pasos{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+  .cot-pasos li{flex:none}
+  .cot-pasos li.on{flex:1}
+  .cot-pl{font-style:normal;white-space:nowrap}
+  .cot-pasos li:not(.on) .cot-pl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .cot-pasos button{width:100%;min-width:44px;display:flex;align-items:center;gap:8px;background:none;border:0;border-bottom:3px solid var(--line,#e3e5ea);padding:6px 6px 9px;font-weight:600;font-size:14px;line-height:1.2;font-family:inherit;color:var(--muted,#5c6070);cursor:pointer;text-align:left}
   .cot-pasos span{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#f1f2f5;font-size:13px;font-weight:800}
   .cot-pasos li.on button{color:var(--ink,#16171a);border-color:var(--rosa,#db3978)}
   .cot-pasos li.on span{background:var(--rosa,#db3978);color:#fff}
@@ -435,22 +485,44 @@ const datos = {
   .cot-pista{display:flex;align-items:flex-start;width:100%;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
   .cot-paso:not(.cot-activo){visibility:hidden;transition:visibility 0s .35s}
   .cot-paso{flex:0 0 100%;min-width:0;display:flex;flex-direction:column;gap:14px;padding:2px 4px 4px;box-sizing:border-box}
-  .cot-preg{font-weight:800;font-size:17px;margin:0}
+  .cot-preg{font-weight:800;font-size:16px;margin:0}
   .cot-campo{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
   .cot-campo small{font-weight:500;color:var(--muted,#5c6070)}
   .cot-campo input{min-height:48px;border:1.5px solid var(--line,#e3e5ea);border-radius:12px;padding:0 14px;font-weight:500;font-size:16px;line-height:1.2;font-family:inherit;color:inherit;background:#fff;width:100%;box-sizing:border-box}
   .cot-campo input:focus{outline:none;border-color:var(--accent,#6043e1);box-shadow:0 0 0 3px #6043e122}
-  .cot-fecha{display:flex;flex-direction:column;gap:8px;background:#fdf3f7;border:1.5px solid #f6c9da;border-radius:16px;padding:14px 14px 12px}
-  .cot-fecha-t{font-weight:800;font-size:17px}
-  .cot-fecha input{min-height:52px;border:1.5px solid #f0b3ca;border-radius:12px;padding:0 14px;font-weight:700;font-size:17px;font-family:inherit;color:inherit;background:#fff;width:100%;box-sizing:border-box}
-  .cot-fecha input:focus{outline:none;border-color:var(--rosa,#db3978);box-shadow:0 0 0 3px #db397822}
-  .cot-fecha small{color:var(--rosa-ink,#b8285f);font-size:13px;font-weight:600}
+  .cot-fecha{display:flex;flex-direction:column;gap:8px;background:#fdf3f7;border:1.5px solid #f6c9da;border-radius:16px;padding:12px}
+  .cot-fecha-t{font-weight:800;font-size:16px;margin:0}
+  .cot-fecha small{color:var(--rosa-ink,#b8285f);font-size:12.5px;font-weight:600}
+  .cot-fecha-sel{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;background:#fff;border:1.5px solid #f0b3ca;border-radius:12px;padding:0 14px;font-family:inherit;font-size:16px;color:inherit;cursor:pointer;text-align:left}
+  .cot-fecha-sel:hover,.cot-fecha-sel.abierto{border-color:var(--rosa,#db3978)}
+  .cot-fecha-sel.abierto{box-shadow:0 0 0 3px #db397822;border-bottom-left-radius:4px;border-bottom-right-radius:4px}
+  .cot-fecha-sel:focus-visible{outline:3px solid var(--accent,#6043e1);outline-offset:2px}
+  .cot-fecha-sel b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cot-fecha-sel.vacio b{color:var(--muted,#5c6070);font-weight:600}
+  .cot-fecha-sel i{font-style:normal;font-size:14px;color:var(--rosa,#db3978);transition:transform .2s}
+  .cot-fecha-sel.abierto i{transform:rotate(180deg)}
+  .cot-fecha-ico{font-size:18px;line-height:1}
+  .cot-cal{background:#fff;border:1.5px solid var(--rosa,#db3978);border-top:0;border-radius:0 0 12px 12px;margin-top:-10px;padding:10px 8px 8px;box-shadow:0 10px 24px -14px #16171a40}
+  .cot-cal[hidden]{display:none}
+  .cot-cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .cot-cal-top b{font-size:15px;text-transform:capitalize}
+  .cot-cal-top button{width:36px;height:36px;border-radius:50%;border:0;background:#f4f1f8;font-size:20px;line-height:1;cursor:pointer;color:inherit}
+  .cot-cal-top button:disabled{opacity:.3;cursor:default}
+  .cot-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+  .cot-cal-dow{font-size:11.5px;font-weight:700;color:var(--muted,#5c6070);padding:4px 0}
+  .cot-dia{height:38px;border:0;border-radius:10px;background:none;font-family:inherit;font-size:14.5px;font-weight:600;color:inherit;cursor:pointer}
+  .cot-dia:hover:not(:disabled){background:#fdf3f7}
+  .cot-dia:disabled{opacity:.28;cursor:default}
+  .cot-dia.dom{color:var(--muted,#5c6070);font-weight:500}
+  .cot-dia.hoy{box-shadow:inset 0 0 0 1.5px #d6d1e6}
+  .cot-dia.on{background:var(--rosa,#db3978);color:#fff;box-shadow:none}
+  .cot-dia:focus-visible{outline:3px solid var(--accent,#6043e1);outline-offset:1px}
   .cot-inv input{max-width:220px}
-  .cot-tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+  .cot-tipos{display:flex;flex-wrap:wrap;gap:8px}
   .cot-tipo input,.cot-modo input,.cot-pack input,.cot-chips input{position:absolute;opacity:0;pointer-events:none}
-  .cot-tipo span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:96px;padding:10px 8px;border:1.5px solid var(--line,#e3e5ea);border-radius:var(--cot-r);font-weight:700;font-size:13.5px;line-height:1.2;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
-  .cot-tipo img{width:40px;height:40px;object-fit:contain}
-  .cot-tipo b{font-size:30px;line-height:40px}
+  .cot-tipo span{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px 6px 8px;border:1.5px solid var(--line,#e3e5ea);border-radius:999px;font-weight:700;font-size:14px;line-height:1.2;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
+  .cot-tipo img{width:26px;height:26px;object-fit:contain;flex:none}
+  .cot-tipo b{font-size:19px;line-height:26px;width:26px;text-align:center}
   .cot-tipo input:checked+span,.cot-modo input:checked+span,.cot-pack input:checked+span,.cot-chips input:checked+span{border-color:var(--rosa,#db3978);background:#fdf3f7;box-shadow:inset 0 0 0 1px var(--rosa,#db3978)}
   .cot-tipo input:focus-visible+span,.cot-modo input:focus-visible+span,.cot-pack input:focus-visible+span,.cot-chips input:focus-visible+span{outline:3px solid var(--accent,#6043e1);outline-offset:2px}
   .cot-aviso{margin:0;background:#fff8e1;border:1px solid #f3dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45}
@@ -510,17 +582,17 @@ const datos = {
   .cot-sheet .cot-nav{position:sticky;bottom:0;z-index:1;background:#fff;margin:0 -22px -22px;padding:12px 22px 16px;border-top:1px solid #f0f1f4}
   .cot-atras,.cot-sig,.cot-enviar{white-space:nowrap}
   @media (max-width:640px){
-    .cot{padding:16px;border-radius:20px}
     .cot-ov{padding:0;align-items:flex-end}
     .cot-sheet{width:100%;max-height:94dvh;border-radius:22px 22px 0 0;transform:translateY(100%)}
-    .cot-pasos button{font-size:12px;gap:5px;flex-direction:column;align-items:flex-start}
-    .cot-tipos{grid-template-columns:repeat(3,1fr)}
-    .cot-tipo span{min-height:84px;font-size:12px}
-    .cot-tipo img{width:32px;height:32px}
     .cot-final li{grid-template-columns:80px 1fr auto}
     .cot-sheet .cot-nav{margin:0 -16px -16px;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
     .cot-puntos{display:none}
     .cot-sig,.cot-enviar{flex:1;justify-content:center;padding:0 16px}
+  }
+  @media (min-width:641px){
+    .cot{padding:22px;font-size:16px}
+    .cot-pasos{display:grid;grid-template-columns:repeat(3,1fr)}
+    .cot-pasos li:not(.on) .cot-pl{position:static;width:auto;height:auto;overflow:visible;clip:auto}
   }
   @media (prefers-reduced-motion:reduce){.cot-pista,.cot-vista,.cot-sheet,.cot-ov{transition:none}}
 </style>
