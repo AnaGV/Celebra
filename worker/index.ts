@@ -7,6 +7,7 @@ import { onRequestPost as lead } from '../functions/api/lead';
 import { onRequestPost as codigo } from '../functions/api/codigo';
 import { onRequestPost as orders } from '../functions/api/orders';
 import { subirFoto, verFoto, borrarFoto } from './foto';
+import { tasaBcv } from './tasa';
 import { registrarBaja, consultarBaja } from './baja';
 import { enviarContacto } from './contacto';
 import { registrarClub, resumenDiario } from './club';
@@ -27,6 +28,7 @@ export default {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return handler({ request, env, waitUntil: ctx.waitUntil.bind(ctx), params: {}, data: {} });
     }
+    if (url.pathname === '/api/tasa') return tasaBcv(env);
     if (url.pathname === '/api/club') {
       if (request.method !== 'POST') return new Response('Método no permitido', { status: 405, headers: { allow: 'POST' } });
       return registrarClub(request, env);

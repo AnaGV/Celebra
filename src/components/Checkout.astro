@@ -354,17 +354,18 @@ import { site, countries } from '../config/site';
     }
 
     if (state.method === 'pago_movil') {
-      const amountBs = price * pay.pagoMovil.rate;
       panel.innerHTML = `
         <div class="ticket">
-          <div class="ticket-total"><span class="muted">Monto a transferir</span><span class="ticket-amount">${bs(amountBs)}</span></div>
-          <p class="co-note">${usd(price)} × ${pay.pagoMovil.rate} Bs/USD · ${esc(pay.pagoMovil.rateLabel)}</p>
+          <div class="ticket-total"><span class="muted">Monto a pagar</span><span class="ticket-amount" data-bs>${usd(price)}</span></div>
+          <p class="co-note" data-tasa>Buscando la tasa BCV del día…</p>
           <dl class="ticket-rows" style="margin:0">
             ${copyRow('Banco', pay.pagoMovil.bank)}
             ${copyRow('Teléfono', pay.pagoMovil.phone)}
             ${copyRow('Cédula', pay.pagoMovil.idDocument)}
-            ${copyRow('Monto', amountBs.toFixed(2))}
+            ${copyRow('Titular', pay.pagoMovil.holder)}
+            <div data-monto-row></div>
           </dl>
+          <p class="co-note">¿Prefieres transferencia? Cuenta Banesco ${esc(pay.pagoMovil.account)} a nombre de ${esc(pay.pagoMovil.holder)}, ${esc(pay.pagoMovil.idDocument)}.</p>
         </div>
         <form class="co-form" data-form="pago_movil" novalidate>
           <div class="field">
@@ -382,6 +383,16 @@ import { site, countries } from '../config/site';
           <button class="btn btn-block" type="submit">Ya pagué, enviar comprobante</button>
           <p class="co-note">Verificamos el pago en tu banco y te enviamos ${p.kind === 'digital' ? 'el ebook por email' : 'la confirmación para retirar tu libro'}.</p>
         </form>`;
+      fetch(pay.pagoMovil.rateEndpoint).then((r) => (r.ok ? r.json() : null)).then((t) => {
+        const nota = panel.querySelector('[data-tasa]'), monto = panel.querySelector('[data-bs]'), fila = panel.querySelector('[data-monto-row]');
+        if (!nota) return;
+        if (t && t.tasa > 0) {
+          const amountBs = Math.round(price * t.tasa * 100) / 100;
+          if (monto) monto.textContent = bs(amountBs);
+          nota.textContent = `${usd(price)} × ${t.tasa.toLocaleString('es-VE')} Bs/USD · tasa BCV${t.fecha ? ' del ' + t.fecha : ''}`;
+          if (fila) fila.outerHTML = copyRow('Monto', amountBs.toFixed(2));
+        } else nota.textContent = `Paga ${usd(price)} en bolívares a la tasa BCV del día.`;
+      }).catch(() => { const n = panel.querySelector('[data-tasa]'); if (n) n.textContent = `Paga ${usd(price)} en bolívares a la tasa BCV del día.`; });
       return;
     }
 

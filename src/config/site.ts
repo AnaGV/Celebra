@@ -72,13 +72,14 @@ export const site = {
     },
 
     pagoMovil: {
-      bank: 'Banco de Venezuela (0102)',
-      phone: '0414-000-0000',
-      idDocument: 'V-00.000.000',
-      holder: 'Nombre del titular',
-      /** Tasa referencial Bs por USD. TODO: leerla automáticamente (BCV) desde /functions. */
-      rate: 40,
-      rateLabel: 'Tasa referencial de ejemplo',
+      bank: 'Banesco (0134)',
+      phone: '0414-8503387',
+      idDocument: 'V-19.037.416',
+      holder: 'Yenny Vera',
+      /** Para transferencias desde Banesco u otro banco (no hace falta para Pago Móvil). */
+      account: '0134-0520-41-5201014797',
+      /** La tasa BCV del día se lee de /api/tasa. Si falla, se pide pagar a la tasa BCV del día. */
+      rateEndpoint: '/api/tasa',
     },
 
     pickup: {
