@@ -136,7 +136,7 @@ const datos = {
 
 <script>
   type Datos = { anticipacion: Record<string, number>; waNum: string; tipos: { name: string }[]; packs: { id: string; name: string; invitados: string; max: number; incluye: string[] }[]; items: string[] };
-  type Estado = { tipo: string; tipoOtra: string; fecha: string; invitados: string; modo: string; pack: string; items: string[]; otro: string; tematica: string; fotoUrl: string; nombre: string; correo: string; promos: boolean; invAuto?: boolean };
+  type Estado = { tipo: string; tipoOtra: string; fecha: string; invitados: string; modo: string; pack: string; items: string[]; otro: string; tematica: string; fotoUrl: string; nombre: string; correo: string; promos: boolean };
   const D: Datos = JSON.parse(document.getElementById('cot-datos')!.textContent || '{}');
   const ov = document.getElementById('cot-ov')!;
   const slot = ov.querySelector<HTMLElement>('.cot-slot')!;
@@ -239,11 +239,13 @@ const datos = {
   // ---------- Formulario → estado ----------
   f.addEventListener('input', leer);
   f.addEventListener('change', leer);
-  // Al elegir un pack, invitados toma su máximo (si estaba vacío o lo habíamos puesto nosotros)
+  // Al cambiar de pack, invitados se ajusta al pack (si el número no cabe en su rango)
   function invDePack() {
-    const p = packDe(E.pack);
-    if (!p || p.max >= 9999 || (E.invitados && !E.invAuto)) return;
-    E.invitados = String(p.max); E.invAuto = true;
+    const i = D.packs.findIndex((p) => p.id === E.pack);
+    if (i < 0) return;
+    const p = D.packs[i], min = i ? D.packs[i - 1].max + 1 : 1, n = parseInt(E.invitados, 10);
+    if (n >= min && n <= p.max) return;
+    E.invitados = p.max >= 9999 ? String(min) : String(p.max);
   }
   function leer(e: Event) {
     const t = e.target as HTMLInputElement;
@@ -251,7 +253,6 @@ const datos = {
     if (t.name === 'items') E.items = [...f.querySelectorAll<HTMLInputElement>('input[name="items"]:checked')].map((i) => i.value);
     else if (t.name === 'promos') E.promos = t.checked;
     else if (t.name in E) (E as any)[t.name] = t.value;
-    if (t.name === 'invitados') E.invAuto = false;
     if (t.name === 'pack' && t.checked) { E.modo = 'pack'; invDePack(); fIn('invitados').value = E.invitados; }
     err.hidden = true;
     guardar(); mostrar();

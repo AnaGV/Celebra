@@ -124,9 +124,12 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
       <section class="h-sec h-wrap" aria-labelledby="t-unete">
         <div class="h-res rv" style="background:#e3f5ff">
           <div class="h-res-info">
-            <span class="h-kicker" style="color:#0f6fa3">Aliados Celebra</span>
+            <div class="h-ali-top">
+              <span class="h-kicker" style="color:#0f6fa3">Aliados Celebra</span>
+              <button type="button" class="h-ali-info" data-ali-info aria-haspopup="dialog"><span aria-hidden="true">i</span>Más info</button>
+            </div>
             <h2 id="t-unete">¿Quieres ser aliado de Celebra?</h2>
-            <p class="h-lead" style="font-size:18px">Si tienes un negocio de fiestas en Caripe o sus alrededores, únete a nuestros aliados. Te mandamos clientes con nuestra publicidad, ellos reservan contigo en línea según tu disponibilidad y te pagan directo a ti. Tú manejas tus reservas desde tu propio panel.</p>
+            <p class="h-lead h-ali-lead" style="font-size:18px">Si tienes un negocio de fiestas en Caripe o sus alrededores, únete a nuestros aliados. Te mandamos clientes con nuestra publicidad, ellos reservan contigo en línea según tu disponibilidad y te pagan directo a ti. Tú manejas tus reservas desde tu propio panel.</p>
             <ul class="h-ali-pts">
               <li>Reservas en línea con tu calendario</li>
               <li>El cliente te paga directo a ti</li>
@@ -147,10 +150,13 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
             <label>Qué servicios ofreces<input type="text" name="servicio" placeholder="Ej. Sonido para 8 horas, luces, animador" /></label>
             <label>¿Dónde trabajas?<input type="text" name="zona" value="Caripe" placeholder="Ej. Caripe, Teresén, El Guácharo" required /></label>
             <fieldset class="h-ali-modo">
-              <legend>¿Cómo atiendes al cliente?</legend>
+              <legend id="modo-t">¿Cómo atiendes al cliente?</legend>
+              <button type="button" class="h-dd" data-dd aria-expanded="false" aria-controls="modo-ops" aria-describedby="modo-t"><b>Elige una opción</b><i aria-hidden="true">▾</i></button>
+              <div class="h-dd-ops" id="modo-ops" hidden>
               <label><input type="radio" name="modo" value="Voy a donde es la fiesta" required /><span>Voy a donde es la fiesta <small>(ej. sonido, animación)</small></span></label>
               <label><input type="radio" name="modo" value="El cliente retira en mi local" /><span>El cliente retira en mi local <small>(ej. tortas, pasapalos)</small></span></label>
               <label><input type="radio" name="modo" value="Las dos" /><span>Las dos</span></label>
+              </div>
             </fieldset>
             <label><span>Instagram <span class="h-opt">(opcional)</span></span><input type="text" name="instagram" placeholder="@tunegocio" autocapitalize="off" /></label>
             <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
@@ -158,6 +164,18 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
             <p class="h-form-err" role="alert" hidden></p>
           </form>
         </div>
+        <dialog class="h-ali-dlg" id="ali-dlg" aria-labelledby="ali-dlg-t">
+          <button type="button" class="h-ali-x" data-cerrar aria-label="Cerrar">✕</button>
+          <h3 id="ali-dlg-t">¿Quieres ser aliado de Celebra?</h3>
+          <p>Si tienes un negocio de fiestas en Caripe o sus alrededores, únete a nuestros aliados. Te mandamos clientes con nuestra publicidad, ellos reservan contigo en línea según tu disponibilidad y te pagan directo a ti. Tú manejas tus reservas desde tu propio panel.</p>
+          <ul class="h-ali-pts">
+            <li>Reservas en línea con tu calendario</li>
+            <li>El cliente te paga directo a ti</li>
+            <li>Empezar es gratis</li>
+          </ul>
+          <p class="h-ali-nota">Las piñatas, arreglos, globos, cotillón y papelería los hacemos nosotras en el taller. Por eso buscamos aliados que complementen lo nuestro. Revisamos cada solicitud y te escribimos por WhatsApp.</p>
+          <button type="button" class="h-btn" data-cerrar>Entendido</button>
+        </dialog>
       </section>
     </main>
     <Footer />
@@ -168,6 +186,19 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
   const f = document.getElementById('pub-form');
   const deco = document.getElementById('deco-tipo');
   f.tipo.addEventListener('change', () => { deco.hidden = f.tipo.value !== 'Decoración de eventos'; if (!deco.hidden) deco.querySelector('input').focus(); });
+  // Más info (popup)
+  const dlg = document.getElementById('ali-dlg');
+  document.querySelector('[data-ali-info]').addEventListener('click', () => dlg.showModal());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-cerrar]')) dlg.close(); });
+  // ¿Cómo atiendes? como desplegable
+  const dd = f.querySelector('[data-dd]'), ops = document.getElementById('modo-ops');
+  const abrirDd = (si) => { ops.hidden = !si; dd.setAttribute('aria-expanded', String(si)); dd.classList.toggle('abierto', si); };
+  dd.addEventListener('click', () => { abrirDd(ops.hidden); if (!ops.hidden) (ops.querySelector('input:checked') || ops.querySelector('input')).focus(); });
+  ops.addEventListener('change', (e) => {
+    dd.querySelector('b').textContent = e.target.value;
+    dd.classList.add('elegido'); abrirDd(false); dd.focus();
+  });
+  document.addEventListener('click', (e) => { if (!ops.hidden && !e.target.closest('.h-ali-modo')) abrirDd(false); });
   f.addEventListener('submit', (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f));
@@ -175,7 +206,7 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
     const esDeco = d.tipo === 'Decoración de eventos';
     if (!String(d.negocio).trim() || !d.tipo || !String(d.nombre).trim() || (esDeco && !String(d.decoracion || '').trim()) || !String(d.zona || '').trim() || !d.modo) {
       err.textContent = esDeco && !String(d.decoracion || '').trim() ? 'Cuéntanos qué tipo de decoración haces.' : 'Completa el nombre del negocio, el tipo, dónde trabajas, cómo atiendes y tu nombre.';
-      err.hidden = false; return;
+      err.hidden = false; if (!d.modo) abrirDd(true); return;
     }
     err.hidden = true;
     const ig = String(d.instagram || '').trim();
