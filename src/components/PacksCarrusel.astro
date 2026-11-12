@@ -1,0 +1,69 @@
+---
+/** Packs en carrusel que se desliza hacia el lado (flechas, puntos y dedo). «Cotizar este pack» abre el cotizador con el pack precargado. */
+import { packs } from '../config/celebra';
+interface Props { tag?: string; tipo?: string; invitados?: boolean }
+const { tag = 'Recomendado para ti', tipo, invitados = false } = Astro.props;
+const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
+---
+
+<div class="h-pkc" data-pkc>
+  {invitados && (
+    <div class="h-guests rv" role="radiogroup" aria-label="Número de invitados">
+      {packs.map((p) => <button type="button" class="h-guest" role="radio" aria-checked={p.destacado ? 'true' : 'false'} data-pack={p.id}>{p.invitados}</button>)}
+    </div>
+  )}
+  <div class="h-pkc-in">
+    <button type="button" class="h-pkc-flecha prev" aria-label="Pack anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div class="h-packs h-pkc-pista" tabindex="0" aria-label="Packs: desliza para ver más">
+      {packs.map((p, i) => (
+        <article class:list={['h-pack', { on: p.destacado }]} data-pack-card={p.id}>
+          <span class="h-pack-tag">{tag}</span>
+          <h3>{p.name}</h3>
+          <p class="h-pack-inv">{p.invitados}</p>
+          <ul>{p.incluye.map((x) => <li>{x}</li>)}</ul>
+          <p class="h-pack-price">{precio(p.priceUsd)}</p>
+          <a class="h-btn h-btn-line" href={`/?pack=${p.id}#reservar`} data-cot-pack={p.id} data-cot-tipo={tipo}>Cotizar este pack</a>
+        </article>
+      ))}
+    </div>
+    <button type="button" class="h-pkc-flecha next" aria-label="Pack siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+  </div>
+  <div class="h-pkc-puntos" aria-hidden="true">{packs.map(() => <i></i>)}</div>
+  <p class="h-pkc-hint" aria-hidden="true">Desliza para ver los {packs.length} packs →</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-pkc]').forEach((root) => {
+    const pista = root.querySelector<HTMLElement>('.h-pkc-pista')!;
+    const cards = [...pista.querySelectorAll<HTMLElement>('.h-pack')];
+    const puntos = [...root.querySelectorAll<HTMLElement>('.h-pkc-puntos i')];
+    const prev = root.querySelector<HTMLButtonElement>('.prev')!, next = root.querySelector<HTMLButtonElement>('.next')!;
+    const paso = () => (cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : pista.clientWidth);
+    const actual = () => Math.round(pista.scrollLeft / paso());
+    const pintar = () => {
+      const fin = pista.scrollLeft + pista.clientWidth >= pista.scrollWidth - 8;
+      // Cuántos caben a la vista: los puntos marcan todos los packs visibles
+      const vis = Math.max(1, Math.round(pista.clientWidth / paso()));
+      const i = actual(), hasta = fin ? cards.length - 1 : i + vis - 1;
+      puntos.forEach((p, k) => p.classList.toggle('on', k >= (fin ? cards.length - vis : i) && k <= hasta));
+      prev.disabled = pista.scrollLeft < 8;
+      next.disabled = fin;
+    };
+    const irA = (i: number, suave = true) => pista.scrollTo({ left: cards[Math.max(0, Math.min(cards.length - 1, i))].offsetLeft - cards[0].offsetLeft, behavior: suave ? 'smooth' : 'auto' });
+    prev.addEventListener('click', () => irA(actual() - 1));
+    next.addEventListener('click', () => irA(actual() + 1));
+    puntos.forEach((p, k) => p.addEventListener('click', () => irA(k)));
+    pista.addEventListener('scroll', () => requestAnimationFrame(pintar), { passive: true });
+    pista.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); irA(actual() + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); irA(actual() - 1); } });
+    // Elegir invitados → marca y muestra el pack recomendado
+    const elegir = (id: string, suave = true) => {
+      root.querySelectorAll<HTMLElement>('.h-guest').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pack === id)));
+      cards.forEach((c) => c.classList.toggle('on', c.dataset.packCard === id));
+      const k = cards.findIndex((c) => c.dataset.packCard === id);
+      if (k >= 0) irA(k, suave);
+    };
+    root.querySelectorAll<HTMLElement>('.h-guest').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.pack!)));
+    pintar();
+    new ResizeObserver(pintar).observe(pista);
+  });
+</script>

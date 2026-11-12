@@ -1,5 +1,6 @@
 ---
 import { site } from '../config/site';
+import Cotizador from './Cotizador.astro';
 const c = site.contact;
 const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1';
 const waPedido = `https://wa.me/${c.localWhatsapp}?text=${encodeURIComponent('¡Hola Celebra! Quiero cotizar para una fiesta.')}`;
@@ -30,6 +31,7 @@ const links = [
     {links.map(([href, label]) => <a href={href}>{label}</a>)}
   </nav>
 </header>
+<Cotizador />
 <a class="h-wa" href={waPedido} target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
 </a>

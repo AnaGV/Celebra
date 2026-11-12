@@ -28,6 +28,13 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 | /ref/<id> | worker/foto.ts | Fotos de referencia y capturas: se borran al descargar o a las 24 h; `?aliado=1` muestra el botón al panel |
 | Instagram | worker/instagram.ts | Feed sincronizado a diario; comentarios aprobados por correo |
 
+### Cotizador (desde el 11 nov 2026)
+- `src/components/Cotizador.astro` (va dentro de HomeNav, una copia por página). En el inicio se muestra dentro de `#cot-home`; en las demás páginas se abre encima (ventana / hoja en el teléfono) sin cambiar de página. Atrás del teléfono y Esc lo cierran.
+- 3 pasos que se deslizan: 1 Tu fiesta (la FECHA va primero, tipo, invitados) · 2 Cómo la imaginas (pack o piezas sueltas, temática, foto) · 3 Tus datos (resumen con «Cambiar», nombre, correo) → WhatsApp. Barra «Tu cotización» en vivo, «Empezar de cero», lo escrito se guarda en sessionStorage.
+- Cualquier enlace a `#reservar` o `[data-cotizar]` lo abre y precarga: `data-cot-pack`, `data-cot-item`, `data-cot-tipo`, `data-cot-tematica`, `data-cot-paso`. También `?pack=` en enlaces viejos.
+- Agenda del taller, parte 1: `src/config/taller.ts` (anticipación y peso por producto). Nunca bloquea: avisa al cliente y marca el WhatsApp con «⚠️ Pide con N días…». Parte 2 pendiente: panel para confirmar pedidos y semáforo de carga por fecha (tope 4 cosas por día).
+- Packs en carrusel deslizable: `src/components/PacksCarrusel.astro` (en /packs/ y /fiestas/*).
+
 ### Secretos (solo en Cloudflare, nunca en el chat ni en el código)
 CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID, IG_APP_SECRET, IG_CONFIG_ID, IG_USER_ID. Token de Instagram en R2 `privado/ig.json`.
 
@@ -72,3 +79,4 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
 - Probar el resumen diario del Club.
 - Automatización con n8n.
 - Quitar el banner de Navidad en enero.
+- Agenda del taller parte 2: panel «Confirmar pedido» + calendario de colores por carga.

@@ -1,0 +1,523 @@
+---
+/**
+ * Cotizador de Celebra: 3 pasos que se deslizan hacia el lado.
+ * - Una sola copia por página (va dentro de HomeNav).
+ * - En el inicio se muestra dentro de #cot-home; en las demás páginas se abre encima (ventana / hoja en el teléfono).
+ * - Cualquier enlace a «#reservar» o elemento con [data-cotizar] lo abre, y puede precargar datos:
+ *   data-cot-pack="fiesta" · data-cot-item="Chupetera" · data-cot-tipo="Baby shower y revelación" · data-cot-tematica="Navidad"
+ *   (también lee ?pack= del enlace).
+ * - Termina en WhatsApp con el mismo mensaje de siempre.
+ */
+import { site } from '../config/site';
+import { tipos, packs } from '../config/celebra';
+import { ANTICIPACION_DIAS } from '../config/taller';
+
+const waNum = site.contact.localWhatsapp;
+const ITEMS = ['Piñata', 'Chupetera', 'Cotillón', 'Bolsitas de recuerdo', 'Globos y decoración', 'Cartel con nombre', 'Invitación digital'];
+const datos = {
+  waNum,
+  tipos: tipos.map((t) => ({ name: t.name, img: t.img })),
+  packs: packs.map((p) => ({ id: p.id, name: p.name, invitados: p.invitados, max: p.max, incluye: p.incluye })),
+  items: ITEMS,
+  anticipacion: ANTICIPACION_DIAS,
+};
+---
+
+<div class="cot-ov" id="cot-ov" hidden>
+  <div class="cot-sheet" role="dialog" aria-modal="true" aria-labelledby="cot-titulo">
+    <button type="button" class="cot-x" data-cot-cerrar aria-label="Cerrar">✕</button>
+    <div class="cot-slot">
+      <div class="cot" id="cot">
+        <div class="cot-top">
+          <p class="cot-titulo" id="cot-titulo">Cotiza tu fiesta</p>
+          <button type="button" class="cot-cero" data-cot-cero>Empezar de cero</button>
+        </div>
+
+        <ol class="cot-pasos" aria-label="Pasos">
+          <li><button type="button" data-ir="0"><span>1</span>Tu fiesta</button></li>
+          <li><button type="button" data-ir="1"><span>2</span>Cómo la imaginas</button></li>
+          <li><button type="button" data-ir="2"><span>3</span>Tus datos</button></li>
+        </ol>
+
+        <div class="cot-resumen" aria-live="polite" hidden></div>
+
+        <form class="cot-form" novalidate>
+          <div class="cot-vista">
+            <div class="cot-pista">
+              <!-- Paso 1 -->
+              <section class="cot-paso" data-paso="0" aria-label="Paso 1 de 3: Tu fiesta">
+                <label class="cot-fecha">
+                  <span class="cot-fecha-t">📅 ¿Para cuándo es tu fiesta?</span>
+                  <input type="date" name="fecha" required />
+                  <small>Primero revisamos que tengamos ese día disponible para ti.</small>
+                </label>
+                <p class="cot-aviso" data-aviso-fecha hidden></p>
+                <p class="cot-preg">¿Qué celebras?</p>
+                <div class="cot-tipos">
+                  {datos.tipos.map((t) => (
+                    <label class="cot-tipo"><input type="radio" name="tipo" value={t.name} /><span><img src={t.img} alt="" loading="lazy" />{t.name}</span></label>
+                  ))}
+                  <label class="cot-tipo"><input type="radio" name="tipo" value="otra" /><span><b aria-hidden="true">✨</b>Otra</span></label>
+                </div>
+                <label class="cot-campo" data-si="tipoOtra" hidden>¿Qué celebras?<input type="text" name="tipoOtra" placeholder="Ej. Aniversario, Navidad, día del niño…" /></label>
+                <label class="cot-campo cot-inv">Invitados (aprox.)<input type="number" name="invitados" min="1" inputmode="numeric" placeholder="Ej. 25" /></label>
+                <p class="cot-tip" data-sugerido hidden></p>
+              </section>
+
+              <!-- Paso 2 -->
+              <section class="cot-paso" data-paso="1" aria-label="Paso 2 de 3: Cómo la imaginas">
+                <p class="cot-preg">¿Qué necesitas?</p>
+                <div class="cot-modo" role="radiogroup">
+                  <label><input type="radio" name="modo" value="pack" /><span>🎁 Un pack completo</span></label>
+                  <label><input type="radio" name="modo" value="sueltas" /><span>🧩 Piezas sueltas</span></label>
+                </div>
+                <div data-si="pack" hidden>
+                  <div class="cot-packs">
+                    {datos.packs.map((p) => (
+                      <label class="cot-pack"><input type="radio" name="pack" value={p.id} /><span><b>{p.name}</b><small>{p.invitados}</small></span></label>
+                    ))}
+                  </div>
+                  <ul class="cot-incluye" data-incluye></ul>
+                </div>
+                <div data-si="sueltas" hidden>
+                  <div class="cot-chips">
+                    {datos.items.map((x) => (<label><input type="checkbox" name="items" value={x} /><span>{x}</span></label>))}
+                    <label><input type="checkbox" name="items" value="otro" /><span>Otra cosa</span></label>
+                  </div>
+                  <label class="cot-campo" data-si="otro" hidden>¿Qué otra cosa?<input type="text" name="otro" placeholder="Ej. centro de mesa, fondo para fotos…" /></label>
+                </div>
+                <p class="cot-aviso" data-aviso-tiempo hidden></p>
+                <label class="cot-campo">Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
+                <div class="cot-foto">
+                  <label class="cot-foto-box">
+                    <input type="file" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
+                    <img alt="Tu foto de referencia" hidden />
+                    <span class="cot-foto-txt"><b>📷 Foto de referencia <i>(opcional)</i></b><small>Una captura de Pinterest o Instagram nos ayuda a cotizar justo lo que quieres.</small></span>
+                  </label>
+                  <p class="cot-foto-estado" role="status" hidden></p>
+                </div>
+              </section>
+
+              <!-- Paso 3 -->
+              <section class="cot-paso" data-paso="2" aria-label="Paso 3 de 3: Tus datos">
+                <div class="cot-final" data-final></div>
+                <label class="cot-campo">Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+                <label class="cot-campo"><span>Correo <small>(opcional)</small></span><input type="email" name="correo" autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.com" /></label>
+                <label class="cot-check"><input type="checkbox" name="promos" value="si" /><span>Quiero recibir descuentos y novedades de Celebra. Puedes darte de baja cuando quieras.</span></label>
+              </section>
+            </div>
+          </div>
+
+          <p class="cot-err" role="alert" hidden></p>
+          <div class="cot-nav">
+            <button type="button" class="cot-atras" data-atras>← Atrás</button>
+            <div class="cot-puntos" aria-hidden="true"><i></i><i></i><i></i></div>
+            <button type="button" class="h-btn cot-sig" data-sig>Siguiente →</button>
+            <button type="submit" class="h-btn cot-enviar" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>Enviar por WhatsApp
+            </button>
+          </div>
+        </form>
+
+        <div class="cot-ok" role="status" hidden>
+          <b>¡Listo! Tu cotización se abrió en WhatsApp.</b>
+          <span class="cot-ok-foto" hidden>No pudimos subir tu foto: en WhatsApp toca el clip 📎 y adjúntala.</span>
+          <span>¿No se abrió? <a class="cot-ok-wa" href="#" target="_blank" rel="noopener">Ábrelo de nuevo</a>.</span>
+          <span>🎁 ¿Tienes más cumpleaños en el año? <a href="/club/">Únete al Club Celebra</a> y te avisamos antes con ofertas.</span>
+          <button type="button" class="h-btn h-btn-line" data-cot-cero>Hacer otra cotización</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="cot-datos" set:html={JSON.stringify(datos)}></script>
+
+<script>
+  type Datos = { anticipacion: Record<string, number>; waNum: string; tipos: { name: string }[]; packs: { id: string; name: string; invitados: string; max: number; incluye: string[] }[]; items: string[] };
+  type Estado = { tipo: string; tipoOtra: string; fecha: string; invitados: string; modo: string; pack: string; items: string[]; otro: string; tematica: string; fotoUrl: string; nombre: string; correo: string; promos: boolean };
+  const D: Datos = JSON.parse(document.getElementById('cot-datos')!.textContent || '{}');
+  const ov = document.getElementById('cot-ov')!;
+  const slot = ov.querySelector<HTMLElement>('.cot-slot')!;
+  const cot = document.getElementById('cot')!;
+  const f = cot.querySelector<HTMLFormElement>('.cot-form')!;
+  const vista = cot.querySelector<HTMLElement>('.cot-vista')!;
+  const pista = cot.querySelector<HTMLElement>('.cot-pista')!;
+  const pasos = [...cot.querySelectorAll<HTMLElement>('.cot-paso')];
+  const err = cot.querySelector<HTMLElement>('.cot-err')!;
+  const $ = <T extends Element = HTMLElement>(q: string) => cot.querySelector<T>(q)!;
+  const host = document.getElementById('cot-home'); // en el inicio: se muestra dentro de la página
+  if (host) host.append(cot);
+
+  const VACIO = (): Estado => ({ tipo: '', tipoOtra: '', fecha: '', invitados: '', modo: '', pack: '', items: [], otro: '', tematica: '', fotoUrl: '', nombre: '', correo: '', promos: false });
+  let E: Estado = VACIO();
+  try { const g = sessionStorage.getItem('celebra-cot'); if (g) E = { ...E, ...JSON.parse(g) }; } catch {}
+  const guardar = () => { try { sessionStorage.setItem('celebra-cot', JSON.stringify(E)); } catch {} };
+  const hoy = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; };
+  const packDe = (id: string) => D.packs.find((p) => p.id === id);
+  const fechaTxt = (d: string) => new Date(d + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  const tipoTxt = () => (E.tipo === 'otra' ? E.tipoOtra.trim() || 'Otra' : E.tipo);
+  // Anticipación: días que faltan y lo que normalmente necesita lo elegido (nunca bloquea)
+  const diasHasta = (d: string) => Math.round((new Date(d + 'T12:00').getTime() - new Date(hoy() + 'T12:00').getTime()) / 864e5);
+  function falta_tiempo(): { nombre: string; req: number } | null {
+    if (!E.fecha) return null;
+    const n = diasHasta(E.fecha);
+    const pedidos: [string, string][] = E.modo === 'pack' && packDe(E.pack) ? [['pack', packDe(E.pack)!.name]] : E.modo === 'sueltas' ? E.items.map((x) => [x, x === 'otro' ? E.otro.trim() || 'Otra cosa' : x]) : [];
+    let peor: { nombre: string; req: number } | null = null;
+    for (const [k, nombre] of pedidos) { const req = D.anticipacion[k] ?? 3; if (n < req && (!peor || req > peor.req)) peor = { nombre, req }; }
+    return peor;
+  }
+  const necesito = () => (E.modo === 'pack' && packDe(E.pack) ? [packDe(E.pack)!.name] : E.modo === 'sueltas' ? E.items.map((x) => (x === 'otro' ? E.otro.trim() || 'Otra cosa' : x)) : []);
+
+  // ---------- Estado → formulario ----------
+  const fIn = (n: string) => f.elements.namedItem(n) as any;
+  function pintar() {
+    fIn('fecha').min = hoy();
+    f.querySelectorAll<HTMLInputElement>('input[name="tipo"]').forEach((i) => (i.checked = i.value === E.tipo));
+    f.querySelectorAll<HTMLInputElement>('input[name="modo"]').forEach((i) => (i.checked = i.value === E.modo));
+    f.querySelectorAll<HTMLInputElement>('input[name="pack"]').forEach((i) => (i.checked = i.value === E.pack));
+    f.querySelectorAll<HTMLInputElement>('input[name="items"]').forEach((i) => (i.checked = E.items.includes(i.value)));
+    for (const k of ['tipoOtra', 'fecha', 'invitados', 'otro', 'tematica', 'nombre', 'correo'] as const) if (fIn(k).value !== E[k]) fIn(k).value = E[k];
+    fIn('promos').checked = E.promos;
+    mostrar();
+  }
+  // Partes que dependen de lo elegido + resumen en vivo
+  function mostrar() {
+    const si = (k: string, on: boolean) => cot.querySelectorAll<HTMLElement>(`[data-si="${k}"]`).forEach((x) => (x.hidden = !on));
+    si('tipoOtra', E.tipo === 'otra'); si('pack', E.modo === 'pack'); si('sueltas', E.modo === 'sueltas'); si('otro', E.items.includes('otro'));
+    const p = packDe(E.pack);
+    const inc = $('[data-incluye]');
+    inc.replaceChildren(...(p ? p.incluye.map((x) => Object.assign(document.createElement('li'), { textContent: x })) : []));
+    inc.hidden = !p;
+    // Sugerencia de pack según invitados
+    const n = parseInt(E.invitados, 10);
+    const sug = $('[data-sugerido]');
+    const rec = n > 0 ? D.packs.find((x) => n <= x.max) : undefined;
+    sug.hidden = !rec;
+    const clave = rec ? `${n}|${rec.id}|${E.pack === rec.id}` : '';
+    if (rec && sug.dataset.clave !== clave) { // solo se redibuja si cambia (si no, el botón se pierde al tocarlo)
+      sug.dataset.clave = clave;
+      sug.innerHTML = E.pack === rec.id && E.modo === 'pack' ? `✓ Elegiste el <b>${rec.name}</b>, ideal para ${n} invitados.` : `💡 Para ${n} invitados te recomendamos el <b>${rec.name}</b>. <button type="button" data-usar-pack="${rec.id}">Usar este pack</button>`;
+    }
+    // Avisos de fecha y anticipación
+    const avF = $('[data-aviso-fecha]'), avT = $('[data-aviso-tiempo]');
+    if (E.fecha && E.fecha >= hoy()) {
+      const n = diasHasta(E.fecha), dom = new Date(E.fecha + 'T12:00').getDay() === 0;
+      const txt = [] as string[];
+      if (n <= 2) txt.push(`⏰ <b>Fecha muy cercana${n === 0 ? ' (¡es hoy!)' : n === 1 ? ' (mañana)' : ''}.</b> Igual escríbenos: te ofrecemos lo que tengamos listo en el taller o algo sencillo que alcancemos a hacer.`);
+      if (dom) txt.push('🛍️ Los domingos no trabajamos en el taller, pero <b>sí puedes retirar</b> tu pedido ese día.');
+      avF.innerHTML = txt.join('<br>'); avF.hidden = !txt.length;
+    } else avF.hidden = true;
+    const ft = falta_tiempo();
+    avT.hidden = !ft;
+    if (ft) { const n = diasHasta(E.fecha); avT.innerHTML = `🟡 Para esa fecha ${n === 1 ? 'queda' : 'quedan'} <b>${n} día${n === 1 ? '' : 's'}</b>, y ${ft.nombre === 'Otra cosa' ? 'eso' : '<b>' + ft.nombre + '</b>'} normalmente necesita <b>${ft.req} días</b>. Igual envíanos tu cotización: te ofrecemos una opción más sencilla o lo disponible en el taller.`; }
+    // Resumen (vista previa de la cotización)
+    const partes: string[] = [];
+    if (E.fecha) partes.push('📅 ' + fechaTxt(E.fecha));
+    if (E.tipo) partes.push(tipoTxt());
+    if (E.invitados) partes.push('👥 ' + E.invitados);
+    const nec = necesito(); if (nec.length) partes.push('🎁 ' + nec.join(', '));
+    if (E.tematica.trim()) partes.push('🎨 ' + E.tematica.trim());
+    if (E.fotoUrl) partes.push('📷 Foto');
+    const r = $('.cot-resumen');
+    r.hidden = !partes.length || paso === 2;
+    r.replaceChildren(Object.assign(document.createElement('b'), { textContent: 'Tu cotización: ' }), ...partes.map((t) => Object.assign(document.createElement('span'), { textContent: t })));
+    // Resumen grande en el paso 3, con «Cambiar»
+    const fin = $('[data-final]');
+    const fila = (et: string, val: string, ir: number) => `<li><span>${et}</span><b>${val}</b><button type="button" data-ir="${ir}">Cambiar</button></li>`;
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    fin.innerHTML = `<p class="cot-preg">Revisa tu cotización</p><ul>` +
+      fila('Fecha', E.fecha ? fechaTxt(E.fecha) : '—', 0) +
+      fila('Fiesta', esc(tipoTxt() || 'Por definir'), 0) +
+      fila('Invitados', esc(E.invitados || 'Por confirmar'), 0) +
+      fila('Necesito', esc(nec.join(', ') || 'Que me asesoren'), 1) +
+      fila('Temática', esc(E.tematica.trim() || 'Por definir'), 1) +
+      (E.fotoUrl ? fila('Foto', 'Lista ✓', 1) : '') + `</ul>`;
+  }
+
+  // ---------- Formulario → estado ----------
+  f.addEventListener('input', leer);
+  f.addEventListener('change', leer);
+  function leer(e: Event) {
+    const t = e.target as HTMLInputElement;
+    if (!t.name || t.name === 'foto') return;
+    if (t.name === 'items') E.items = [...f.querySelectorAll<HTMLInputElement>('input[name="items"]:checked')].map((i) => i.value);
+    else if (t.name === 'promos') E.promos = t.checked;
+    else if (t.name in E) (E as any)[t.name] = t.value;
+    if (t.name === 'pack' && t.checked) E.modo = 'pack';
+    err.hidden = true;
+    guardar(); mostrar();
+  }
+  cot.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-usar-pack]');
+    if (b) { E.modo = 'pack'; E.pack = b.dataset.usarPack!; guardar(); pintar(); ir(1); }
+  });
+
+  // ---------- Pasos que se deslizan ----------
+  let paso = 0;
+  const atras = $('[data-atras]'), sig = $('[data-sig]'), enviar = $('.cot-enviar');
+  function falta(n: number) {
+    if (n === 0 && !E.fecha) return 'Primero elige la fecha de tu fiesta.';
+    if (n === 0 && E.fecha < hoy()) return 'Esa fecha ya pasó: elige otra.';
+    if (n === 2 && !E.nombre.trim()) return 'Escribe tu nombre.';
+    return '';
+  }
+  function ir(n: number, forzar = false) {
+    n = Math.max(0, Math.min(2, n));
+    if (!forzar && n > paso) for (let i = paso; i < n; i++) { const m = falta(i); if (m) { err.textContent = m; err.hidden = false; n = i; break; } }
+    paso = n;
+    pista.style.transform = `translateX(${-100 * paso}%)`;
+    pasos.forEach((p, i) => { p.inert = i !== paso; p.setAttribute('aria-hidden', String(i !== paso)); });
+    cot.querySelectorAll<HTMLElement>('.cot-pasos li').forEach((li, i) => { li.classList.toggle('on', i === paso); li.classList.toggle('ok', i < paso); });
+    cot.querySelectorAll<HTMLElement>('.cot-puntos i').forEach((d, i) => d.classList.toggle('on', i === paso));
+    atras.style.visibility = paso === 0 ? 'hidden' : 'visible';
+    sig.hidden = paso === 2; enviar.hidden = paso !== 2;
+    alto(); mostrar();
+  }
+  const alto = () => { vista.style.height = pasos[paso].offsetHeight + 'px'; };
+  new ResizeObserver(alto).observe(pista);
+  pasos.forEach((p) => new ResizeObserver(() => { if (pasos[paso] === p) alto(); }).observe(p));
+  sig.addEventListener('click', () => { const m = falta(paso); if (m) { err.textContent = m; err.hidden = false; return; } err.hidden = true; ir(paso + 1); });
+  atras.addEventListener('click', () => { err.hidden = true; ir(paso - 1, true); });
+  cot.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-ir]'); if (b) { err.hidden = true; ir(+b.dataset.ir!, +b.dataset.ir! < paso); } });
+  // Deslizar con el dedo
+  let x0 = 0, y0 = 0;
+  vista.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  vista.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if ((e.target as HTMLElement).closest('.cot-packs')) return; // los packs se deslizan solos
+    if (dx < 0) sig.click(); else atras.click();
+  });
+
+  // ---------- Empezar de cero ----------
+  function cero() {
+    E = VACIO(); guardar();
+    foto.value = ''; fotoImg.hidden = true; fotoImg.removeAttribute('src'); fotoEst.hidden = true;
+    $('.cot-ok').hidden = true; f.hidden = false; cot.querySelector<HTMLElement>('.cot-pasos')!.hidden = false;
+    err.hidden = true; pintar(); ir(0, true);
+  }
+  cot.querySelectorAll('[data-cot-cero]').forEach((b) => b.addEventListener('click', cero));
+
+  // ---------- Foto de referencia (se sube apenas la eligen) ----------
+  const foto = $<HTMLInputElement>('input[name="foto"]');
+  const fotoImg = $<HTMLImageElement>('.cot-foto-box img');
+  const fotoEst = $('.cot-foto-estado');
+  let subiendo: Promise<string> | null = null;
+  const achicar = async (file: File) => {
+    const bmp = await createImageBitmap(file);
+    if (bmp.width * bmp.height > 60_000_000) throw new Error('enorme');
+    const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+    const cx = cv.getContext('2d')!; cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(bmp, 0, 0, cv.width, cv.height);
+    return new Promise<Blob>((ok) => cv.toBlob((b) => ok(b!), 'image/jpeg', 0.82));
+  };
+  foto.addEventListener('change', async () => {
+    const file = foto.files && foto.files[0];
+    E.fotoUrl = ''; guardar();
+    if (!file) { fotoImg.hidden = true; fotoEst.hidden = true; mostrar(); return; }
+    if (!/^image\//.test(file.type) || file.size > 20 * 1024 * 1024) {
+      foto.value = ''; fotoImg.hidden = true; fotoEst.hidden = false; fotoEst.dataset.s = 'err';
+      fotoEst.textContent = !/^image\//.test(file.type) ? 'Ese archivo no es una imagen.' : 'La foto pesa más de 20 MB. Elige otra o una captura de pantalla.';
+      return;
+    }
+    fotoImg.src = URL.createObjectURL(file); fotoImg.hidden = false;
+    fotoEst.hidden = false; fotoEst.textContent = 'Subiendo tu foto…'; fotoEst.dataset.s = 'up';
+    const yo = (subiendo = (async () => {
+      const r = await fetch('/api/foto', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: await achicar(file) });
+      if (!r.ok) throw new Error('subida');
+      return (await r.json()).url as string;
+    })());
+    try { const url = await yo; if (subiendo !== yo) return; E.fotoUrl = url; guardar(); fotoEst.textContent = '✓ Foto lista'; fotoEst.dataset.s = 'ok'; }
+    catch { if (subiendo !== yo) return; fotoEst.textContent = 'No pudimos subir la foto. Podrás adjuntarla en WhatsApp.'; fotoEst.dataset.s = 'err'; }
+    mostrar();
+  });
+
+  // ---------- Enviar por WhatsApp ----------
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (paso !== 2) { sig.click(); return; }
+    for (const n of [0, 2]) { const m = falta(n); if (m) { err.textContent = m; err.hidden = false; if (n !== paso) ir(n, true); return; } }
+    if (fotoEst.dataset.s === 'up' && !fotoEst.hidden) { err.textContent = 'Espera un momento: tu foto se está subiendo.'; err.hidden = false; return; }
+    const nec = necesito();
+    const hayFoto = !!(foto.files && foto.files.length);
+    const linea = E.fotoUrl ? `\n📷 Foto de referencia (se borra al descargarla o a las 24 h): ${E.fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
+    const correo = E.correo.trim();
+    const ft = falta_tiempo(), dn = diasHasta(E.fecha);
+    const alerta = ft ? `\n⚠️ Pide con ${dn} día${dn === 1 ? '' : 's'} de anticipación (lo normal para ${ft.nombre}: ${ft.req} días).` : dn <= 2 ? `\n⚠️ Fecha muy cercana: ${dn === 0 ? 'hoy' : dn === 1 ? 'mañana' : 'en 2 días'}.` : '';
+    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipoTxt() || 'Por definir'}\n• Fecha: ${fechaTxt(E.fecha)}\n• Invitados: ${E.invitados || 'por confirmar'}\n• Necesito: ${nec.length ? nec.join(', ') : 'quiero que me asesoren'}\n• Temática: ${E.tematica.trim() || 'por definir'}\n• Nombre: ${E.nombre.trim()}` + (correo ? `\n• Correo: ${correo}${E.promos ? ' (acepta recibir descuentos)' : ''}` : '') + linea + alerta;
+    const wa = `https://wa.me/${D.waNum}?text=${encodeURIComponent(txt)}`;
+    const ok = $('.cot-ok');
+    ok.querySelector<HTMLElement>('.cot-ok-foto')!.hidden = !(hayFoto && !E.fotoUrl);
+    ok.querySelector<HTMLAnchorElement>('.cot-ok-wa')!.href = wa;
+    E = VACIO(); guardar();
+    f.hidden = true; cot.querySelector<HTMLElement>('.cot-pasos')!.hidden = true; $('.cot-resumen').hidden = true; ok.hidden = false;
+    if (matchMedia('(pointer: coarse)').matches) location.href = wa; else window.open(wa, '_blank', 'noopener');
+  });
+
+  // ---------- Abrir / cerrar encima de la página ----------
+  let abierto = false;
+  let antesFoco: Element | null = null;
+  function abrir() {
+    if (abierto) return;
+    abierto = true; antesFoco = document.activeElement;
+    slot.append(cot); ov.hidden = false; document.documentElement.classList.add('cot-on');
+    requestAnimationFrame(() => ov.classList.add('in'));
+    history.pushState({ cot: 1 }, ''); // el botón «atrás» del teléfono cierra el cotizador
+    setTimeout(() => cot.querySelector<HTMLElement>(paso === 0 && !E.fecha ? 'input[name="fecha"]' : '.cot-paso:not([inert]) input, .cot-paso:not([inert]) button')?.focus({ preventScroll: true }), 250);
+    alto();
+  }
+  function cerrar(desdeAtras = false) {
+    if (!abierto) return;
+    abierto = false; ov.classList.remove('in'); document.documentElement.classList.remove('cot-on');
+    setTimeout(() => { ov.hidden = true; if (host) host.append(cot); alto(); }, 200);
+    if (!desdeAtras && history.state?.cot) history.back();
+    (antesFoco as HTMLElement | null)?.focus?.({ preventScroll: true });
+  }
+  window.addEventListener('popstate', () => cerrar(true));
+  ov.addEventListener('click', (e) => { if (e.target === ov || (e.target as HTMLElement).closest('[data-cot-cerrar]')) cerrar(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && abierto) cerrar(); });
+
+  // Precarga según el botón tocado
+  function precargar(src: { pack?: string; item?: string; tipo?: string; tematica?: string; paso?: string }) {
+    if (!$('.cot-ok').hidden) cero();
+    if (src.pack && packDe(src.pack)) { E.modo = 'pack'; E.pack = src.pack; }
+    if (src.item) { E.modo = 'sueltas'; if (!E.items.includes(src.item)) E.items = [...E.items, src.item]; }
+    if (src.tipo) {
+      if (D.tipos.some((t) => t.name === src.tipo)) E.tipo = src.tipo;
+      else { E.tipo = 'otra'; E.tipoOtra = src.tipo; }
+    }
+    if (src.tematica && !E.tematica.trim()) E.tematica = src.tematica;
+    if (src.paso === 'pack' || src.paso === '2') { if (!src.pack && !src.item && !E.modo) E.modo = 'sueltas'; }
+    guardar(); pintar();
+    ir(src.paso === '2' && E.fecha ? 1 : 0, true);
+  }
+  (window as any).celebraCotizar = (src: any = {}) => { precargar(src); abrir(); };
+  document.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest<HTMLElement>('[data-cotizar], a[href$="#reservar"]');
+    if (!a || (e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey) return;
+    if (a.closest('#cot')) return;
+    e.preventDefault();
+    const ds = a.dataset;
+    let pack = ds.cotPack;
+    try { pack = pack || new URL((a as HTMLAnchorElement).href, location.href).searchParams.get('pack') || undefined; } catch {}
+    (window as any).celebraCotizar({ pack, item: ds.cotItem, tipo: ds.cotTipo, tematica: ds.cotTematica, paso: ds.cotPaso });
+  });
+  // Llegó con un enlace viejo (/?pack=fiesta#reservar): precarga y lo deja a la vista
+  const qp = new URLSearchParams(location.search).get('pack');
+  pintar(); ir(0, true);
+  if (qp || location.hash === '#reservar') {
+    if (qp) precargar({ pack: qp });
+    history.replaceState(null, '', location.pathname);
+    if (host) host.scrollIntoView({ block: 'start' }); else (window as any).celebraCotizar({});
+  }
+</script>
+
+<style is:global>
+  .cot{--cot-r:18px;display:flex;flex-direction:column;gap:14px;background:#fff;border:1.5px solid var(--line,#e3e5ea);border-radius:24px;padding:22px;color:var(--ink,#16171a);font-size:16px;min-width:0}
+  .cot-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .cot-titulo{font-size:20px;font-weight:800;margin:0;letter-spacing:-.01em}
+  .cot-cero{background:none;border:0;padding:4px 0;color:var(--muted,#5c6070);font-weight:600;font-size:14px;line-height:1;font-family:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .cot-pasos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .cot-pasos button{width:100%;display:flex;align-items:center;gap:8px;background:none;border:0;border-bottom:3px solid var(--line,#e3e5ea);padding:6px 2px 10px;font-weight:600;font-size:14px;line-height:1.2;font-family:inherit;color:var(--muted,#5c6070);cursor:pointer;text-align:left}
+  .cot-pasos span{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#f1f2f5;font-size:13px;font-weight:800}
+  .cot-pasos li.on button{color:var(--ink,#16171a);border-color:var(--rosa,#db3978)}
+  .cot-pasos li.on span{background:var(--rosa,#db3978);color:#fff}
+  .cot-pasos li.ok button{border-color:#f3b7cd}
+  .cot-pasos li.ok span{background:#fbe6ee;color:var(--rosa-ink,#b8285f)}
+  .cot-resumen{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#fdf3f7;border-radius:14px;padding:10px 12px;font-size:13.5px}
+  .cot-resumen b{font-weight:800;color:var(--rosa-ink,#b8285f)}
+  .cot-resumen span{background:#fff;border-radius:999px;padding:4px 10px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .cot-vista{overflow:hidden;transition:height .3s ease;margin:0 -4px;padding:0 4px}
+  .cot-pista{display:flex;align-items:flex-start;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
+  .cot-paso{flex:0 0 100%;min-width:0;display:flex;flex-direction:column;gap:14px;padding:2px 4px 4px;box-sizing:border-box}
+  .cot-preg{font-weight:800;font-size:17px;margin:0}
+  .cot-campo{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+  .cot-campo small{font-weight:500;color:var(--muted,#5c6070)}
+  .cot-campo input{min-height:48px;border:1.5px solid var(--line,#e3e5ea);border-radius:12px;padding:0 14px;font-weight:500;font-size:16px;line-height:1.2;font-family:inherit;color:inherit;background:#fff;width:100%;box-sizing:border-box}
+  .cot-campo input:focus{outline:none;border-color:var(--accent,#6043e1);box-shadow:0 0 0 3px #6043e122}
+  .cot-fecha{display:flex;flex-direction:column;gap:8px;background:#fdf3f7;border:1.5px solid #f6c9da;border-radius:16px;padding:14px 14px 12px}
+  .cot-fecha-t{font-weight:800;font-size:17px}
+  .cot-fecha input{min-height:52px;border:1.5px solid #f0b3ca;border-radius:12px;padding:0 14px;font-weight:700;font-size:17px;font-family:inherit;color:inherit;background:#fff;width:100%;box-sizing:border-box}
+  .cot-fecha input:focus{outline:none;border-color:var(--rosa,#db3978);box-shadow:0 0 0 3px #db397822}
+  .cot-fecha small{color:var(--rosa-ink,#b8285f);font-size:13px;font-weight:600}
+  .cot-inv input{max-width:220px}
+  .cot-tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+  .cot-tipo input,.cot-modo input,.cot-pack input,.cot-chips input{position:absolute;opacity:0;pointer-events:none}
+  .cot-tipo span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:96px;padding:10px 8px;border:1.5px solid var(--line,#e3e5ea);border-radius:var(--cot-r);font-weight:700;font-size:13.5px;line-height:1.2;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
+  .cot-tipo img{width:40px;height:40px;object-fit:contain}
+  .cot-tipo b{font-size:30px;line-height:40px}
+  .cot-tipo input:checked+span,.cot-modo input:checked+span,.cot-pack input:checked+span,.cot-chips input:checked+span{border-color:var(--rosa,#db3978);background:#fdf3f7;box-shadow:inset 0 0 0 1px var(--rosa,#db3978)}
+  .cot-tipo input:focus-visible+span,.cot-modo input:focus-visible+span,.cot-pack input:focus-visible+span,.cot-chips input:focus-visible+span{outline:3px solid var(--accent,#6043e1);outline-offset:2px}
+  .cot-aviso{margin:0;background:#fff8e1;border:1px solid #f3dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45}
+  .cot-tip{margin:0;background:#fff8e1;border-radius:12px;padding:10px 12px;font-size:14px}
+  .cot-tip button{background:none;border:0;color:var(--accent,#6043e1);font-weight:700;font-size:14px;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0}
+  .cot-modo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .cot-modo span{display:flex;align-items:center;justify-content:center;min-height:52px;border:1.5px solid var(--line,#e3e5ea);border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-align:center;padding:6px}
+  .cot-packs{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px}
+  .cot-packs::-webkit-scrollbar{display:none}
+  .cot-pack{flex:0 0 auto;scroll-snap-align:start}
+  .cot-pack span{display:flex;flex-direction:column;gap:2px;min-width:132px;padding:10px 14px;border:1.5px solid var(--line,#e3e5ea);border-radius:14px;cursor:pointer}
+  .cot-pack b{font-size:15px}
+  .cot-pack small{color:var(--muted,#5c6070);font-size:13px}
+  .cot-incluye{margin:10px 0 0;padding:10px 12px 10px 30px;background:#f7f5ff;border-radius:12px;font-size:14px;display:grid;gap:3px}
+  .cot-incluye[hidden]{display:none}
+  .cot-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .cot-chips span{display:inline-flex;align-items:center;min-height:42px;padding:0 14px;border:1.5px solid var(--line,#e3e5ea);border-radius:999px;font-weight:600;font-size:14.5px;cursor:pointer}
+  .cot-foto-box{display:flex;align-items:center;gap:12px;border:1.5px dashed #d6d1e6;border-radius:14px;padding:12px;cursor:pointer;position:relative}
+  .cot-foto-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .cot-foto-box img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}
+  .cot-foto-txt{font-size:14px;display:flex;flex-direction:column;gap:2px}
+  .cot-foto-txt small{color:var(--muted,#5c6070);font-size:12.5px}
+  .cot-foto-txt i{font-style:normal;font-weight:500;color:var(--muted,#5c6070)}
+  .cot-foto-estado{margin:6px 0 0;font-size:13.5px;font-weight:600}
+  .cot-foto-estado[data-s="ok"]{color:#17784a}.cot-foto-estado[data-s="err"]{color:#b42318}
+  .cot-final ul{list-style:none;margin:8px 0 0;padding:0;border:1.5px solid var(--line,#e3e5ea);border-radius:14px;overflow:hidden}
+  .cot-final li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;padding:9px 12px;font-size:14.5px;border-top:1px solid #f0f1f4}
+  .cot-final li:first-child{border-top:0}
+  .cot-final li span{color:var(--muted,#5c6070);font-size:13.5px}
+  .cot-final li b{font-weight:700;min-width:0;overflow-wrap:anywhere}
+  .cot-final li button{background:none;border:0;color:var(--accent,#6043e1);font-weight:600;font-size:13px;font-family:inherit;cursor:pointer;padding:0}
+  .cot-check{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted,#5c6070)}
+  .cot-check input{margin-top:3px;width:18px;height:18px;accent-color:var(--rosa,#db3978);flex:none}
+  .cot-err{margin:0;color:#b42318;font-weight:600;font-size:14.5px}
+  .cot-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .cot-atras{background:none;border:0;font-weight:700;font-size:15px;font-family:inherit;color:var(--muted,#5c6070);cursor:pointer;padding:10px 4px}
+  .cot-puntos{display:flex;gap:6px}
+  .cot-puntos i{width:8px;height:8px;border-radius:50%;background:#e3e5ea;transition:all .2s}
+  .cot-puntos i.on{width:22px;border-radius:99px;background:var(--rosa,#db3978)}
+  .cot-sig,.cot-enviar{min-height:50px;padding:0 22px}
+  .cot-enviar{background:#17784a;display:inline-flex;align-items:center;gap:8px}
+  .cot-enviar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+  .cot-ok{display:flex;flex-direction:column;gap:10px;background:#eef8f2;border-radius:16px;padding:18px;font-size:15px}
+  .cot-ok b{font-size:17px}
+  .cot-ok .h-btn{align-self:flex-start}
+  .cot [hidden]{display:none !important}
+  /* Ventana encima de la página */
+  .cot-ov{position:fixed;inset:0;z-index:1000;background:rgba(22,23,26,.45);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}
+  .cot-ov[hidden]{display:none}
+  .cot-ov.in{opacity:1}
+  .cot-sheet{position:relative;width:min(600px,100%);max-height:calc(100dvh - 40px);overflow:auto;border-radius:26px;background:#fff;transform:translateY(16px);transition:transform .25s ease;overscroll-behavior:contain}
+  .cot-ov.in .cot-sheet{transform:none}
+  .cot-sheet .cot{border:0;padding-top:24px}
+  .cot-x{position:absolute;top:14px;right:14px;z-index:2;width:38px;height:38px;border-radius:50%;border:0;background:#f1f2f5;font-size:16px;cursor:pointer}
+  .cot-sheet .cot-top{padding-right:48px}
+  html.cot-on{overflow:hidden}
+  .cot-sheet .cot-nav{position:sticky;bottom:0;z-index:1;background:#fff;margin:0 -22px -22px;padding:12px 22px 16px;border-top:1px solid #f0f1f4}
+  .cot-atras,.cot-sig,.cot-enviar{white-space:nowrap}
+  @media (max-width:640px){
+    .cot{padding:16px;border-radius:20px}
+    .cot-ov{padding:0;align-items:flex-end}
+    .cot-sheet{width:100%;max-height:94dvh;border-radius:22px 22px 0 0;transform:translateY(100%)}
+    .cot-pasos button{font-size:12px;gap:5px;flex-direction:column;align-items:flex-start}
+    .cot-tipos{grid-template-columns:repeat(3,1fr)}
+    .cot-tipo span{min-height:84px;font-size:12px}
+    .cot-tipo img{width:32px;height:32px}
+    .cot-final li{grid-template-columns:80px 1fr auto}
+    .cot-sheet .cot-nav{margin:0 -16px -16px;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+    .cot-puntos{display:none}
+    .cot-sig,.cot-enviar{flex:1;justify-content:center;padding:0 16px}
+  }
+  @media (prefers-reduced-motion:reduce){.cot-pista,.cot-vista,.cot-sheet,.cot-ov{transition:none}}
+</style>

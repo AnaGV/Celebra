@@ -15,7 +15,6 @@ const wa = (txt: string) => `https://wa.me/${c.localWhatsapp}?text=${encodeURICo
 const precio = (p: number | null) => (p == null ? 'Precio a consultar' : `Desde USD ${p}`);
 const propios = servicios.filter((s) => s.kind === 'propio');
 const aliados = servicios.filter((s) => s.kind === 'aliado');
-const hoy = new Date().toISOString().slice(0, 10);
 ---
 
 <Base
@@ -33,9 +32,9 @@ const hoy = new Date().toISOString().slice(0, 10);
             <XmasBanner />
           </div>
           {[
-            { bg: 'fondo-1', color: '#dcc8f7', kick: 'Hechas a mano en Caripe', t: 'Piñatas a medida', d: 'Con la forma, la temática, el nombre y los colores que tu peque sueña.', imgs: [['', 'Piñatas hechas a mano: forrada rosada, de selva con monito, corona amarilla con flores y letra N con nombre']] },
-            { bg: 'fondo-2', color: '#f7cfdf', kick: 'Para la mesa dulce', t: 'Chupeteras con mucho dulce', d: 'Personajes y temáticas hechos a mano, listos para la foto.', imgs: [['', 'Chupeteras con dulces: niña, fresita y dinosaurio']] },
-            { bg: 'fondo-3', color: '#bfe3f7', kick: 'Su número, su inicial', t: 'Piñatas con número y letra', d: 'Su edad o la inicial de su nombre, armada con la temática que elijan.', imgs: [['', 'Piñatas con número 1 de dinosaurios y de granja, y letra N con nombre']] },
+            { item: 'Piñata', bg: 'fondo-1', color: '#dcc8f7', kick: 'Hechas a mano en Caripe', t: 'Piñatas a medida', d: 'Con la forma, la temática, el nombre y los colores que tu peque sueña.', imgs: [['', 'Piñatas hechas a mano: forrada rosada, de selva con monito, corona amarilla con flores y letra N con nombre']] },
+            { item: 'Chupetera', bg: 'fondo-2', color: '#f7cfdf', kick: 'Para la mesa dulce', t: 'Chupeteras con mucho dulce', d: 'Personajes y temáticas hechos a mano, listos para la foto.', imgs: [['', 'Chupeteras con dulces: niña, fresita y dinosaurio']] },
+            { item: 'Piñata', tematica: 'Piñata con número o letra', bg: 'fondo-3', color: '#bfe3f7', kick: 'Su número, su inicial', t: 'Piñatas con número y letra', d: 'Su edad o la inicial de su nombre, armada con la temática que elijan.', imgs: [['', 'Piñatas con número 1 de dinosaurios y de granja, y letra N con nombre']] },
           ].map((sl, i) => (
             <div class:list={['h-slide', { full: (sl as any).full }]} role="group" aria-roledescription="diapositiva" aria-label={`${i + 2} de 4`} aria-hidden="true" style={`--c:${sl.color}`}>
               <picture class="h-slide-bg">
@@ -48,7 +47,7 @@ const hoy = new Date().toISOString().slice(0, 10);
                   <p class="h-slide-t">{sl.t}</p>
                   <p class="h-slide-d">{sl.d}</p>
                   <div class="h-btns">
-                    <a class="h-btn" href="#reservar" tabindex="-1">Cotizar el mío</a>
+                    <a class="h-btn" href="#reservar" data-cot-item={(sl as any).item} data-cot-tematica={(sl as any).tematica} tabindex="-1">Cotizar el mío</a>
                     <a class="h-btn h-btn-line" href={c.instagram} target="_blank" rel="noopener" tabindex="-1">Ver más trabajos</a>
                   </div>
                 </div>
@@ -131,55 +130,7 @@ const hoy = new Date().toISOString().slice(0, 10);
             </ol>
             <p class="h-fine">Pide con 2 a 3 semanas de anticipación: los fines de semana se llenan primero.</p>
           </div>
-          <form class="h-form" id="res-form" novalidate>
-            <label>Tipo de fiesta
-              <select name="tipo">{tipos.map((t) => <option>{t.name}</option>)}<option value="otra">Otra</option></select>
-            </label>
-            <label class="h-cond" data-show-if="otra" hidden>¿Qué celebras?<input type="text" name="tipoOtra" placeholder="Ej. Aniversario, despedida, día del niño…" /></label>
-            <div class="h-form-2">
-              <label class="h-date">Fecha de la fiesta<input type="date" name="fecha" min={hoy} required /><span class="h-date-ph" aria-hidden="true">Elige el día</span></label>
-              <label>Invitados<input type="number" name="invitados" min="1" inputmode="numeric" placeholder="Ej. 25" /></label>
-            </div>
-            <fieldset class="h-need">
-              <legend>¿Qué necesitas? <span>Marca todo lo que quieras cotizar</span></legend>
-              <div class="h-chk">
-                {['Piñata', 'Chupetera', 'Cotillón', 'Bolsitas de recuerdo', 'Globos y decoración', 'Cartel con nombre', 'Invitación digital'].map((x) => (
-                  <label><input type="checkbox" name="necesito" value={x} /><span>{x}</span></label>
-                ))}
-                <label><input type="checkbox" name="necesito" value="pack" data-pack-toggle /><span>Un pack completo</span></label>
-                <label><input type="checkbox" name="necesito" value="otro" data-otro-toggle /><span>Otra cosa</span></label>
-              </div>
-            </fieldset>
-            <label class="h-cond" data-pack-field hidden>¿Cuál pack?
-              <select name="pack">{packs.map((p) => <option value={p.name} data-id={p.id} selected={p.destacado}>{p.name} · {p.invitados.replace(' invitados', '').toLowerCase()}</option>)}</select>
-            </label>
-            <label class="h-cond" data-otro-field hidden>¿Qué otra cosa necesitas?<input type="text" name="otro" placeholder="Ej. centro de mesa, fondo para fotos…" /></label>
-            <label>Temática<input type="text" name="tematica" placeholder="Ej. Estrellita arcoíris, dinosaurios…" /></label>
-            <div class="h-ref">
-              <span class="h-ref-t">Foto de referencia <span>(opcional)</span></span>
-              <label class="h-ref-box">
-                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
-                <span class="h-ref-empty"><svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4zM12 17a4 4 0 100-8 4 4 0 000 8z"></path></svg>Sube una imagen de lo que te gusta</span>
-                <img class="h-ref-img" alt="Tu foto de referencia" hidden />
-              </label>
-              <p class="h-ref-estado" role="status" hidden></p>
-              <p class="h-ref-note">Una captura de Pinterest, Instagram o una foto de otra fiesta nos ayuda a cotizar justo lo que quieres. La foto se borra apenas la descargamos.</p>
-            </div>
-            <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
-            <label><span>Correo <span class="h-opt">(opcional)</span></span><input type="email" name="correo" autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.com" /></label>
-            <label class="h-promo"><input type="checkbox" name="promos" value="si" /><span>Quiero recibir descuentos y novedades de Celebra. Puedes darte de baja cuando quieras.</span></label>
-            <button class="h-btn" type="submit">
-              <svg class="h-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1.1z"></path></svg>
-              Enviar por WhatsApp
-            </button>
-            <p class="h-form-err" role="alert" hidden></p>
-            <div class="h-form-ok" role="status" hidden>
-              <b>¡Listo! Tu cotización se abrió en WhatsApp.</b>
-              <span class="h-ok-foto" hidden>No pudimos subir tu foto: en WhatsApp toca el clip 📎 y adjúntala.</span>
-              <span>¿No se abrió? <a class="h-ok-wa" href="#" target="_blank" rel="noopener">Ábrelo de nuevo</a>. Puedes llenar el formulario otra vez para una cotización distinta.</span>
-              <span>🎁 ¿Tienes más cumpleaños en el año? <a href="/club/">Únete al Club Celebra</a> y te avisamos antes con ofertas.</span>
-            </div>
-          </form>
+          <div id="cot-home" class="cot-home"></div>
         </div>
       </section>
 
@@ -254,123 +205,6 @@ const hoy = new Date().toISOString().slice(0, 10);
   </div>
 </Base>
 
-<script define:vars={{ waNum: c.localWhatsapp }}>
-  const f = document.getElementById('res-form');
-  // La fecha mínima es hoy en el teléfono del cliente (la web es estática: no sirve calcularla al publicar).
-  const fIn = f.querySelector('input[name="fecha"]');
-  if (fIn) { const n = new Date(); fIn.min = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
-  const $ = (q) => f.querySelector(q);
-  const packToggle = $('[data-pack-toggle]');
-  const otroToggle = $('[data-otro-toggle]');
-  const sync = () => {
-    $('[data-show-if="otra"]').hidden = $('select[name="tipo"]').value !== 'otra';
-    $('[data-pack-field]').hidden = !packToggle.checked;
-    $('[data-otro-field]').hidden = !otroToggle.checked;
-  };
-  f.addEventListener('change', sync);
-  sync();
-
-  // Selector de invitados → resalta el pack recomendado.
-  const pick = (id, marcar) => {
-    document.querySelectorAll('.h-guest').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pack === id)));
-    document.querySelectorAll('.h-pack').forEach((c) => c.classList.toggle('on', c.dataset.packCard === id));
-    const card = document.querySelector(`[data-pack-card="${id}"] h3`);
-    if (card) $('select[name="pack"]').value = card.textContent;
-    if (marcar) { packToggle.checked = true; sync(); }
-  };
-  document.querySelectorAll('.h-guest').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pack, false)));
-  // Viene desde /packs/ con ?pack=…: deja marcado ese pack en el formulario.
-  const qp = new URLSearchParams(location.search).get('pack');
-  if (qp && document.querySelector(`[data-pack-card="${qp}"]`) === null) {
-    const opt = [...$('select[name="pack"]').options].find((o) => o.dataset.id === qp);
-    if (opt) { $('select[name="pack"]').value = opt.value; packToggle.checked = true; sync(); }
-    history.replaceState(null, '', location.pathname);
-  }
-  document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => pick(a.dataset.pick, true)));
-
-  // Foto de referencia: se achica y se sube apenas la eligen (no al enviar),
-  // así el botón Enviar abre WhatsApp al instante y el celular no lo bloquea.
-  const foto = $('input[name="foto"]');
-  const btn = $('button[type="submit"]');
-  const btnHtml = btn.innerHTML;
-  const estado = $('.h-ref-estado');
-  let fotoUrl = '';
-  let subiendo = null;
-  const achicar = async (file) => {
-    const bmp = await createImageBitmap(file);
-    if (bmp.width * bmp.height > 60_000_000) throw new Error('enorme');
-    const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-    const cv = document.createElement('canvas');
-    cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
-    const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, cv.width, cv.height);
-    cx.drawImage(bmp, 0, 0, cv.width, cv.height);
-    return new Promise((ok) => cv.toBlob(ok, 'image/jpeg', 0.82));
-  };
-  foto.addEventListener('change', async () => {
-    const file = foto.files && foto.files[0];
-    const img = $('.h-ref-img');
-    fotoUrl = '';
-    if (!file) { img.hidden = true; $('.h-ref-empty').hidden = false; estado.hidden = true; return; }
-    // Límites antes de procesar: solo imágenes y hasta 20 MB (las fotos de celular pesan 2-8 MB).
-    if (!/^image\//.test(file.type) || file.size > 20 * 1024 * 1024) {
-      foto.value = ''; img.hidden = true; $('.h-ref-empty').hidden = false;
-      estado.hidden = false; estado.dataset.s = 'err';
-      estado.textContent = !/^image\//.test(file.type) ? 'Ese archivo no es una imagen.' : 'La foto pesa más de 20 MB. Elige otra o una captura de pantalla.';
-      return;
-    }
-    img.src = URL.createObjectURL(file); img.hidden = false; $('.h-ref-empty').hidden = true;
-    estado.hidden = false; estado.textContent = 'Subiendo tu foto…'; estado.dataset.s = 'up';
-    btn.disabled = true; btn.textContent = 'Subiendo tu foto…';
-    const yo = (subiendo = (async () => {
-      const blob = await achicar(file);
-      const r = await fetch('/api/foto', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob });
-      if (!r.ok) throw new Error('subida');
-      return (await r.json()).url;
-    })());
-    try {
-      const url = await yo;
-      if (subiendo !== yo) return; // eligieron otra foto mientras tanto
-      fotoUrl = url; estado.textContent = '✓ Foto lista'; estado.dataset.s = 'ok';
-    } catch {
-      if (subiendo !== yo) return;
-      estado.textContent = 'No pudimos subir la foto. Podrás adjuntarla en WhatsApp.'; estado.dataset.s = 'err';
-    }
-    btn.disabled = false; btn.innerHTML = btnHtml;
-  });
-
-  // Enviar → abre WhatsApp con el mensaje armado (sin esperas, dentro del toque).
-  f.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (btn.disabled) return;
-    const fd = new FormData(f);
-    const d = Object.fromEntries(fd);
-    const err = $('.h-form-err');
-    const falta = [];
-    if (!d.fecha) falta.push('la fecha');
-    if (!String(d.nombre || '').trim()) falta.push('tu nombre');
-    if (falta.length) { err.textContent = 'Falta ' + falta.join(' y ') + '.'; err.hidden = false; return; }
-    err.hidden = true;
-    const tipo = d.tipo === 'otra' ? (String(d.tipoOtra || '').trim() || 'Otra') : d.tipo;
-    const necesito = fd.getAll('necesito').map((x) => x === 'pack' ? d.pack : x === 'otro' ? (String(d.otro || '').trim() || 'Otra cosa') : x);
-    const fecha = new Date(d.fecha + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-    const hayFoto = foto.files && foto.files.length > 0;
-    const linea = fotoUrl ? `\n📷 Foto de referencia (se borra al descargarla o a las 24 h): ${fotoUrl}` : hayFoto ? '\n📷 Te mando una foto de referencia.' : '';
-    const txt = `¡Hola Celebra! Quiero cotizar para una fiesta.\n• Fiesta: ${tipo}\n• Fecha: ${fecha}\n• Invitados: ${d.invitados || 'por confirmar'}\n• Necesito: ${necesito.length ? necesito.join(', ') : 'quiero que me asesoren'}\n• Temática: ${d.tematica || 'por definir'}\n• Nombre: ${d.nombre}` + (String(d.correo || '').trim() ? `\n• Correo: ${String(d.correo).trim()}${d.promos ? ' (acepta recibir descuentos)' : ''}` : '') + linea;
-    const wa = `https://wa.me/${waNum}?text=${encodeURIComponent(txt)}`;
-    // Deja el formulario limpio para una nueva cotización (también al volver con "atrás").
-    const ok = $('.h-form-ok');
-    ok.querySelector('.h-ok-foto').hidden = !(hayFoto && !fotoUrl);
-    ok.querySelector('.h-ok-wa').href = wa;
-    f.reset();
-    fotoUrl = '';
-    $('.h-ref-img').hidden = true; $('.h-ref-img').removeAttribute('src'); $('.h-ref-empty').hidden = false; estado.hidden = true;
-    sync();
-    ok.hidden = false;
-    // En el celular, abrir en la misma pestaña es lo que hace saltar a la app de WhatsApp.
-    if (matchMedia('(pointer: coarse)').matches) location.href = wa;
-    else window.open(wa, '_blank', 'noopener');
-  });
-</script>
 
 <script>
   // Carrusel de la portada: cambia solo cada 6 s, flechas, puntos y deslizar con el dedo.
