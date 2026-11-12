@@ -91,7 +91,6 @@ const datos = {
                 <div class="cot-foto">
                   <label class="cot-foto-box">
                     <input type="file" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
-                    <img alt="Tu foto de referencia" hidden />
                     <span class="cot-foto-txt"><b>📷 Foto de referencia <i>(opcional)</i></b><small>Una captura de Pinterest o Instagram nos ayuda a cotizar justo lo que quieres.</small></span>
                   </label>
                   <p class="cot-foto-estado" role="status" hidden></p>
@@ -267,7 +266,7 @@ const datos = {
     if (!forzar && n > paso) for (let i = paso; i < n; i++) { const m = falta(i); if (m) { err.textContent = m; err.hidden = false; n = i; break; } }
     paso = n;
     pista.style.transform = `translateX(${-100 * paso}%)`;
-    pasos.forEach((p, i) => { p.inert = i !== paso; p.setAttribute('aria-hidden', String(i !== paso)); });
+    pasos.forEach((p, i) => { p.inert = i !== paso; p.setAttribute('aria-hidden', String(i !== paso)); p.classList.toggle('cot-activo', i === paso); });
     cot.querySelectorAll<HTMLElement>('.cot-pasos li').forEach((li, i) => { li.classList.toggle('on', i === paso); li.classList.toggle('ok', i < paso); });
     cot.querySelectorAll<HTMLElement>('.cot-puntos i').forEach((d, i) => d.classList.toggle('on', i === paso));
     atras.style.visibility = paso === 0 ? 'hidden' : 'visible';
@@ -301,7 +300,10 @@ const datos = {
 
   // ---------- Foto de referencia (se sube apenas la eligen) ----------
   const foto = $<HTMLInputElement>('input[name="foto"]');
-  const fotoImg = $<HTMLImageElement>('.cot-foto-box img');
+  // La vista previa se crea aquí (no hay <img> vacía en el HTML)
+  const fotoImg = document.createElement('img');
+  fotoImg.alt = 'Tu foto de referencia'; fotoImg.hidden = true;
+  $('.cot-foto-box').insertBefore(fotoImg, $('.cot-foto-txt'));
   const fotoEst = $('.cot-foto-estado');
   let subiendo: Promise<string> | null = null;
   const achicar = async (file: File) => {
@@ -429,8 +431,9 @@ const datos = {
   .cot-resumen{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#fdf3f7;border-radius:14px;padding:10px 12px;font-size:13.5px}
   .cot-resumen b{font-weight:800;color:var(--rosa-ink,#b8285f)}
   .cot-resumen span{background:#fff;border-radius:999px;padding:4px 10px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-  .cot-vista{overflow:hidden;transition:height .3s ease;margin:0 -4px;padding:0 4px}
-  .cot-pista{display:flex;align-items:flex-start;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
+  .cot-vista{overflow:hidden;transition:height .3s ease;margin:0 -4px;padding:0;width:calc(100% + 8px)}
+  .cot-pista{display:flex;align-items:flex-start;width:100%;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
+  .cot-paso:not(.cot-activo){visibility:hidden;transition:visibility 0s .35s}
   .cot-paso{flex:0 0 100%;min-width:0;display:flex;flex-direction:column;gap:14px;padding:2px 4px 4px;box-sizing:border-box}
   .cot-preg{font-weight:800;font-size:17px;margin:0}
   .cot-campo{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
