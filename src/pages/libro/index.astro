@@ -70,7 +70,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
         </a>
         <nav class="nav-links" aria-label="Secciones">
           <a href="#libro">El libro</a>
-          <a href="#muestra">Capítulo gratis</a>
+          {site.capituloGratis && <a href="#muestra">Capítulo gratis</a>}
           <a href="#preguntas">Preguntas</a>
           <a href="#local">Local en Caripe</a>
         </nav>
@@ -132,7 +132,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
 
             <div class="buy-actions">
               <button type="button" class="btn js-main-buy" data-buy={ebook.id}><span data-fmt-solo="ebook">Quiero mi libro</span><span data-fmt-solo="print" hidden>Reservar libro impreso</span></button>
-              <a class="link" href="#muestra">Leer el capítulo 2 gratis</a>
+              {site.capituloGratis && <a class="link" href="#muestra">Leer el capítulo 2 gratis</a>}
             </div>
 
             <div class="ship">
@@ -230,7 +230,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
           </div>
         </section>
 
-        <section class="lead-band" id="muestra" aria-labelledby="gratis">
+        {site.capituloGratis && <section class="lead-band" id="muestra" aria-labelledby="gratis">
           <div class="lead-copy">
             <h2 id="gratis">Lee el capítulo de presupuesto gratis</h2>
             <p>8 páginas en PDF: la regla del taller para que el dinero alcance, un ejemplo resuelto para 15 niños y la plantilla para imprimir. Te llega al email junto con un descuento para el libro completo.</p>
@@ -247,7 +247,7 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
             <b>¡Listo! Revisa tu email.</b>
             <span>Te enviamos el capítulo a <b id="lead-done-email"></b>. Si no lo ves en un par de minutos, revisa promociones o spam.</span>
           </div>
-        </section>
+        </section>}
 
         <section class="sec" aria-labelledby="cmp" data-solo="VE" hidden>
           <div class="sec-head"><h2 id="cmp">Ebook o libro impreso</h2><p>El mismo contenido en los dos formatos. Elige cómo quieres leerlo.</p></div>
@@ -454,8 +454,8 @@ const star = 'M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5
     }
   });
 
-  const form = document.getElementById('lead-form') as HTMLFormElement;
-  wireLeadForm(form, (email) => {
+  const form = document.getElementById('lead-form') as HTMLFormElement | null;
+  if (form) wireLeadForm(form, (email) => {
     form.hidden = true;
     document.getElementById('lead-done-email')!.textContent = email;
     document.getElementById('lead-done')!.hidden = false;

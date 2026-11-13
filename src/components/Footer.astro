@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
             <summary>El libro</summary>
             <div>
               <a href="/libro/">Fiestas que se recuerdan</a>
-              <a href="/libro/regalo/">Capítulo de regalo</a>
+              {site.capituloGratis && <a href="/libro/regalo/">Capítulo de regalo</a>}
               <a href="/calculadora/">Calculadora de presupuesto</a>
             </div>
           </details>

@@ -63,7 +63,9 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
 ## Libros
 - **Fiestas que se recuerdan** (32 págs., venta por Lemon Squeezy).
   - Pago Móvil listo (Banesco, titular Yenny Vera; monto en Bs con la tasa BCV de /api/tasa).
-  - Falta: subir el PDF, el checkout link (apaga el modo de prueba), una compra de prueba y una "Lista de compras" con cantidades.
+  - Publicado en Lemon Squeezy (producto 1508631, variante 2348869); checkout conectado en src/config/products.ts y `demoMode: false`.
+  - Capítulo gratis apagado (`capituloGratis: false` en site.ts) hasta que n8n funcione; /libro/regalo/ redirige a /libro/.
+  - Falta: compra de prueba y una "Lista de compras" con cantidades (para la próxima versión).
   - Los videos irán después con un QR a una página propia.
 - **Mi Navidad hecha en casa**: portada v2 lista (escena de papel azul noche).
   - Imprimibles hechos: toppers, copos de nieve, cajas y reno con trineo.

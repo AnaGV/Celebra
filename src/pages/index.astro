@@ -219,7 +219,7 @@ const aliados = servicios.filter((s) => s.kind === 'aliado');
             <p class="h-price"><b>USD {mainProduct.priceUsd}</b> · ebook en PDF, llega a tu correo</p>
             <div class="h-btns">
               <a class="h-btn" href="/libro/">Ver el libro</a>
-              <a class="h-btn h-btn-line" href="/libro/regalo/">Capítulo de regalo</a>
+              {site.capituloGratis && <a class="h-btn h-btn-line" href="/libro/regalo/">Capítulo de regalo</a>}
             </div>
           </div>
         </div>

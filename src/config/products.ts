@@ -27,7 +27,7 @@ export const products: Product[] = [
     format: 'PDF · 32 páginas',
     delivery: 'Llega a tu email apenas se confirma el pago',
     countries: 'ALL',
-    lemonCheckoutUrl: '',
+    lemonCheckoutUrl: 'https://celebra.lemonsqueezy.com/checkout/buy/7938fb4c-3f2c-48f3-84db-dd0a7c628a87',
   },
   {
     id: 'libro-fisico-caripe',

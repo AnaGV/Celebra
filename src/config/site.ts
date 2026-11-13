@@ -11,7 +11,9 @@ export type PaymentMethodId = 'lemon' | 'binance' | 'pago_movil' | 'pagar_en_loc
 
 export const site = {
   /** Mientras sea true, ningún pago es real: el checkout simula cada paso. */
-  demoMode: true,
+  demoMode: false,
+  /** Capítulo gratis: se activa cuando n8n esté funcionando (envía el PDF y el código). */
+  capituloGratis: false,
 
   brand: {
     name: 'Celebra',
