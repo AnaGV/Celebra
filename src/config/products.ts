@@ -23,7 +23,7 @@ export const products: Product[] = [
     kind: 'digital',
     name: 'Fiestas que se recuerdan (ebook)',
     shortName: 'Ebook',
-    priceUsd: 7, // precio recomendado de lanzamiento (ver revisión de precio)
+    priceUsd: 5, // igual a CLP 5.000 en Lemon Squeezy (dólar ~985 CLP, nov 2026)
     format: 'PDF · 32 páginas',
     delivery: 'Llega a tu email apenas se confirma el pago',
     countries: 'ALL',
