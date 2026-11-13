@@ -559,11 +559,11 @@ import { site, countries } from '../config/site';
     url.searchParams.set('checkout[custom][country]', state.country);
     // Lemon Squeezy vuelve a validar el código al cobrar: un solo uso y con vencimiento.
     if (state.code) url.searchParams.set('checkout[discount_code]', state.code);
-    if (!inApp && window.LemonSqueezy) {
-      window.LemonSqueezy.Url.Open(url.toString());
-    } else {
-      window.location.href = url.toString();
-    }
+    // Página completa de Lemon Squeezy (no la ventana flotante): la flotante quedaba detrás de nuestro
+    // cuadro de pago y no respondía. Así funciona igual en teléfono, computador e Instagram.
+    void inApp;
+    try { dialog.close(); } catch {}
+    window.location.href = url.toString();
   }
 
   // ---------- eventos ----------
