@@ -226,6 +226,7 @@ import { site, countries } from '../config/site';
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ codigo, producto: 'ebook-fiestas' }),
         });
+        if (res.status >= 500) throw new Error('validador no disponible');
         out = await res.json();
       }
       if (out.valido) {
@@ -236,7 +237,14 @@ import { site, countries } from '../config/site';
         setCodeMsg(out.mensaje ?? 'Ese código no es válido.', false);
       }
     } catch {
-      setCodeMsg('No pudimos revisar el código. Inténtalo de nuevo.', false);
+      // Sin el validador (n8n): con tarjeta o PayPal, Lemon Squeezy revisa el código en su página de pago.
+      if (state.method === 'lemon' && product().kind === 'digital') {
+        state.code = codigo;
+        state.discount = 0;
+        setCodeMsg('Código guardado: se aplica en el siguiente paso, en la página de pago con tarjeta o PayPal.', true);
+      } else {
+        setCodeMsg('Por ahora los códigos de descuento solo funcionan pagando con tarjeta o PayPal.', false);
+      }
     } finally {
       codeBtn.disabled = false;
       renderAll();
@@ -640,6 +648,8 @@ import { site, countries } from '../config/site';
     const input = e.target as HTMLInputElement;
     keepPlace(input, () => {
       state.method = input.value as PaymentMethodId;
+      // Un código guardado sin validar solo sirve con tarjeta/PayPal: al cambiar de método se vuelve a revisar.
+      if (state.code && state.discount === 0) applyCode(state.code);
       renderPanel();
     });
   });
