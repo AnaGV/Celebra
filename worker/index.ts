@@ -3,8 +3,7 @@
  * - /api/*  → las mismas funciones de functions/api (lead, código, pedidos).
  * - todo lo demás → la página estática generada por Astro (carpeta dist).
  */
-import { onRequestPost as lead } from '../functions/api/lead';
-import { onRequestPost as codigo } from '../functions/api/codigo';
+import { lead, validarCodigo } from './libro';
 import { onRequestPost as orders } from '../functions/api/orders';
 import { subirFoto, verFoto, borrarFoto } from './foto';
 import { tasaBcv } from './tasa';
@@ -15,8 +14,8 @@ import { listaAliados, fichaAliado, fotoAliado, crearReserva, panel, admin } fro
 import { conectar, callback, sincronizar, feed, imagen, aprobar } from './instagram';
 
 const rutas: Record<string, (ctx: any) => Promise<Response> | Response> = {
-  '/api/lead': lead,
-  '/api/codigo': codigo,
+  '/api/lead': ({ request, env }) => lead(request, env),
+  '/api/codigo': ({ request, env }) => validarCodigo(request, env),
   '/api/orders': orders,
 };
 

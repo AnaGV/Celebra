@@ -64,7 +64,8 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
 - **Fiestas que se recuerdan** (32 págs., venta por Lemon Squeezy).
   - Pago Móvil listo (Banesco, titular Yenny Vera; monto en Bs con la tasa BCV de /api/tasa).
   - Publicado en Lemon Squeezy (tienda 513563, producto 1508631, variante 2348869); checkout conectado en src/config/products.ts y `demoMode: false`.
-  - Capítulo gratis apagado (`capituloGratis: false` en site.ts) hasta que n8n funcione; /libro/regalo/ redirige a /libro/.
+  - Capítulo gratis SIN n8n (worker/libro.ts): /api/lead guarda el contacto en R2 (leads/), crea el código y envía el PDF con Resend (secreto RESEND_API_KEY; dominio verificado en Resend, región São Paulo). Códigos: con LEMON_API_KEY, únicos FIESTAxxxxxx (20%, 1 uso, 48 h, creados en Lemon y en R2 codigos/); sin ella, el compartido CAPITULO20 (crearlo a mano en Lemon). /api/codigo valida contra R2. Config en src/config/lemon.ts (cambiar variantId al pasar a modo real).
+  - n8n descartado (costo). Lo que hacía se hace en el worker: correos con Resend, CAPI de Meta pendiente (secreto META_CAPI_TOKEN), confirmar pagos manuales pendiente.
   - Falta: compra de prueba y una "Lista de compras" con cantidades (para la próxima versión).
   - Los videos irán después con un QR a una página propia.
 - **Mi Navidad hecha en casa**: portada v2 lista (escena de papel azul noche).

@@ -13,7 +13,7 @@ export const site = {
   /** Mientras sea true, ningún pago es real: el checkout simula cada paso. */
   demoMode: false,
   /** Capítulo gratis: se activa cuando n8n esté funcionando (envía el PDF y el código). */
-  capituloGratis: false,
+  capituloGratis: true,
 
   brand: {
     name: 'Celebra',
@@ -93,7 +93,7 @@ export const site = {
     leadEndpoint: '/api/lead',
     codeEndpoint: '/api/codigo',
     /** Descuento del código que recibe quien pide el capítulo gratis. Debe coincidir con LEAD_DISCOUNT_CENTS en n8n. */
-    leadDiscountUsd: 2,
+    leadDiscountUsd: 1,
   },
 
   tracking: {
