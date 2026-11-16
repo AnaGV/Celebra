@@ -67,7 +67,7 @@ import '../../styles/home.css';
     for (const p of lista) {
       const li = el('li', 'h-ped ' + (p.estado || 'pendiente'));
       const top = el('div', 'h-ped-top');
-      top.append(el('b', '', `${p.ref} · ${PROD[p.productId] || p.productId}`), el('span', 'h-adm-t gratis', METODO[p.method] || p.method), el('span', 'h-ped-usd', `USD ${Number(p.amountUsd).toFixed(2)}`));
+      top.append(el('span', 'h-ped-est', { pendiente: 'Por confirmar', confirmado: 'Confirmado', rechazado: 'Rechazado' }[(p.estado || 'pendiente') as string] || ''), el('b', '', `${p.ref} · ${PROD[p.productId] || p.productId}`), el('span', 'h-adm-t gratis', METODO[p.method] || p.method), el('span', 'h-ped-usd', `USD ${Number(p.amountUsd).toFixed(2)}`));
       li.append(top);
       const dl = el('dl', 'h-ped-datos');
       const fila = (k: string, v: string | HTMLElement) => { if (!v) return; const dt = el('dt', '', k), dd = el('dd'); dd.append(v); dl.append(dt, dd); };

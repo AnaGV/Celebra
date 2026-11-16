@@ -1,6 +1,6 @@
 /**
  * Correos a clientas (Resend) con una sola plantilla de marca.
- * Diseño: fondo gris muy claro, tarjeta blanca, logo arriba, botón rosa Celebra.
+ * Diseño: fondo gris muy claro, tarjeta blanca, logo arriba, botón rosa Celebra (el rosa va solo en el botón y el código).
  * Hecho con tablas y estilos en línea para que se vea bien en Gmail, Outlook y el teléfono.
  * (Arial a propósito: es la letra que todos los programas de correo tienen.)
  */
@@ -30,7 +30,7 @@ export function plantilla(p: Plantilla) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f5"><tr><td align="center" style="padding:28px 14px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 <tr><td align="center" style="padding:0 0 18px"><a href="${DOM}"><img src="${DOM}/img/correo/logo.png" width="150" alt="Celebra" style="display:block;width:150px;height:auto;border:0"></a></td></tr>
-<tr><td style="background:#ffffff;border-radius:20px;overflow:hidden;border-top:6px solid #db3978">
+<tr><td style="background:#ffffff;border-radius:20px;overflow:hidden">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 ${p.imagen ? `<tr><td align="center" style="padding:28px 28px 4px"><img src="${p.imagen.src}" width="200" alt="${esc(p.imagen.alt)}" style="display:block;width:200px;height:auto;border-radius:10px;border:1px solid #ececf1"></td></tr>` : ''}
 <tr><td style="padding:24px 28px 8px;${f}">
