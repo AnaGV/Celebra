@@ -57,9 +57,11 @@ export const site = {
   payments: {
     /** Métodos visibles según el país del comprador. El orden es el orden en pantalla. */
     byCountry: {
-      VE: ['binance', 'pago_movil', 'lemon'],
-      CL: ['lemon', 'binance'],
-      OTRO: ['lemon', 'binance'],
+      // Tarjeta/PayPal ('lemon') oculto: Lemon Squeezy rechazó la tienda (nov 2026). Volver a agregar
+      // el método cuando esté conectado el reemplazo (Gumroad u otro).
+      VE: ['binance', 'pago_movil'],
+      CL: ['binance'],
+      OTRO: ['binance'],
     } satisfies Record<CountryCode, PaymentMethodId[]>,
 
     lemon: {

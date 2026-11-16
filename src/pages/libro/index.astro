@@ -28,10 +28,16 @@ const M = {
   lc: { name: 'Pago en el local', note: 'Solo libro impreso, al retirarlo en Caripe', icon: IC.store, bg: '#fdeaf2', fg: '#c2185b' },
 };
 type K = keyof typeof M;
-const byCountry: Record<'VE' | 'CL' | 'OTRO', { methods: K[]; hero: string[]; announce: string; t: string; s: string; d: string }> = {
+// Tarjeta/PayPal apagado mientras se conecta el reemplazo de Lemon Squeezy: poner en true al volver.
+const TARJETA = false;
+const byCountry: Record<'VE' | 'CL' | 'OTRO', { methods: K[]; hero: string[]; announce: string; t: string; s: string; d: string }> = TARJETA ? {
   VE: { methods: ['pm', 'bn', 'cd', 'pp', 'lc'], hero: ['Pago Móvil', 'Binance', 'Tarjeta', 'PayPal'], announce: 'En Venezuela pagas con Pago Móvil, Binance o tarjeta. El ebook llega a tu email.', t: 'Pagas en bolívares o USDT', s: 'Pago Móvil, Binance o tarjeta', d: 'Al confirmar tu pago' },
   CL: { methods: ['cd', 'ap', 'pp', 'bn'], hero: ['Tarjeta', 'Apple Pay', 'PayPal', 'Binance'], announce: 'Recibe el ebook en tu email al instante. Pagas con tarjeta, PayPal o Binance.', t: 'Pagas con tu tarjeta', s: 'Visa, Mastercard o PayPal', d: 'Al instante tras pagar' },
   OTRO: { methods: ['cd', 'ap', 'pp', 'bn'], hero: ['Tarjeta', 'Apple Pay', 'PayPal', 'Binance'], announce: 'Recibe el ebook en tu email al instante, estés donde estés.', t: 'Pagas con tarjeta o PayPal', s: 'También con Binance (USDT)', d: 'Al instante tras pagar' },
+} : {
+  VE: { methods: ['pm', 'bn', 'lc'], hero: ['Pago Móvil', 'Binance'], announce: 'En Venezuela pagas con Pago Móvil o Binance. El ebook llega a tu email.', t: 'Pagas en bolívares o USDT', s: 'Pago Móvil o Binance', d: 'Al confirmar tu pago' },
+  CL: { methods: ['bn'], hero: ['Binance'], announce: 'Pagas con Binance (USDT) y el ebook llega a tu email. Pronto también con tarjeta.', t: 'Pagas con Binance', s: 'Pronto también con tarjeta', d: 'Al confirmar tu pago' },
+  OTRO: { methods: ['bn'], hero: ['Binance'], announce: 'Pagas con Binance (USDT) y el ebook llega a tu email, estés donde estés. Pronto también con tarjeta.', t: 'Pagas con Binance', s: 'Pronto también con tarjeta', d: 'Al confirmar tu pago' },
 };
 const paises = ['VE', 'CL', 'OTRO'] as const;
 const nombrePais = { VE: 'Venezuela', CL: 'Chile', OTRO: 'Otro país' };
@@ -40,7 +46,7 @@ const faqs = [
   ['¿Cómo recibo el ebook?', 'Apenas se confirma el pago te llega un email con el botón de descarga y tu recibo. Con Binance o Pago Móvil lo enviamos al verificar el pago, normalmente en menos de 2 horas en horario laboral.'],
   ['No me llegó el email, ¿qué hago?', 'Revisa spam o promociones. Si no está, escríbenos a soporte@somoscelebrave.com o por WhatsApp con tu código de pedido y te lo reenviamos.'],
   ['¿Puedo pagar desde Venezuela?', 'Sí. Puedes pagar con Pago Móvil en bolívares, con Binance Pay (USDT) o con tarjeta internacional y PayPal.'],
-  ['¿Y desde Chile u otro país?', 'Sí. Pagas con tarjeta Visa o Mastercard, Apple Pay, Google Pay, PayPal o Binance Pay. La página te muestra solo los métodos de tu país.'],
+  ['¿Y desde Chile u otro país?', TARJETA ? 'Sí. Pagas con tarjeta Visa o Mastercard, Apple Pay, Google Pay, PayPal o Binance Pay. La página te muestra solo los métodos de tu país.' : 'Sí. Por ahora pagas con Binance Pay (USDT); muy pronto también con tarjeta y PayPal. Si no tienes Binance, escríbenos por WhatsApp y lo resolvemos.'],
   ['¿En qué formato viene?', 'En PDF. Lo lees en el celular, la tablet o el computador, y puedes imprimir las hojas de listas y plantillas.'],
   ['¿Hacen envíos del libro impreso?', 'No. El libro impreso se retira en nuestro local de Caripe. Puedes reservarlo online y pagar al retirarlo.'],
   ['¿Puedo pedir un reembolso?', 'Como es un libro digital que recibes al instante, no hacemos devoluciones una vez entregado. Si no te llega o el archivo no abre, te ayudamos por WhatsApp; y si no logramos entregártelo, te devolvemos el dinero.'],
