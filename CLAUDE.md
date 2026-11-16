@@ -26,6 +26,7 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 | /reservar/?a=id | src/pages/reservar.astro | Reserva con un aliado |
 | /aliado/ | src/pages/aliado.astro | Panel del aliado (enlace privado `#<id>.<token>`, se recuerda en localStorage o se pega) |
 | /admin/aliados/ | src/pages/admin/aliados.astro | Admin de Ana (clave CELEBRA_ADMIN_KEY) |
+| /admin/pedidos/ | src/pages/admin/pedidos.astro + worker/pedidos.ts | Confirmar pagos manuales del libro y subir el PDF privado |
 | /ref/<id> | worker/foto.ts | Fotos de referencia y capturas: se borran al descargar o a las 24 h; `?aliado=1` muestra el botón al panel |
 | Instagram | worker/instagram.ts | Feed sincronizado a diario; comentarios aprobados por correo |
 
@@ -66,7 +67,8 @@ CELEBRA_FORM_KEY (la usa otra parte; no cambiarla), CELEBRA_ADMIN_KEY, IG_APP_ID
   - Pago Móvil listo (Banesco, titular Yenny Vera; monto en Bs con la tasa BCV de /api/tasa).
   - Publicado en Lemon Squeezy (tienda 513563, producto 1508631, variante 2348869); checkout conectado en src/config/products.ts y `demoMode: false`.
   - Capítulo gratis SIN n8n (worker/libro.ts): /api/lead guarda el contacto en R2 (leads/), crea el código y envía el PDF con Resend (secreto RESEND_API_KEY; dominio verificado en Resend, región São Paulo). Códigos: con LEMON_API_KEY, únicos FIESTAxxxxxx (20%, 1 uso, 48 h, creados en Lemon y en R2 codigos/); sin ella, el compartido CAPITULO20 (crearlo a mano en Lemon). /api/codigo valida contra R2. Config en src/config/lemon.ts (cambiar variantId al pasar a modo real).
-  - n8n descartado (costo). Lo que hacía se hace en el worker: correos con Resend, CAPI de Meta pendiente (secreto META_CAPI_TOKEN), confirmar pagos manuales pendiente.
+  - n8n descartado (costo). Lo que hacía se hace en el worker: correos con Resend (plantilla única en worker/correo.ts, imágenes en public/img/correo/), CAPI de Meta pendiente (secreto META_CAPI_TOKEN).
+  - Pagos manuales (Pago Móvil, Binance, local): /admin/pedidos/ (worker/pedidos.ts). Lista R2 pedidos/, «Confirmar pago y enviar libro» manda un enlace personal /descarga/<token> (14 días, 10 descargas). El PDF completo se sube desde esa página a R2 privado/libro/fiestas.pdf (nunca al repo).
   - Falta: compra de prueba y una "Lista de compras" con cantidades (para la próxima versión).
   - Los videos irán después con un QR a una página propia.
 - **Mi Navidad hecha en casa**: portada v2 lista (escena de papel azul noche).

@@ -87,7 +87,7 @@ async function avisarPedido(env: any, p: any) {
     p.method === 'binance' ? `ID de orden Binance: ${p.binanceOrderId}` : '',
     p.codigo ? `Código de descuento: ${p.codigo}` : '',
     `País elegido: ${p.country || '-'} · País según Cloudflare: ${p.cfCountry || '-'}`, '',
-    'Cuando confirmes el pago, respóndele a este correo con el PDF (responder le escribe al cliente).',
+    'Cuando veas el pago en el banco o en Binance, entra a https://somoscelebrave.com/admin/pedidos/ y toca «Confirmar pago»: el libro le llega solo por correo.',
   ].filter((l) => l !== '');
   const desde = 'contacto@somoscelebrave.com';
   const para = env.CONTACTO_DESTINO || 'somoscelebra.ve@gmail.com';

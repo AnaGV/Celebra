@@ -7,6 +7,7 @@ import { lead, validarCodigo } from './libro';
 import { onRequestPost as orders } from '../functions/api/orders';
 import { subirFoto, verFoto, borrarFoto } from './foto';
 import { tasaBcv } from './tasa';
+import { adminPedidos, adminLibro, descarga } from './pedidos';
 import { registrarBaja, consultarBaja } from './baja';
 import { enviarContacto } from './contacto';
 import { registrarClub, resumenDiario } from './club';
@@ -70,6 +71,10 @@ export default {
     }
     if (url.pathname === '/api/panel' || url.pathname.startsWith('/api/panel/')) return panel(request, env, url.pathname.slice(11));
     if (url.pathname === '/api/admin/aliados') return admin(request, env);
+    if (url.pathname === '/api/admin/pedidos') return adminPedidos(request, env);
+    if (url.pathname.startsWith('/api/admin/pedidos/')) return adminPedidos(request, env, url.pathname.split('/')[4]);
+    if (url.pathname === '/api/admin/libro') return adminLibro(request, env);
+    if (url.pathname.startsWith('/descarga/')) return descarga(env, url.pathname.split('/')[2] || '');
     if (url.pathname === '/api/pais') {
       const c = (request as any).cf?.country ?? request.headers.get('cf-ipcountry') ?? '';
       const pais = c === 'VE' ? 'VE' : c === 'CL' ? 'CL' : 'OTRO';

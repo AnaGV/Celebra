@@ -1,0 +1,124 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/home.css';
+---
+
+<Base image="/img/og-celebra.jpg" title="Pedidos del libro · Admin Celebra" description="Pedidos del libro por Pago Móvil y Binance.">
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="home">
+    <header class="h-pan-top"><a href="/"><img src="/img/marca/logo.webp" width="1000" height="437" alt="Celebra" /></a><span>Admin · <a href="/admin/aliados/">Aliados</a> · <b>Pedidos</b></span></header>
+    <main class="h-wrap h-pan">
+      <form class="h-form" id="k-form">
+        <label>Clave de administración<input type="password" name="k" autocomplete="current-password" /></label>
+        <button class="h-btn" type="submit">Entrar</button>
+        <p class="h-form-err" role="alert" hidden></p>
+      </form>
+
+      <div id="adm" hidden>
+        <div class="h-adm-intro">
+          <p><b>Pedidos del libro pagados por Pago Móvil, Binance o en el local.</b> Los de tarjeta o PayPal los entrega Lemon Squeezy solo y no aparecen aquí.</p>
+          <p>Revisa en el banco o en Binance que el pago llegó y toca <b>«Confirmar pago y enviar libro»</b>: al cliente le llega el PDF por correo con un enlace personal.</p>
+        </div>
+        <div class="h-ped-alerta" id="p-sinlibro" hidden>Antes de confirmar pedidos, sube el PDF del libro <a href="#libro">aquí abajo</a>. Se guarda privado: no queda en la web pública.</div>
+        <div class="h-ped-alerta" id="p-sinresend" hidden>Falta el secreto RESEND_API_KEY en Cloudflare: sin él no se pueden enviar los correos.</div>
+
+        <div class="h-ped-filtros" role="tablist">
+          <button type="button" data-f="pendiente" aria-selected="true">Por confirmar <span id="n-pend"></span></button>
+          <button type="button" data-f="confirmado" aria-selected="false">Confirmados</button>
+          <button type="button" data-f="rechazado" aria-selected="false">Rechazados</button>
+        </div>
+        <ul class="h-ped-lista" id="p-lista"></ul>
+
+        <section class="h-ped-libro" id="libro">
+          <h2>PDF del libro</h2>
+          <p id="libro-estado">Revisando…</p>
+          <label class="h-btn h-btn-line h-ped-subir">Subir o reemplazar el PDF<input type="file" accept="application/pdf" id="libro-file" hidden /></label>
+          <p class="h-pan-help">Usa siempre la versión final (la misma que subiste a Lemon Squeezy). Al reemplazarlo, los próximos envíos usan el nuevo.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const el = (t: string, c?: string, x?: string) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  let K = ''; try { K = sessionStorage.getItem('celebra-admin') || ''; } catch {}
+  const H = () => ({ 'x-celebra-key': K, 'content-type': 'application/json' });
+  let P: any[] = [], filtro = 'pendiente';
+  const METODO: Record<string, string> = { pago_movil: 'Pago Móvil', binance: 'Binance', pagar_en_local: 'Paga en el local' };
+  const PROD: Record<string, string> = { 'ebook-fiestas': 'Ebook', 'libro-fisico-caripe': 'Libro impreso (retiro)' };
+  const fecha = (s: string) => new Date(s).toLocaleString('es-VE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Caracas' });
+
+  async function cargar() {
+    const r = await fetch('/api/admin/pedidos', { headers: H() });
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Error');
+    P = d.pedidos; $('#p-sinlibro').hidden = d.libro; $('#p-sinresend').hidden = d.resend;
+    $('#libro-estado').textContent = d.libro ? '✓ El PDF del libro está subido.' : 'Todavía no has subido el PDF del libro.';
+    pintar();
+  }
+  function pintar() {
+    const pend = P.filter((p) => (p.estado || 'pendiente') === 'pendiente').length;
+    $('#n-pend').textContent = pend ? `(${pend})` : '';
+    document.querySelectorAll<HTMLButtonElement>('.h-ped-filtros button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.f === filtro)));
+    const ul = $('#p-lista'); ul.replaceChildren();
+    const lista = P.filter((p) => (p.estado || 'pendiente') === filtro);
+    if (!lista.length) { ul.append(el('li', 'h-pan-vacio', filtro === 'pendiente' ? 'No hay pagos por confirmar. 🎉' : 'Nada por aquí todavía.')); return; }
+    for (const p of lista) {
+      const li = el('li', 'h-ped ' + (p.estado || 'pendiente'));
+      const top = el('div', 'h-ped-top');
+      top.append(el('b', '', `${p.ref} · ${PROD[p.productId] || p.productId}`), el('span', 'h-adm-t gratis', METODO[p.method] || p.method), el('span', 'h-ped-usd', `USD ${Number(p.amountUsd).toFixed(2)}`));
+      li.append(top);
+      const dl = el('dl', 'h-ped-datos');
+      const fila = (k: string, v: string | HTMLElement) => { if (!v) return; const dt = el('dt', '', k), dd = el('dd'); dd.append(v); dl.append(dt, dd); };
+      fila('Fecha', fecha(p.creado));
+      fila('Nombre', p.name || '');
+      fila('Correo', p.email || '');
+      if (p.phone) { const a = el('a', '', '+' + String(p.phone).replace(/\D/g, '')) as HTMLAnchorElement; a.href = 'https://wa.me/' + String(p.phone).replace(/\D/g, ''); a.target = '_blank'; a.rel = 'noopener'; fila('WhatsApp', a); }
+      fila(p.method === 'binance' ? 'ID de orden Binance' : 'Referencia bancaria', p.bankReference || p.binanceOrderId || '');
+      fila('Código de descuento', p.codigo || '');
+      if (p.enviado) fila('Libro enviado', fecha(p.enviado) + (p.envios > 1 ? ` (${p.envios} envíos)` : ''));
+      li.append(dl);
+      const acc = el('div', 'h-pan-acc'); const msg = el('p', 'h-ped-msg'); msg.hidden = true;
+      const boton = (t: string, accion: string, cls: string, pregunta?: string) => {
+        const b = el('button', 'h-btn ' + cls, t) as HTMLButtonElement; b.type = 'button';
+        b.addEventListener('click', async () => {
+          if (pregunta && !confirm(pregunta)) return;
+          b.disabled = true; msg.hidden = false; msg.textContent = 'Un momento…';
+          const r = await fetch('/api/admin/pedidos/' + p.ref, { method: 'POST', headers: H(), body: JSON.stringify({ accion }) });
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) { b.disabled = false; msg.textContent = d.error || 'No se pudo.'; return; }
+          msg.textContent = d.aviso || 'Listo.';
+          Object.assign(p, d.pedido); setTimeout(pintar, 1200);
+        });
+        acc.append(b);
+      };
+      const ebook = p.productId === 'ebook-fiestas';
+      if ((p.estado || 'pendiente') === 'pendiente') {
+        boton(ebook ? '✅ Confirmar pago y enviar libro' : '✅ Confirmar pago', 'confirmar', 'h-dir-wa', ebook ? `¿Ya viste el pago de ${p.ref} en el banco o en Binance? Se le envía el libro a ${p.email}.` : undefined);
+        boton('No llegó el pago', 'rechazar', 'h-btn-line', '¿Marcar este pedido como rechazado?');
+      } else if (p.estado === 'confirmado') {
+        if (ebook) boton('Reenviar el libro', 'reenviar', 'h-btn-line', `¿Reenviar el libro a ${p.email}?`);
+      } else boton('Volver a «por confirmar»', 'reabrir', 'h-btn-line');
+      li.append(acc, msg); ul.append(li);
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>('.h-ped-filtros button').forEach((b) => b.addEventListener('click', () => { filtro = b.dataset.f!; pintar(); }));
+
+  $<HTMLInputElement>('#libro-file').addEventListener('change', async (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return;
+    const st = $('#libro-estado'); st.textContent = 'Subiendo… (no cierres la página)';
+    const r = await fetch('/api/admin/libro', { method: 'PUT', headers: { 'x-celebra-key': K, 'content-type': 'application/pdf' }, body: f });
+    const d = await r.json().catch(() => ({}));
+    st.textContent = r.ok ? `✓ PDF subido (${(d.bytes / 1048576).toFixed(1)} MB).` : d.error || 'No se pudo subir.';
+    if (r.ok) $('#p-sinlibro').hidden = true;
+  });
+
+  $<HTMLFormElement>('#k-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); K = String(new FormData(e.target as HTMLFormElement).get('k') || '');
+    const err = $('#k-form .h-form-err');
+    try { await cargar(); try { sessionStorage.setItem('celebra-admin', K); } catch {} $('#k-form').hidden = true; $('#adm').hidden = false; }
+    catch (x) { err.textContent = (x as Error).message; err.hidden = false; }
+  });
+  if (K) cargar().then(() => { $('#k-form').hidden = true; $('#adm').hidden = false; }).catch(() => {});
+</script>
