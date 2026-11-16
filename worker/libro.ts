@@ -82,7 +82,7 @@ ${codigo ? `<div style="border:2px dashed #db3978;border-radius:14px;padding:16p
 ${venceTxt ? `<p style="margin:8px 0 0;font-size:13px;color:#5a5a66">${esc(venceTxt)}</p>` : ''}
 </div>
 <p style="margin:0 0 8px"><a href="${libro}" style="color:#db3978;font-weight:bold">Usar mi código en el libro completo →</a></p>` : ''}
-<p style="font-size:14px;line-height:1.5;color:#5a5a66;margin:20px 0 0">Si tienes dudas, responde este correo. Te leemos Yenny, Ana y Mirna, del taller de Caripe.</p>
+<p style="font-size:14px;line-height:1.5;color:#5a5a66;margin:20px 0 0">Si tienes dudas, responde este correo. Te leemos Yenny y Ana, del taller de Caripe.</p>
 </div>
 <p style="font-size:12px;color:#8a8a96;text-align:center;margin:18px 0 0">Recibes este correo porque pediste el capítulo gratis en somoscelebrave.com.</p>
 </div></body></html>`;

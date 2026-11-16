@@ -26,6 +26,11 @@
         ],
         "createdAt": "2026-11-08T04:13:58.261Z",
         "reason": "Claude: print chapter of the book uses the book's editorial italic accents by design, not a landing hero"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-16T02:39:10.335Z"
       }
     ]
   }
