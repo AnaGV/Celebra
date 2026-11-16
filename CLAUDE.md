@@ -6,6 +6,7 @@ Lee esto antes de trabajar en Celebra. Responde en español, con "tú", cercano 
 - Taller familiar de fiestas en Caripe, Monagas, Venezuela: piñatas, arreglos, globos, chupeteras, toppers, cotillón y detalles hechos a mano. Empezó en el garaje de la casa.
 - Web: somoscelebrave.com · Instagram: @somoscelebra.ve.
 - Todo se vende por WhatsApp. Los packs van "a consultar por WhatsApp".
+- Firma en libros y correos: solo **Yenny y Ana**. A Mirna se la nombra únicamente en Quiénes somos (/contacto/), donde se cuenta cómo nació Celebra.
 - Sellos de marca: "Tu idea, nuestra fiesta" y decir "En Celebra…". Colores: rosa #db3978, tinta #16171a, crema. Poco morado, porque satura la vista.
 
 ## Cómo está hecha la web
